@@ -1,4 +1,4 @@
--- Bootstrap folke/lazy.nvim -------------------------------------------------
+-- Bootstrap Lazy.nvim plugin manager and load core configurations and plugins
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
@@ -8,25 +8,24 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Utility: safe require that warns instead of erroring ----------------------
+-- Safe require: does not throw error if module is missing
 local function srequire(mod)
 	local ok, pkg = pcall(require, mod)
 	if not ok then vim.notify("Failed loading " .. mod, vim.log.levels.WARN) end
 	return ok and pkg or nil
 end
-_G.srequire = srequire -- make global for reuse
+_G.srequire = srequire -- make global for reuse in configs
 
--- Register core options & keys before plugins load --------------------------
+-- Load core settings and keymaps before plugins
 require("core.options")
 require("core.keymaps")
-require("core.path_display")
+-- (Optional module core.path_display was removed as its functionality was redundant)
 
--- Start lazy ---------------------------------------------------------------
+-- Setup plugins via lazy.nvim
 require("lazy").setup({
-	{ import = "plugins" },
+	{ import = "plugins" }
 }, {
 	change_detection = { enabled = true, notify = true },
 	checker = { enabled = true, concurrency = 20 },
 	ui = { border = "rounded" },
 })
-

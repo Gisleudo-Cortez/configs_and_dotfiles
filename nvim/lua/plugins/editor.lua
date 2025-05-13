@@ -1,13 +1,53 @@
+-- General editor enhancements (Treesitter, Git signs, autopairs, etc.)
 return {
-    { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate", opts = {
-        ensure_installed = {
-          "bash","c","css","html","javascript","json","lua","python","rust","go",
-          "typescript","vim","yaml","sql"
-        },
-        highlight = { enable = true },
-        indent    = { enable = true },
-      }
-    },
-    { "lewis6991/gitsigns.nvim", event = { "BufReadPre","BufNewFile" }, opts = {} },
-    { "windwp/nvim-autopairs",  event = "InsertEnter", opts = {} },
-  }
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		event = { "BufReadPost", "BufNewFile" },
+		opts = {
+			ensure_installed = {
+				"bash", "c", "css", "html", "javascript", "json", "lua", "python",
+				"rust", "go", "typescript", "vim", "yaml", "sql", "markdown", "java",
+			},
+			highlight        = { enable = true },
+			indent           = { enable = true },
+		},
+	},
+	{
+		"lewis6991/gitsigns.nvim",
+		event = { "BufReadPre", "BufNewFile" },
+		opts = {}, -- use default settings
+	},
+	{
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		opts = {}, -- use default settings
+	},
+	{
+		"folke/which-key.nvim",
+		event = "VeryLazy",
+		config = function()
+			local wk = require("which-key")
+			wk.setup({})
+			wk.register({
+				b = { name = "Buffer" },
+				f = { name = "Find" },
+				t = { name = "Terminal" },
+			}, { prefix = "<leader>" })
+		end,
+	},
+	{
+		"akinsho/toggleterm.nvim",
+		keys = {
+			{ "<leader>tt", "<cmd>ToggleTerm<CR>", desc = "Toggle terminal" },
+		},
+		opts = {
+			size = 15,
+			open_mapping = nil, -- disable built-in mapping (using our custom mapping)
+			shade_terminals = true,
+			direction = "horizontal",
+		},
+	},
+
+
+}
