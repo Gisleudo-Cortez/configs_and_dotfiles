@@ -225,3 +225,6 @@ alias dbgate="/home/nero/Downloads/aur/dbgate-5.3.1-linux_x64/dbgate"
 # bun
 set --export BUN_INSTALL "$HOME/.bun"
 set --export PATH $BUN_INSTALL/bin $PATH
+
+# change editor to nvim 
+set -gx EDITOR /usr/bin/nvim
