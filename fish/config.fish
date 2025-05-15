@@ -193,6 +193,9 @@ alias backup_storage='bash /home/nero/Documents/Estudos/Bash_Scripts/mount_stora
 alias save_fish_config='cp ~/.config/fish/config.fish $pessoal/dotfiles/config.fish'
 alias estudos_env='source $estudos/estudos/bin/activate.fish'
 alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollama_update_models.sh'
+alias gcm="git commit -m"
+alias gad="git add"
+alias gpom="git push origin main"
 
 # Custom user functions
 ## Create folder structure for AdventOfCode python folders
