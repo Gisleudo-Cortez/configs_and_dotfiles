@@ -2,7 +2,7 @@ local opt            = vim.opt
 opt.termguicolors    = true -- 24‑bit colour
 opt.number           = true
 opt.relativenumber   = true
-opt.hlsearch         = true
+opt.hlsearch         = false
 opt.incsearch        = true
 opt.ignorecase       = true
 opt.smartcase        = true
@@ -22,4 +22,3 @@ opt.undofile         = true
 
 vim.g.mapleader      = " "
 vim.g.maplocalleader = " "
-

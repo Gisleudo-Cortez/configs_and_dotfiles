@@ -72,4 +72,11 @@ return {
 			vim.notify = require("notify")
 		end,
 	},
+	{
+		"echasnovski/mini.nvim",
+		version = false,
+		config = function()
+			require("mini.icons").setup() -- This resolves the missing `mini.icons` warning
+		end,
+	}
 }

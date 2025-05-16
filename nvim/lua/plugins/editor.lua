@@ -24,18 +24,24 @@ return {
 		opts = {}, -- use default settings
 	},
 	{
-		"folke/which-key.nvim",
-		event = "VeryLazy",
-		config = function()
-			local wk = require("which-key")
-			wk.setup({})
-			wk.register({
-				b = { name = "Buffer" },
-				f = { name = "Find" },
-				t = { name = "Terminal" },
-			}, { prefix = "<leader>" })
-		end,
 	},
+	"folke/which-key.nvim",
+	event = "VeryLazy",
+	config = function()
+		local wk = require("which-key")
+		wk.setup({}) -- mantém sua configuração padrão
+		-- Novo formato de registro de grupos
+		wk.register({
+			b = { name = "Buffer" }, -- agrupa <leader>b*
+			f = { name = "Find" }, -- agrupa <leader>f*
+			t = { name = "Terminal" }, -- agrupa <leader>t*
+		}, {
+			prefix  = "<leader>", -- prefixo comum
+			mode    = "n", -- mapeamento em modo normal
+			noremap = true, -- garante não-recursividade
+			silent  = true, -- evita eco de comandos
+		})
+	end,
 	{
 		"akinsho/toggleterm.nvim",
 		keys = {

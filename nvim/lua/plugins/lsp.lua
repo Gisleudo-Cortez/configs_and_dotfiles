@@ -62,6 +62,7 @@ return {
 				bufmap("n", "gr", vim.lsp.buf.references, "Go to References")
 				bufmap("n", "[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
 				bufmap("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
+				bufmap("i", "<C-h>", vim.lsp.buf.signature_help, "Signature Help")
 			end
 
 			local default_opts = {
@@ -93,14 +94,23 @@ return {
 		config = function()
 			local rt = require("rust-tools")
 			local mason_registry = require("mason-registry")
-			local codelldb = mason_registry.get_package("codelldb")
-			if not codelldb or not codelldb:is_installed() then
+
+			local ok, codelldb = pcall(mason_registry.get_package, mason_registry, "codelldb")
+			if not ok or not codelldb or type(codelldb.get_install_path) ~= "function" then
+				vim.notify("Mason: codelldb not found or invalid. Install it via :MasonInstall codelldb",
+					vim.log.levels.ERROR)
+				return
+			end
+
+			if not codelldb:is_installed() then
 				vim.notify("Mason: please install codelldb for Rust debugging", vim.log.levels.WARN)
 				return
 			end
+
 			local extension_path = codelldb:get_install_path() .. "/extension/"
 			local codelldb_path = extension_path .. "adapter/codelldb"
 			local liblldb_path = extension_path .. "lldb/lib/liblldb.so"
+
 			rt.setup({
 				server = {
 					on_attach = function(_, bufnr)
