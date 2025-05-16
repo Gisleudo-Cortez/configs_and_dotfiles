@@ -197,16 +197,6 @@ alias gcm="git commit -m"
 alias gad="git add"
 alias gpom="git push origin main"
 
-# Custom user functions
-## Create folder structure for AdventOfCode python folders
-function mkday
-    read -p "Enter a value: " VALUE
-    mkdir -p day$VALUE/python
-    touch day$VALUE/input.txt day$VALUE/python/part1.py day$VALUE/python/part2.py
-end
-
-
-
 # Custom env vars
 set -gx loja  $HOME/Documents/Lonam
 set -gx estudos  $HOME/Documents/Estudos
