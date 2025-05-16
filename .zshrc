@@ -1,3 +1,7 @@
+# Turn off command tracing
+set +x        # disables the Bourne-shell-style -x flag 
+
+
 ## Path section
 # Set $PATH if ~/.local/bin exist
 if [ -d "$HOME/.local/bin" ]; then
@@ -164,7 +168,7 @@ if [[ -n "${key[Control-Left]}"  ]]; then
 	bindkey -M vicmd "${key[Control-Left]}"  backward-word
 fi
 
-# Control Left - go forward a word
+# Control Right - go forward a word
 key[Control-Right]="${terminfo[kRIT5]}"
 if [[ -n "${key[Control-Right]}" ]]; then
 	bindkey -M emacs "${key[Control-Right]}" forward-word
@@ -180,7 +184,7 @@ if [[ -n "${key[Alt-Left]}"  ]]; then
 	bindkey -M vicmd "${key[Alt-Left]}"  backward-word
 fi
 
-# Control Right - go forward a word
+# Alt Right - go forward a word
 key[Alt-Right]="${terminfo[kRIT3]}"
 if [[ -n "${key[Alt-Right]}" ]]; then
 	bindkey -M emacs "${key[Alt-Right]}" forward-word
@@ -280,13 +284,14 @@ alias gad="git add"
 alias gpom="git push origin main"
 
 #Custom env vars
-set -gx loja  $HOME/Documents/Lonam
-set -gx estudos  $HOME/Documents/Estudos
-set -gx ourodata  $HOME/Documents/ourodata
-set -gx geg  $HOME/Documents/GEG
-set -gx portfolio  $HOME/Documents/Portfolio
-set -gx pessoal  $HOME/Documents/Pessoal
+export OURODATA="$HOME/Documents/ourodata"
+export GEG="$HOME/Documents/GEG"
+export PORTFOLIO="$HOME/Documents/Portfolio"
+export PESSOAL="$HOME/Documents/Pessoal"
+export LOJA="$HOME/Documents/Lonam"
+export ESTUDOS="$HOME/Documents/Estudos"
 
+export EDITOR="/usr/bin/nvim" # Or use nvim if it's in your PATH
 # go env setup
 export PATH="$PATH:$(go env GOBIN):$(go env GOPATH)/bin"
 
@@ -296,10 +301,3 @@ export WINETRICKS="/usr/bin/winetricks"
 
 # add executables
 alias dbgate="/home/nero/Downloads/aur/dbgate-5.3.1-linux_x64/dbgate"
-
-# bun
-set --export BUN_INSTALL "$HOME/.bun"
-set --export PATH $BUN_INSTALL/bin $PATH
-
-# change editor to nvim 
-set -gx EDITOR /usr/bin/nvim
