@@ -1,7 +1,3 @@
-# Turn off command tracing
-set +x        # disables the Bourne-shell-style -x flag 
-
-
 ## Path section
 # Set $PATH if ~/.local/bin exist
 if [ -d "$HOME/.local/bin" ]; then
@@ -72,8 +68,8 @@ zstyle ':completion:*' cache-path ~/.cache/zcache
 autoload -U +X bashcompinit && bashcompinit
 
 HISTFILE=~/.zhistory
-HISTSIZE=500000
-SAVEHIST=100000
+HISTSIZE=50000
+SAVEHIST=10000
 
 
 ## Keys
@@ -168,7 +164,7 @@ if [[ -n "${key[Control-Left]}"  ]]; then
 	bindkey -M vicmd "${key[Control-Left]}"  backward-word
 fi
 
-# Control Right - go forward a word
+# Control Left - go forward a word
 key[Control-Right]="${terminfo[kRIT5]}"
 if [[ -n "${key[Control-Right]}" ]]; then
 	bindkey -M emacs "${key[Control-Right]}" forward-word
@@ -184,7 +180,7 @@ if [[ -n "${key[Alt-Left]}"  ]]; then
 	bindkey -M vicmd "${key[Alt-Left]}"  backward-word
 fi
 
-# Alt Right - go forward a word
+# Control Right - go forward a word
 key[Alt-Right]="${terminfo[kRIT3]}"
 if [[ -n "${key[Alt-Right]}" ]]; then
 	bindkey -M emacs "${key[Alt-Right]}" forward-word
@@ -260,44 +256,7 @@ export MCFLY_INTERFACE_VIEW=BOTTOM
 export MCFLY_RESULTS_SORT=LAST_RUN
 eval "$(mcfly init zsh)"
 
+## Run neofetch
+neofetch
 
-# Custom aliases
-
-alias cls='clear'
-alias cd_estudos='cd ~/Documents/Estudos'
-alias cd_loja='cd ~/Documents/Loja'
-alias cd_storage='cd /run/media/nero/storage'
-alias config_fish='nvim ~/.config/fish/config.fish'
-alias backup_all='bash /home/nero/Documents/Estudos/Bash_Scripts/backup_all.sh'
-alias backup_loja='bash /home/nero/Documents/Estudos/Bash_Scripts/back_up_loja.sh'
-alias backup_pessoal='bash /home/nero/Documents/Estudos/Bash_Scripts/back_up_pessoal.sh'
-alias backup_estudos='bash /home/nero/Documents/Estudos/Bash_Scripts/backup_estudos.sh'
-alias source_fish='source ~/.config/fish/config.fish'
-alias create_dc_folder='bash /home/nero/Documents/Estudos/Bash_Scripts/create_dc_folder.sh'
-alias print_file='lp -d EPSON-L3210-Series'
-alias backup_storage='bash /home/nero/Documents/Estudos/Bash_Scripts/mount_storage_backup.sh'
-alias save_fish_config='cp ~/.config/fish/config.fish $pessoal/dotfiles/config.fish'
-alias estudos_env='source $estudos/estudos/bin/activate.fish'
-alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollama_update_models.sh'
-alias gcm="git commit -m"
-alias gad="git add"
-alias gpom="git push origin main"
-
-#Custom env vars
-export OURODATA="$HOME/Documents/ourodata"
-export GEG="$HOME/Documents/GEG"
-export PORTFOLIO="$HOME/Documents/Portfolio"
-export PESSOAL="$HOME/Documents/Pessoal"
-export LOJA="$HOME/Documents/Lonam"
-export ESTUDOS="$HOME/Documents/Estudos"
-
-export EDITOR="/usr/bin/nvim" # Or use nvim if it's in your PATH
-# go env setup
-export PATH="$PATH:$(go env GOBIN):$(go env GOPATH)/bin"
-
-# protontricks env variables
-export WINE="/usr/bin/wine"
-export WINETRICKS="/usr/bin/winetricks"
-
-# add executables
-alias dbgate="/home/nero/Downloads/aur/dbgate-5.3.1-linux_x64/dbgate"
+. "$HOME/.local/share/../bin/env"

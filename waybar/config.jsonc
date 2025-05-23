@@ -153,7 +153,7 @@
         "rotate": 0,
         "separate-outputs": true,
         "rewrite": {
-            "nero@nero-stormx:(.*)": "$1 ",
+            "nero@stormx:(.*)": "$1 ",
             "(.*) — Mozilla Firefox": "$1 󰈹",
             "(.*)Mozilla Firefox": "Firefox 󰈹",
             "(.*) - Visual Studio Code": "$1 󰨞",
