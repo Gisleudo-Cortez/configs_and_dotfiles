@@ -186,13 +186,16 @@ alias backup_estudos='bash /home/nero/Documents/Estudos/Bash_Scripts/backup_estu
 alias backup='sudo bash /home/nero/Documents/Estudos/Bash_Scripts/mount_storage_backup.sh && backup_all'
 alias source_fish='source ~/.config/fish/config.fish'
 alias create_dc_folder='bash /home/nero/Documents/Estudos/Bash_Scripts/create_dc_folder.sh'
-alias print_file='lp -d EPSON-L3210-Series'
+alias print_file='lp -d EPSON_L3210_Series'
 alias save_fish_config='cp ~/.config/fish/config.fish $pessoal/dotfiles/config.fish'
 alias estudos_env='source $estudos/estudos/bin/activate.fish'
 alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollama_update_models.sh'
 alias gcm="git commit -m"
 alias gad="git add"
 alias gpom="git push origin main"
+alias sf_lonam=" sftp -r lonam:Documents/LONAM/"
+alias sf_geg=" sftp -r lonam:Documents/GEG/"
+
 
 # Custom env vars
 set -gx loja  $HOME/Documents/Lonam
