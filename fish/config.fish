@@ -196,6 +196,14 @@ alias gpom="git push origin main"
 alias sf_lonam=" sftp -r lonam:Documents/LONAM/"
 alias sf_geg=" sftp -r lonam:Documents/GEG/"
 
+# Custom functions 
+
+function unzip_all
+    for file in *.zip
+        set dir_name (basename "$file" .zip)
+        mkdir -p "$dir_name"; and unzip -o "$file" -d "$dir_name"
+    end
+end
 
 # Custom env vars
 set -gx loja  $HOME/Documents/Lonam
@@ -209,11 +217,8 @@ set -gx pessoal  $HOME/Documents/Pessoal
 export PATH="$PATH:$(go env GOBIN):$(go env GOPATH)/bin"
 
 # protontricks env variables
-export WINE="/usr/bin/wine"
-export WINETRICKS="/usr/bin/winetricks"
-
-# add executables
-alias dbgate="/home/nero/Downloads/aur/dbgate-5.3.1-linux_x64/dbgate"
+set -gx WINE "/usr/bin/wine"
+set -gx WINETRICKS "/usr/bin/winetricks"
 
 # bun
 set --export BUN_INSTALL "$HOME/.bun"
