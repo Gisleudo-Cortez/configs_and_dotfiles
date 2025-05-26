@@ -189,10 +189,13 @@ alias print_file='lp -d EPSON_L3210_Series'
 alias save_fish_config='cp ~/.config/fish/config.fish $pessoal/dotfiles/config.fish'
 alias estudos_env='source $estudos/estudos/bin/activate.fish'
 alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollama_update_models.sh'
-alias sf_lonam=" sftp -r lonam:Documents/LONAM/"
-alias sf_geg=" sftp -r lonam:Documents/GEG/"
 alias ds "dust -d 2"
 alias dua "dua interactive"
+## abbreviations
+abbr ya yazi
+abbr sfl "sftp -r lonam:Documents/LONAM/"
+abbr sfg "sftp -r lonam:Documents/GEG/"
+
 ## git 
 # --- Status & Diffing ---
 alias gs "git status"
