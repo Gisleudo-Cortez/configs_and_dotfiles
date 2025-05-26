@@ -1,4 +1,4 @@
-## Set values
+# Set values
 # Hide welcome message & ensure we are reporting fish as shell
 set fish_greeting
 set VIRTUAL_ENV_DISABLE_PROMPT "1"
@@ -176,7 +176,6 @@ if status --is-interactive && type -q fastfetch
 end
 
 # Custom aliases
-
 alias cls='clear'
 alias config_fish='nvim ~/.config/fish/config.fish'
 alias backup_all='bash /home/nero/Documents/Estudos/Bash_Scripts/backup_all.sh'
@@ -190,14 +189,86 @@ alias print_file='lp -d EPSON_L3210_Series'
 alias save_fish_config='cp ~/.config/fish/config.fish $pessoal/dotfiles/config.fish'
 alias estudos_env='source $estudos/estudos/bin/activate.fish'
 alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollama_update_models.sh'
-alias gcm="git commit -m"
-alias gad="git add"
-alias gpom="git push origin main"
 alias sf_lonam=" sftp -r lonam:Documents/LONAM/"
 alias sf_geg=" sftp -r lonam:Documents/GEG/"
+alias ds "dust -d 2"
+alias dua "dua interactive"
+## git 
+# --- Status & Diffing ---
+alias gs "git status"
+alias gd "git diff"                             # Show unstaged changes
+alias gds "git diff --staged"                   # Show staged changes (same as gdc)
+alias gdc "git diff --cached"                   # Show staged changes (alternative to gds)
+
+# --- Staging & Committing ---
+alias ga "git add"
+alias gaa "git add ."                           # Add all changes in current directory
+alias gau "git add -u"                          # Add all tracked files (update)
+alias gc "git commit -m"
+alias gca "git commit -a -m"                    # Add all tracked files and commit
+alias gcam "git commit --amend -m"              # Amend last commit with a new message
+alias gcnm "git commit --amend --no-edit"       # Amend last commit, keep existing message
+alias gfix "git commit -a --amend -C HEAD"      # Add to last commit without changing message (stages all tracked files)
+alias greset "git reset HEAD --"                # Unstage a file
+
+# --- Branching ---
+alias gb "git branch"
+alias gba "git branch -a"                       # Show all branches (local and remote)
+alias gco "git checkout"
+alias gcb "git checkout -b"                     # Create and switch to a new branch
+alias gbd "git branch -d"                       # Delete a local branch (safer: only if merged)
+alias gbD "git branch -D"                       # Force delete a local branch
+alias gbm "git branch -m"                       # Rename current local branch
+alias gbM "git branch -M"                       # Force rename current local branch (even if new name exists)
+
+# --- Remotes, Pushing & Pulling ---
+alias gph "git push"
+alias gpl "git pull"
+alias gpr "git pull --rebase"                   # Pull and rebase
+alias gpo "git push -u origin (git rev-parse --abbrev-ref HEAD)" # Push current branch to origin and set upstream
+alias gf "git fetch"
+alias gfa "git fetch --all --prune"             # Fetch all remotes and remove stale remote-tracking branches
+alias grv "git remote -v"                       # List remotes
+alias gra "git remote add"
+alias grr "git remote remove"
+alias grset "git remote set-url"
+
+# --- Merging & Rebasing ---
+alias gm "git merge"
+alias gma "git merge --abort"                   # Abort a merge in progress
+alias gmc "git merge --continue"                # Continue a merge in progress
+alias gr "git rebase"
+alias gra "git rebase --abort"                  # Abort a rebase in progress
+alias grc "git rebase --continue"               # Continue a rebase in progress
+alias gri "git rebase -i"                       # Interactive rebase
+
+# --- Logging & History ---
+alias gl "git log --oneline --graph --decorate --all" # Concise log of all branches
+alias gll "git log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short --graph" # Detailed, pretty log
+alias gls "git log --stat"                      # Log with stats (files changed)
+alias gsh "git show"                            # Show various types of objects (last commit by default)
+
+# --- Stashing ---
+alias gst "git stash"
+alias gstp "git stash pop"
+alias gsta "git stash apply"
+alias gstd "git stash drop"
+alias gstl "git stash list"
+alias gsts "git stash show -p"                  # Show changes in latest stash as a patch
+
+# --- Ignoring & Cleaning ---
+alias gcl "git clone"
+alias gignore "git update-index --assume-unchanged" # Ignore tracking changes to a file (locally)
+alias gunignore "git update-index --no-assume-unchanged" # Resume tracking changes to a file (locally)
+alias gclean "git clean -fd"                    # Remove untracked files and directories (USE WITH CAUTION!)
+alias gcleani "git clean -fd -i"                # Remove untracked files and directories interactively (safer)
+
+# --- Configuration ---
+alias gcfgl "git config --local --list"         # List local git config
+alias gcfgg "git config --global --list"        # List global git config
+alias gcfgse "git config --global --edit"       # Edit global git config
 
 # Custom functions 
-
 function unzip_all
     for file in *.zip
         set dir_name (basename "$file" .zip)
