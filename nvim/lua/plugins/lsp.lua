@@ -9,6 +9,8 @@ return {
 				"debugpy",
 				"codelldb",
 				"js-debug-adapter",
+				"pyright",
+				"ruff",
 			},
 			ui = {
 				icons = {
@@ -26,6 +28,7 @@ return {
 			ensure_installed = {
 				"rust_analyzer",
 				"pyright",
+				"ruff",
 				"gopls",
 				"ts_ls",
 				"lua_ls",
@@ -49,7 +52,6 @@ return {
 			local lspconfig = require("lspconfig")
 			local mason_lspconfig = require("mason-lspconfig")
 
-			-- Common capabilities and on_attach for LSP servers
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			local on_attach = function(_, bufnr)
 				local bufmap = function(mode, lhs, rhs, desc)
@@ -65,6 +67,14 @@ return {
 				bufmap("i", "<C-h>", vim.lsp.buf.signature_help, "Signature Help")
 			end
 
+			local function get_python_path()
+				local cwd = vim.fn.getcwd()
+				if vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+					return cwd .. "/.venv/bin/python"
+				end
+				return vim.fn.exepath("python") or "python"
+			end
+
 			local default_opts = {
 				on_attach = on_attach,
 				capabilities = capabilities,
@@ -77,53 +87,26 @@ return {
 						},
 					},
 				},
+				pyright = {
+					settings = {
+						python = {
+							pythonPath = get_python_path(),
+						},
+					},
+				},
 			}
 
-			mason_lspconfig.setup() -- ensure the servers above are installed
+			mason_lspconfig.setup()
 			for _, server in ipairs(mason_lspconfig.get_installed_servers()) do
 				local opts = vim.tbl_deep_extend("force", default_opts, server_settings[server] or {})
 				lspconfig[server].setup(opts)
 			end
-		end,
-	},
-	-- Rust enhancements (using rust-tools)
-	{
-		"simrat39/rust-tools.nvim",
-		ft = "rust",
-		dependencies = { "mfussenegger/nvim-dap" },
-		config = function()
-			local rt = require("rust-tools")
-			local mason_registry = require("mason-registry")
 
-			local ok, codelldb = pcall(mason_registry.get_package, mason_registry, "codelldb")
-			if not ok or not codelldb or type(codelldb.get_install_path) ~= "function" then
-				vim.notify("Mason: codelldb not found or invalid. Install it via :MasonInstall codelldb",
-					vim.log.levels.ERROR)
-				return
-			end
-
-			if not codelldb:is_installed() then
-				vim.notify("Mason: please install codelldb for Rust debugging", vim.log.levels.WARN)
-				return
-			end
-
-			local extension_path = codelldb:get_install_path() .. "/extension/"
-			local codelldb_path = extension_path .. "adapter/codelldb"
-			local liblldb_path = extension_path .. "lldb/lib/liblldb.so"
-
-			rt.setup({
-				server = {
-					on_attach = function(_, bufnr)
-						vim.keymap.set("n", "K", rt.hover_actions.hover_actions,
-							{ buffer = bufnr, desc = "Rust Hover" })
-						vim.keymap.set("n", "<leader>ca", rt.code_action_group.code_action_group,
-							{ buffer = bufnr, desc = "Rust Code Actions" })
-					end,
-				},
-				dap = {
-					adapter = require("rust-tools.dap").get_codelldb_adapter(codelldb_path,
-						liblldb_path),
-				},
+			-- Updated: use 'ruff' instead of deprecated 'ruff-lsp'
+			lspconfig.ruff.setup({
+				on_attach = on_attach,
+				capabilities = capabilities,
+				init_options = { settings = { args = {} } },
 			})
 		end,
 	},
