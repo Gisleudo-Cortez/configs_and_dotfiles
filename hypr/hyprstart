@@ -7,12 +7,12 @@ export XCURSOR_SIZE=24
 
 # text editor
 export MICRO_TRUECOLOR=1
-export EDITOR=/usr/bin/micro
+export EDITOR=/usr/bin/kate
 
 #browser
-export BROWSER=firedragon
+export BROWSER=zen-browser
 #terminal
-export TERM=foot
+export TERM=kitty
 #mail
 export MAIL=thunderbird
 
