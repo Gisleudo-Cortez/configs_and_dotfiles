@@ -21,7 +21,7 @@ run_cmd() {
         echo "DRY-RUN ➜ $*"
     else
         echo "EXECUTING ➜ $*"
-        "$@"
+        eval "$*" # Changed from "$@" to eval "$*"
     fi
 }
 
@@ -73,12 +73,12 @@ fi
 
 
 echo "[02-official-packages] Installing packages: ${PKGS[*]}"
-run_cmd pacman -S --needed --noconfirm "${PKGS[@]}"
+run_cmd "pacman -S --needed --noconfirm ${PKGS[*]}" # Note: PKGS array expansion is fine here with eval
 
 # Docker post-install setup
 echo "[02-official-packages] Configuring Docker..."
-run_cmd systemctl enable --now docker.service
-run_cmd systemctl enable --now containerd.service # Often started by docker.service
+run_cmd "systemctl enable --now docker.service"
+run_cmd "systemctl enable --now containerd.service" # Often started by docker.service
 
 SUDO_USER_EFFECTIVE="${SUDO_USER:-}"
 if [[ -z "$SUDO_USER_EFFECTIVE" && "$EUID" -eq 0 ]]; then
@@ -88,7 +88,7 @@ fi
 if [[ -n "$SUDO_USER_EFFECTIVE" && "$SUDO_USER_EFFECTIVE" != "root" ]]; then
     if id -u "$SUDO_USER_EFFECTIVE" &>/dev/null; then
         echo "[02-official-packages] Adding user '$SUDO_USER_EFFECTIVE' to 'docker' group..."
-        run_cmd usermod -aG docker "$SUDO_USER_EFFECTIVE"
+        run_cmd "usermod -aG docker \"$SUDO_USER_EFFECTIVE\""
         echo "[02-official-packages] User '$SUDO_USER_EFFECTIVE' added to 'docker' group. A re-login is required for this to take effect."
     else
         echo "[02-official-packages] Warning: SUDO_USER '$SUDO_USER_EFFECTIVE' does not seem to be a valid user. Skipping add to docker group."
@@ -105,7 +105,7 @@ if pacman -Qs postgresql &>/dev/null; then
     PG_INIT_SUCCESS=false # Flag to track if initdb was successful or skipped due to existing dir
 
     echo "[02-official-packages] Enabling PostgreSQL service (to start on boot)..."
-    run_cmd systemctl enable postgresql.service # Enable first, don't start yet
+    run_cmd "systemctl enable postgresql.service" # Enable first, don't start yet
 
     if [[ "$DRY_RUN" == true ]]; then
         echo "DRY-RUN ➜ Would check if PostgreSQL data directory '$PG_DATA_DIR' exists and initialize if not."
@@ -142,7 +142,7 @@ if pacman -Qs postgresql &>/dev/null; then
     # Attempt to start the service only if initdb was successful or data directory was already present
     if [[ "$PG_INIT_SUCCESS" == true ]]; then
         echo "[02-official-packages] Attempting to start PostgreSQL service..."
-        run_cmd systemctl start postgresql.service
+        run_cmd "systemctl start postgresql.service"
         
         if [[ "$DRY_RUN" == false ]]; then
             sleep 3 # Give the service a moment to start up
