@@ -195,6 +195,7 @@ alias dua "dua interactive"
 abbr ya yazi
 abbr sfl "sftp -r lonam:Documents/LONAM/"
 abbr sfg "sftp -r lonam:Documents/GEG/"
+abbr gtal "./gather_data.sh .config/nvim .zshrc .config/fish .config/hypr .config/kitty .config/waybar .config/starship .config/starship.toml .config/starship_cat.toml"
 
 ## git 
 # --- Status & Diffing ---
