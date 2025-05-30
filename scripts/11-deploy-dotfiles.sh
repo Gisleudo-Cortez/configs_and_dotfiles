@@ -91,22 +91,30 @@ fi
 # Symlinks will be handled by `stow -R`.
 echo "[11-deploy-dotfiles] Checking for conflicting regular files..."
 for pkg_to_check_conflict in "${STOW_PACKAGES_TO_DEPLOY[@]}"; do
-    # Handle .zshrc specifically as it's a common direct file in $HOME
     if [[ "$pkg_to_check_conflict" == "zshrc" ]]; then
         TARGET_FILE="$CURRENT_USER_HOME/.zshrc"
-        # Check if it's a regular file (not a symlink -L)
-        if [[ -f "$TARGET_FILE" && ! -L "$TARGET_FILE" ]]; then
+        if [[ -f "$TARGET_FILE" && ! -L "$TARGET_FILE" ]]; then # Check if it's a regular file (not a symlink -L)
             BACKUP_FILE="${TARGET_FILE}.bak.$(date +%Y%m%d%H%M%S)"
             echo "[11-deploy-dotfiles] Found existing regular file '$TARGET_FILE'."
             echo "[11-deploy-dotfiles] Backing it up to '$BACKUP_FILE' and removing original."
             run_cmd_user "mv \"$TARGET_FILE\" \"$BACKUP_FILE\""
         fi
+    elif [[ "$pkg_to_check_conflict" == "fish" ]]; then
+        # Specifically handle the conflicting uv.env.fish file
+        TARGET_FILE="$CURRENT_USER_HOME/.config/fish/conf.d/uv.env.fish"
+        # Ensure parent directory exists before checking the file, though less likely to be an issue here
+        TARGET_DIR=$(dirname "$TARGET_FILE")
+        if [[ -d "$TARGET_DIR" ]]; then # Check if the fish conf.d directory exists
+            if [[ -f "$TARGET_FILE" && ! -L "$TARGET_FILE" ]]; then # Check if it's a regular file
+                BACKUP_FILE="${TARGET_FILE}.bak.$(date +%Y%m%d%H%M%S)"
+                echo "[11-deploy-dotfiles] Found existing regular file '$TARGET_FILE'."
+                echo "[11-deploy-dotfiles] Backing it up to '$BACKUP_FILE' and removing original."
+                run_cmd_user "mv \"$TARGET_FILE\" \"$BACKUP_FILE\""
+            fi
+        fi
     fi
     # Add similar blocks here for other packages if they are known to conflict
-    # with single, top-level files in $HOME (e.g., .bashrc, .vimrc if managed this way).
-    # For packages that stow into .config/ (like nvim, kitty), stow usually handles
-    # directory creation. Conflicts there are less common unless a regular file
-    # exists where stow expects to create a directory/symlink.
+    # with single, top-level files in $HOME or specific nested files.
 done
 
 echo "[11-deploy-dotfiles] Stowing packages to target directory: $CURRENT_USER_HOME"
