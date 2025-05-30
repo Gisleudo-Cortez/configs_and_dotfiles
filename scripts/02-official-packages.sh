@@ -29,7 +29,7 @@ echo "[02-official-packages] Preparing to install consolidated list of official 
 
 PKGS=(
     # Shells, Terminals, Editors
-    fish starship kitty neovim vim git stow
+    fish starship kitty alacritty neovim vim git stow
 
     # GUI Apps & File Managers
     dolphin dbeaver vlc thunderbird kate konsole obsidian obs-studio
@@ -50,8 +50,7 @@ PKGS=(
 )
 
 # Brave Browser handling: check if available in repos (often in chaotic-aur as brave-bin)
-# If you prefer the official brave package, ensure it's available or use paru later.
-BRAVE_PACKAGE_CANDIDATES=("brave-bin" "brave-browser" "brave") # Check common names
+BRAVE_PACKAGE_CANDIDATES=("brave-bin" "brave-browser" "brave")
 BRAVE_TO_INSTALL=""
 
 if [[ "$DRY_RUN" == true ]]; then
@@ -83,7 +82,6 @@ run_cmd systemctl enable --now containerd.service # Often started by docker.serv
 
 SUDO_USER_EFFECTIVE="${SUDO_USER:-}"
 if [[ -z "$SUDO_USER_EFFECTIVE" && "$EUID" -eq 0 ]]; then
-    # If run as root directly (not sudo) try to get logname
     SUDO_USER_EFFECTIVE=$(logname 2>/dev/null)
 fi
 
@@ -104,30 +102,60 @@ fi
 echo "[02-official-packages] Configuring PostgreSQL..."
 if pacman -Qs postgresql &>/dev/null; then
     PG_DATA_DIR="/var/lib/postgres/data"
-    echo "[02-official-packages] Enabling and starting PostgreSQL service..."
-    run_cmd systemctl enable --now postgresql.service
+    PG_INIT_SUCCESS=false # Flag to track if initdb was successful or skipped due to existing dir
 
-    # Initialize PostgreSQL database cluster if it doesn't exist
-    # Run as postgres user
+    echo "[02-official-packages] Enabling PostgreSQL service (to start on boot)..."
+    run_cmd systemctl enable postgresql.service # Enable first, don't start yet
+
     if [[ "$DRY_RUN" == true ]]; then
         echo "DRY-RUN ➜ Would check if PostgreSQL data directory '$PG_DATA_DIR' exists and initialize if not."
-        echo "DRY-RUN ➜ sudo -iu postgres bash -c '[ -d \"$PG_DATA_DIR\" ] || { mkdir -p \"$PG_DATA_DIR\" && chown postgres:postgres \"$PG_DATA_DIR\" && initdb --locale C.UTF-8 -E UTF8 -D \"$PG_DATA_DIR\"; }'"
+        echo "DRY-RUN ➜ sudo -iu postgres bash -c '[ -d \"$PG_DATA_DIR\" ] || { mkdir -p \"$PG_DATA_DIR\" && chown postgres:postgres \"$PG_DATA_DIR\" && chmod 700 \"$PG_DATA_DIR\" && initdb --locale C.UTF-8 -E UTF8 -D \"$PG_DATA_DIR\"; }'"
+        PG_INIT_SUCCESS=true # Assume success for dry run to show start command
     else
+        # Check if data directory exists
         if [[ ! -d "$PG_DATA_DIR" ]]; then
             echo "[02-official-packages] PostgreSQL data directory '$PG_DATA_DIR' not found. Initializing database cluster..."
             # Create the directory and set permissions before switching to postgres user for initdb
             run_cmd "mkdir -p \"$PG_DATA_DIR\""
             run_cmd "chown postgres:postgres \"$PG_DATA_DIR\""
-            run_cmd "chmod 700 \"$PG_DATA_DIR\"" # Important for security
-            # The initdb command should be run by the postgres user.
+            run_cmd "chmod 700 \"$PG_DATA_DIR\"" # Ensure correct permissions for postgres user
+
+            # Initialize the database cluster as the postgres user
             # Using a specific locale like C.UTF-8 is often recommended for compatibility.
-            if sudo -iu postgres bash -c "initdb --locale C.UTF-8 -E UTF8 -D \"$PG_DATA_DIR\""; then
+            if sudo -iu postgres bash -c "initdb --locale=C.UTF-8 -E UTF8 -D \"$PG_DATA_DIR\""; then
                  echo "[02-official-packages] PostgreSQL database cluster initialized successfully in '$PG_DATA_DIR'."
+                 PG_INIT_SUCCESS=true
             else
-                 echo "[02-official-packages] Error: Failed to initialize PostgreSQL database cluster. Check logs for details (e.g., journalctl -u postgresql.service)."
+                 echo "[02-official-packages] Error: Failed to initialize PostgreSQL database cluster. Service will not be started."
+                 echo "[02-official-packages] Check logs for details (e.g., journalctl -u postgresql.service) and permissions on $PG_DATA_DIR."
+                 PG_INIT_SUCCESS=false
             fi
         else
-            echo "[02-official-packages] PostgreSQL data directory '$PG_DATA_DIR' already exists. Skipping initialization."
+            echo "[02-official-packages] PostgreSQL data directory '$PG_DATA_DIR' already exists. Assuming it's correctly initialized. Skipping initdb."
+            # Ensure ownership and permissions are correct even if directory exists
+            run_cmd "chown -R postgres:postgres \"$PG_DATA_DIR\""
+            run_cmd "chmod -R 700 \"$PG_DATA_DIR\""
+            PG_INIT_SUCCESS=true # Assume existing directory is okay
+        fi
+    fi
+
+    # Attempt to start the service only if initdb was successful or data directory was already present
+    if [[ "$PG_INIT_SUCCESS" == true ]]; then
+        echo "[02-official-packages] Attempting to start PostgreSQL service..."
+        run_cmd systemctl start postgresql.service
+        
+        if [[ "$DRY_RUN" == false ]]; then
+            sleep 3 # Give the service a moment to start up
+            if systemctl is-active --quiet postgresql.service; then
+                echo "[02-official-packages] PostgreSQL service started successfully."
+            else
+                echo "[02-official-packages] Error: PostgreSQL service FAILED to start after initialization/check."
+                echo "[02-official-packages] Please check logs for details:"
+                echo "[02-official-packages]   sudo systemctl status postgresql.service"
+                echo "[02-official-packages]   sudo journalctl -xeu postgresql.service"
+            fi
+        else
+             echo "DRY-RUN ➜ Would check 'systemctl is-active --quiet postgresql.service' after attempting start."
         fi
     fi
 else
@@ -135,3 +163,4 @@ else
 fi
 
 echo "[02-official-packages] Package installation and basic service configuration complete."
+
