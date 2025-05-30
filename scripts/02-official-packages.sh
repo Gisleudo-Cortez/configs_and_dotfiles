@@ -35,7 +35,7 @@ PKGS=(
     dolphin dbeaver vlc thunderbird kate konsole obsidian obs-studio
 
     # Development & Runtimes
-    nodejs npm postgresql cmake go cargo delve gopls
+    nodejs npm postgresql cmake go cargo delve gopls git
 
     # Utilities & Tools
     qalculate-gtk kdeconnect rclone
