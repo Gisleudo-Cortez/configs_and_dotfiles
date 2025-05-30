@@ -83,38 +83,43 @@ echo "[11-deploy-dotfiles] Changing to stow directory: $STOW_RUN_DIR"
 # Store the original PWD to return to it later
 ORIGINAL_PWD=$(pwd)
 if [[ "$DRY_RUN" == false ]]; then
-    cd "$STOW_RUN_DIR" || { echo "Failed to cd into $STOW_RUN_DIR"; exit 1; }
+    cd "$STOW_RUN_DIR" || { echo "[11-deploy-dotfiles] Error: Failed to cd into $STOW_RUN_DIR"; exit 1; }
 fi
 
 # Pre-handle known conflicting files before stowing
 # This specifically targets regular files that would block stow.
 # Symlinks will be handled by `stow -R`.
 echo "[11-deploy-dotfiles] Checking for conflicting regular files..."
-for pkg_to_check_conflict in "${STOW_PACKAGES_TO_DEPLOY[@]}"; do
-    if [[ "$pkg_to_check_conflict" == "zshrc" ]]; then
-        TARGET_FILE="$CURRENT_USER_HOME/.zshrc"
-        if [[ -f "$TARGET_FILE" && ! -L "$TARGET_FILE" ]]; then # Check if it's a regular file (not a symlink -L)
+for pkg_name in "${STOW_PACKAGES_TO_DEPLOY[@]}"; do
+    SOURCE_PKG_DIR="$STOW_RUN_DIR/$pkg_name"
+    if [[ ! -d "$SOURCE_PKG_DIR" ]]; then
+        echo "[11-deploy-dotfiles] Warning: Source package directory '$SOURCE_PKG_DIR' for package '$pkg_name' not found. Skipping conflict check for this package."
+        continue
+    fi
+
+    echo "[11-deploy-dotfiles] Checking conflicts for package: $pkg_name"
+    # Find all files within the current source package directory
+    # Use -print0 and read -d $'\0' to handle filenames with spaces, newlines, etc.
+    find "$SOURCE_PKG_DIR" -type f -print0 | while IFS= read -r -d $'\0' source_file_path; do
+        # Determine the path of the file relative to the root of THIS package directory.
+        # This relative path is what stow will try to create/link in the target directory ($HOME).
+        # Example: if source_file_path is /stow_dir/pkg_name/.config/foo/bar.txt
+        # then path_in_stow_package will be .config/foo/bar.txt
+        path_in_stow_package="${source_file_path#"$SOURCE_PKG_DIR/"}"
+        
+        TARGET_FILE="$CURRENT_USER_HOME/$path_in_stow_package"
+
+        # Only proceed if the target is an actual regular file (not a symlink, not a directory)
+        # The -f check also implicitly checks if the parent directory of TARGET_FILE exists.
+        # If the parent directory doesn't exist, -f "$TARGET_FILE" will be false.
+        if [[ -f "$TARGET_FILE" && ! -L "$TARGET_FILE" ]]; then
             BACKUP_FILE="${TARGET_FILE}.bak.$(date +%Y%m%d%H%M%S)"
-            echo "[11-deploy-dotfiles] Found existing regular file '$TARGET_FILE'."
+            echo "[11-deploy-dotfiles] Conflicting regular file found: '$TARGET_FILE'"
+            echo "[11-deploy-dotfiles] (This target corresponds to '$path_in_stow_package' in stow package '$pkg_name')"
             echo "[11-deploy-dotfiles] Backing it up to '$BACKUP_FILE' and removing original."
             run_cmd_user "mv \"$TARGET_FILE\" \"$BACKUP_FILE\""
         fi
-    elif [[ "$pkg_to_check_conflict" == "fish" ]]; then
-        # Specifically handle the conflicting uv.env.fish file
-        TARGET_FILE="$CURRENT_USER_HOME/.config/fish/conf.d/uv.env.fish"
-        # Ensure parent directory exists before checking the file, though less likely to be an issue here
-        TARGET_DIR=$(dirname "$TARGET_FILE")
-        if [[ -d "$TARGET_DIR" ]]; then # Check if the fish conf.d directory exists
-            if [[ -f "$TARGET_FILE" && ! -L "$TARGET_FILE" ]]; then # Check if it's a regular file
-                BACKUP_FILE="${TARGET_FILE}.bak.$(date +%Y%m%d%H%M%S)"
-                echo "[11-deploy-dotfiles] Found existing regular file '$TARGET_FILE'."
-                echo "[11-deploy-dotfiles] Backing it up to '$BACKUP_FILE' and removing original."
-                run_cmd_user "mv \"$TARGET_FILE\" \"$BACKUP_FILE\""
-            fi
-        fi
-    fi
-    # Add similar blocks here for other packages if they are known to conflict
-    # with single, top-level files in $HOME or specific nested files.
+    done
 done
 
 echo "[11-deploy-dotfiles] Stowing packages to target directory: $CURRENT_USER_HOME"
@@ -136,3 +141,4 @@ if [[ "$DRY_RUN" == false ]]; then
 fi
 
 echo "[11-deploy-dotfiles] Dotfiles deployment process complete."
+
