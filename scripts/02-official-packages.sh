@@ -40,7 +40,7 @@ PKGS=(
     # Utilities & Tools
     qalculate-gtk kdeconnect rclone
     fzf bat eza ripgrep ripgrep-all ugrep htop yazi hyperfine
-    paru jq grim slurp swappy dunst swaylock hypridle 
+    paru jq grim slurp swappy dunst swaylock hypridle rofi-wayland
 
     # Fonts
     ttf-jetbrains-mono ttf-nerd-fonts-symbols
