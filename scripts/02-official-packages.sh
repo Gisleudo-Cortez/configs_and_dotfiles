@@ -45,7 +45,7 @@ PKGS=(
     imagemagick libnotify duf fastfetch cliphist
 
     # Fonts
-    ttf-jetbrains-mono ttf-nerd-fonts-symbols noto-fonts-emoji
+    ttf-jetbrains-mono ttf-nerd-fonts-symbols noto-fonts-emoji ttf-jetbrains-mono nerd-fonts
 
     # Containerization
     docker docker-buildx
