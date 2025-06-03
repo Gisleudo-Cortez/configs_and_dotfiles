@@ -22,13 +22,11 @@
     version: main # Or your preferred branch/tag, e.g., 'master'
     recursive: yes # Clone submodules if your dotfiles repo uses them
     accept_hostkey: yes # Automatically accept new SSH host keys (use with caution if repo URL is SSH)
-    # Check for changes more reliably than just 'Already up to date.'
   register: git_clone_status
   changed_when: >
     git_clone_status.before != git_clone_status.after or
     'Cloning into' in git_clone_status.stdout or
     (git_clone_status.stdout is defined and 'Already up to date.' not in git_clone_status.stdout and 'Current branch main is up to date.' not in git_clone_status.stdout)
-
 
 - name: Ensure .config directory exists in user's home ({{ target_user_home }}/.config)
   ansible.builtin.file:
@@ -49,30 +47,15 @@
     - stow_processing # Tag for selectively running this part
 
 # Explicitly link root dotfiles that are not part of a stow package directory structure
+# This section has been MODIFIED to correctly loop using include_tasks
 - name: Link explicitly defined root dotfiles (e.g., starship.toml)
-  vars:
-    # Ensure parent directory for the destination link exists
-    link_destination_parent_dir: "{{ item.dest | dirname }}"
-  block:
-    - name: "Ensure parent directory exists for root dotfile link: {{ link_destination_parent_dir }}"
-      ansible.builtin.file:
-        path: "{{ link_destination_parent_dir }}"
-        state: directory
-        owner: "{{ target_user }}"
-        group: "{{ target_user }}"
-        mode: '0755'
-
-    - name: "Link root dotfile: {{ item.dest }} -> {{ dotfiles_clone_dir }}/{{ item.src }}"
-      ansible.builtin.file:
-        src: "{{ dotfiles_clone_dir }}/{{ item.src }}" # Source is within the cloned repo
-        dest: "{{ item.dest }}" # Destination is absolute path (already includes target_user_home from vars)
-        owner: "{{ target_user }}"
-        group: "{{ target_user }}"
-        state: link # Create a symlink
-        force: true # Replace if dest exists and is not the correct symlink, or is a file/dir
-  loop: "{{ root_dotfiles_to_link }}"
+  ansible.builtin.include_tasks: link_single_root_dotfile.yml # Include the new file here
+  loop: "{{ root_dotfiles_to_link }}" # Loop over the list from vars/main.yml
   loop_control:
-    label: "{{ item.name }}" # Use the 'name' field for clearer loop output
-  when: root_dotfiles_to_link is defined and root_dotfiles_to_link | length > 0
+    loop_var: root_dotfile_item # Use a distinct loop variable name
+    label: "{{ root_dotfile_item.name }}" # Use the 'name' field for clearer loop output
+  when:
+    - root_dotfiles_to_link is defined
+    - root_dotfiles_to_link | length > 0 # Ensure the list is not empty
   tags:
     - root_dotfiles # Tag for selectively running this part

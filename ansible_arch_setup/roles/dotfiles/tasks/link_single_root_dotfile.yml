@@ -1,0 +1,24 @@
+# ansible_arch_poc/roles/dotfiles/tasks/link_single_root_dotfile.yml
+# This file is included by roles/dotfiles/tasks/main.yml for each root_dotfile_item.
+# It expects 'root_dotfile_item' to be defined by the loop in the calling task.
+# It also expects 'target_user', 'target_user_home', and 'dotfiles_clone_dir'
+# to be available from the play's variables (e.g., vars/main.yml or inventory).
+---
+- name: "Ensure parent directory exists for root dotfile link: {{ (root_dotfile_item.dest | dirname) }}"
+  ansible.builtin.file:
+    path: "{{ (root_dotfile_item.dest | dirname) }}" # Extracts the directory path from the destination
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}" # Consider deriving user's primary group dynamically if needed
+    mode: '0755'
+  # This task ensures the parent directory for the symlink exists.
+
+- name: "Link root dotfile '{{ root_dotfile_item.name }}': {{ root_dotfile_item.dest }} -> {{ dotfiles_clone_dir }}/{{ root_dotfile_item.src }}"
+  ansible.builtin.file:
+    src: "{{ dotfiles_clone_dir }}/{{ root_dotfile_item.src }}"   # Source file within the cloned dotfiles repository
+    dest: "{{ root_dotfile_item.dest }}"  # Absolute destination path for the symlink
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+    state: link # Create a symlink
+    force: true # If destination exists and is not the correct symlink (or is a file/dir), replace it.
+                # This is important for idempotence and ensuring the desired link state.
