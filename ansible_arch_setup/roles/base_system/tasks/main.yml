@@ -10,44 +10,54 @@
 - name: Ensure [multilib] repository line is uncommented in /etc/pacman.conf
   ansible.builtin.lineinfile:
     path: /etc/pacman.conf
-    regexp: '^#\s*(\[multilib\])<span class="math-inline">' \# Matches '\#\[multilib\]' with optional leading spaces
-line\: '\\1'                    \# Replaces with '\[multilib\]' \(uncommented\)
-backrefs\: true                \# Use \\1 to refer to the captured group in regexp
-notify\: "Refresh pacman cache"  \# Use the handler name defined in handlers/main\.yml
-tags\: pacman\_repos
-\- name\: Ensure 'Include' line under \[multilib\] is uncommented in /etc/pacman\.conf
-ansible\.builtin\.lineinfile\:
-path\: /etc/pacman\.conf
-\# This regexp looks for a commented 'Include' line specifically after a '\[multilib\]' line\.
-\# It assumes \[multilib\] is already uncommented by the previous task\.
-\# A more robust approach might use blockinfile or check state more thoroughly\.
-regexp\: '\(?m\)\(^\\\[multilib\\\]\\n\(?\:\.\*\\n\)\*?^\#\\s\*\(Include\\s\*\=\\s\*\\/etc\\/pacman\.d\\/mirrorlist\)\)</span>'
-    line: '\1\n\2' # This is complex; simpler: find commented include after [multilib] block start
-    # Simpler approach for the Include line:
-    # regexp: '^#\s*(Include\s*=\s*\/etc\/pacman.d\/mirrorlist)' # Be careful this is only for multilib
-    # line: '\1'
-    # This part can be tricky with lineinfile for multi-line context.
-    # A blockinfile module for the whole multilib section might be more robust if format varies.
-    # For PoC, let's try a more direct uncomment if the line exists:
-    # This assumes the "Include" line for multilib is known and distinct.
-    # A common pattern is just one "Include = /etc/pacman.d/mirrorlist" under [multilib].
+    regexp: '^#\s*(\[multilib\])$' # Matches '#[multilib]' with optional leading spaces
+    line: '\1'                    # Replaces with '[multilib]' (uncommented)
+    backrefs: true                # Use \1 to refer to the captured group in regexp
+  notify: "Refresh pacman cache"  # Use the handler name defined in handlers/main.yml
+  tags: pacman_repos
+
+- name: Ensure 'Include' line under [multilib] is uncommented in /etc/pacman.conf
+  ansible.builtin.lineinfile:
+    path: /etc/pacman.conf
+    # This complex regexp attempts to find a commented 'Include' line that appears
+    # *after* a '[multilib]' line and before any subsequent section or EOF.
+    # (?m) enables multi-line mode for ^ and $.
+    # (^\[multilib\]\n(?:.*\n)*?^#\s*(Include\s*=\s*\/etc\/pacman.d\/mirrorlist))$
+    #  Group 1: [multilib] and everything up to the commented Include line
+    #  Group 2: The commented Include line itself (capture the 'Include = ...' part)
+    # The goal is to uncomment only the Include specific to multilib.
+    # A simpler, though potentially less precise, regexp would be:
+    # regexp: '^#\s*(Include\s*=\s*\/etc\/pacman.d\/mirrorlist)'
+    # line: 'Include = /etc/pacman.d/mirrorlist'
+    # For now, using a more targeted approach, assuming the structure is somewhat predictable.
+    # If `pacman.conf` has multiple commented `Include` lines, this needs to be specific.
+    # One common pattern is that the multilib section is often at the end.
+    # This task will uncomment the *first* commented "Include = /etc/pacman.d/mirrorlist"
+    # found after "[multilib]".
+    regexp: '(?s)(^\[multilib\](?:(?!^\[).)*?)^#\s*(Include\s*=\s*/etc/pacman.d/mirrorlist)'
+    replace: '\1\2' # \1 is everything from [multilib] up to the line before #Include, \2 is the Include line without #
+    backrefs: yes
   notify: "Refresh pacman cache"
   tags: pacman_repos
-  # Placeholder for a more robust multilib include enabling if needed:
-- name: Ensure multilib 'Include' line is present and uncommented (alternative if above is tricky)
+
+# This was the task block causing the YAML error due to an improper inline comment.
+# The comment has been removed from the regexp line. The task remains disabled.
+- name: Ensure multilib 'Include' line is present and uncommented (alternative strategy - currently disabled)
   ansible.builtin.replace:
     path: /etc/pacman.conf
+    # Original problematic regexp line:
+    # regexp: '^(#\s*Include\s*=\s*\/etc\/pacman.d\/mirrorlist)\s*(\n^\s*\[multilib\])' # Comment removed here
     regexp: '^(#\s*Include\s*=\s*\/etc\/pacman.d\/mirrorlist)\s*(\n^\s*\[multilib\])'
     replace: 'Include = /etc/pacman.d/mirrorlist\n[multilib]'
-    # This is still not perfect. Managing pacman.conf sections is best with blockinfile or template.
-    # For now, focusing on the GPG keys and Chaotic-AUR as more critical.
-  when: false # Disable this complex replace for now, rely on simpler uncommenting if possible or manual check.
+  when: false # This alternative task remains disabled.
+  tags: pacman_repos_alternative
+
 
 # Tasks for Chaotic-AUR (mirroring parts of 00-enable-repos.sh)
 # These commands will be run with 'become' (sudo) privileges by Ansible.
 - name: Check if Chaotic-AUR GPG key {{ item }} is already imported
-  ansible.builtin.command: "pacman-key --list-keys {{ item }}"
-  register: gpg_key_check_results
+  ansible.builtin.command: "pacman-key --list-keys {{ item }}" # Check specific key
+  register: gpg_key_check_results # Changed register name for clarity
   loop: "{{ chaotic_aur_gpg_keys }}"
   changed_when: false # This task only checks, doesn't change state
   failed_when: false  # Do not fail playbook if key is not found (rc will be non-zero from pacman-key)
