@@ -1,0 +1,105 @@
+---
+# tasks file for roles/base_system
+
+- name: Display effective user for base_system tasks (should be root)
+  ansible.builtin.debug:
+    msg: "Running base_system tasks as user: {{ ansible_effective_user_id }} with become: {{ ansible_become }}"
+
+# Task to ensure multilib is enabled (mirroring 00-enable-repos.sh logic)
+# Idempotently uncomment the [multilib] section and its Include line in /etc/pacman.conf
+- name: Ensure [multilib] repository line is uncommented in /etc/pacman.conf
+  ansible.builtin.lineinfile:
+    path: /etc/pacman.conf
+    regexp: '^#\s*(\[multilib\])<span class="math-inline">' \# Matches '\#\[multilib\]' with optional leading spaces
+line\: '\\1'                    \# Replaces with '\[multilib\]' \(uncommented\)
+backrefs\: true                \# Use \\1 to refer to the captured group in regexp
+notify\: "Refresh pacman cache"  \# Use the handler name defined in handlers/main\.yml
+tags\: pacman\_repos
+\- name\: Ensure 'Include' line under \[multilib\] is uncommented in /etc/pacman\.conf
+ansible\.builtin\.lineinfile\:
+path\: /etc/pacman\.conf
+\# This regexp looks for a commented 'Include' line specifically after a '\[multilib\]' line\.
+\# It assumes \[multilib\] is already uncommented by the previous task\.
+\# A more robust approach might use blockinfile or check state more thoroughly\.
+regexp\: '\(?m\)\(^\\\[multilib\\\]\\n\(?\:\.\*\\n\)\*?^\#\\s\*\(Include\\s\*\=\\s\*\\/etc\\/pacman\.d\\/mirrorlist\)\)</span>'
+    line: '\1\n\2' # This is complex; simpler: find commented include after [multilib] block start
+    # Simpler approach for the Include line:
+    # regexp: '^#\s*(Include\s*=\s*\/etc\/pacman.d\/mirrorlist)' # Be careful this is only for multilib
+    # line: '\1'
+    # This part can be tricky with lineinfile for multi-line context.
+    # A blockinfile module for the whole multilib section might be more robust if format varies.
+    # For PoC, let's try a more direct uncomment if the line exists:
+    # This assumes the "Include" line for multilib is known and distinct.
+    # A common pattern is just one "Include = /etc/pacman.d/mirrorlist" under [multilib].
+  notify: "Refresh pacman cache"
+  tags: pacman_repos
+  # Placeholder for a more robust multilib include enabling if needed:
+- name: Ensure multilib 'Include' line is present and uncommented (alternative if above is tricky)
+  ansible.builtin.replace:
+    path: /etc/pacman.conf
+    regexp: '^(#\s*Include\s*=\s*\/etc\/pacman.d\/mirrorlist)\s*(\n^\s*\[multilib\])'
+    replace: 'Include = /etc/pacman.d/mirrorlist\n[multilib]'
+    # This is still not perfect. Managing pacman.conf sections is best with blockinfile or template.
+    # For now, focusing on the GPG keys and Chaotic-AUR as more critical.
+  when: false # Disable this complex replace for now, rely on simpler uncommenting if possible or manual check.
+
+# Tasks for Chaotic-AUR (mirroring parts of 00-enable-repos.sh)
+# These commands will be run with 'become' (sudo) privileges by Ansible.
+- name: Check if Chaotic-AUR GPG key {{ item }} is already imported
+  ansible.builtin.command: "pacman-key --list-keys {{ item }}"
+  register: gpg_key_check_results
+  loop: "{{ chaotic_aur_gpg_keys }}"
+  changed_when: false # This task only checks, doesn't change state
+  failed_when: false  # Do not fail playbook if key is not found (rc will be non-zero from pacman-key)
+  tags: chaotic_aur_keys
+
+- name: Import Chaotic-AUR GPG key {{ item.item }} if not found via pacman-key
+  ansible.builtin.command: "pacman-key --recv-keys {{ item.item }} --keyserver hkps://keyserver.ubuntu.com"
+  loop: "{{ gpg_key_check_results.results }}" # Loop over results of the check
+  when: item.rc != 0 # rc (return code) non-zero means key was not found by --list-keys
+  changed_when: true # Assume this command makes a change if it runs successfully
+  notify: "Refresh pacman cache"
+  tags: chaotic_aur_keys
+
+- name: Locally sign Chaotic-AUR GPG key {{ item.item }} if it was (likely) just imported
+  ansible.builtin.command: "pacman-key --lsign-key {{ item.item }}"
+  loop: "{{ gpg_key_check_results.results }}" # Loop over results of the check
+  # Only sign if the key was not initially found (and thus imported by the previous task).
+  # The 'when: item.rc != 0' ensures this logic.
+  when: item.rc != 0
+  changed_when: true # Assume this command makes a change if it runs successfully
+  notify: "Refresh pacman cache"
+  tags: chaotic_aur_keys
+
+- name: Install Chaotic-AUR keyring and mirrorlist packages from URL
+  community.general.pacman:
+    name:
+      - "{{ chaotic_aur_keyring_pkg_url }}"
+      - "{{ chaotic_aur_mirrorlist_pkg_url }}"
+    state: present # Ensures packages are installed; pacman handles download from URL
+  notify: "Refresh pacman cache"
+  tags: chaotic_aur_setup
+
+- name: Ensure Chaotic-AUR repository is configured in /etc/pacman.conf
+  ansible.builtin.blockinfile:
+    path: /etc/pacman.conf
+    block: |
+      [chaotic-aur]
+      Include = /etc/pacman.d/chaotic-mirrorlist
+    marker: "# {mark} ANSIBLE MANAGED BLOCK FOR CHAOTIC AUR" # Unique marker
+    state: present # Ensures the block exists
+  notify: "Refresh pacman cache"
+  tags: chaotic_aur_setup
+
+# Install general base system packages defined in vars/main.yml
+- name: Install base system packages
+  community.general.pacman:
+    name: "{{ base_packages }}"
+    state: present
+    update_cache: false # Cache should have been updated by pre_tasks or handlers by now
+  tags: packages
+
+# Handler to refresh pacman cache (flushed at end of play or explicitly)
+- name: Flush handlers to ensure pacman cache is refreshed if changes were made
+  ansible.builtin.meta: flush_handlers
+  tags: always # Ensure handlers are considered

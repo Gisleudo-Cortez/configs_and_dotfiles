@@ -1,0 +1,111 @@
+---
+# vars/main.yml
+
+# User to whom dotfiles and user-specific configs will apply.
+# {{ ansible_user_id }} is the username of the user running Ansible (e.g., the one who sudo'd).
+# This is usually the correct non-root user on a single-user workstation setup.
+target_user: "{{ ansible_user_id }}"
+target_user_home: "/home/{{ target_user }}"
+
+# Base System Packages
+base_packages:
+  - git
+  - stow # Useful for users to understand dotfiles structure or manage other stow packages manually
+  - base-devel # For building AUR packages (if any) or other software from source
+  - fish # Shell
+  - starship # Prompt
+  - kitty # Terminal emulator
+  - neovim # Text editor
+  - python-pip # For Python package management
+  - ripgrep # Fast grep alternative
+  - bat # Cat clone with syntax highlighting
+  - eza # Modern ls replacement
+  - fzf # Command-line fuzzy finder
+  - zoxide # Smarter cd command
+  - ttf-jetbrains-mono # Programming font
+  - ttf-nerd-fonts-symbols # For icons in Waybar, prompts, etc.
+  - archlinux-keyring # Ensure latest keyring
+  - curl
+  - wget
+
+# Chaotic-AUR repository setup
+chaotic_aur_keyring_pkg_url: "https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst"
+chaotic_aur_mirrorlist_pkg_url: "https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst"
+chaotic_aur_gpg_keys:
+  - "FBA220DFC880C036" # Main Chaotic-AUR key
+  - "3056513887B78AEB" # Pedro Henrique Lara Campos <root@pedrolara.com>
+
+# Desktop Environment (Hyprland + SDDM)
+hyprland_packages:
+  - hyprland
+  - xdg-desktop-portal-hyprland # For screen sharing, file pickers, etc.
+  - xdg-desktop-portal-gtk # GTK fallback portal
+  - waybar # Status bar
+  - hyprpaper # Wallpaper utility
+  - hyprlock # Lock screen
+  - pipewire # Audio backend
+  - wireplumber # PipeWire session manager
+  - pipewire-pulse # PulseAudio compatibility layer for PipeWire
+  - pipewire-alsa # ALSA compatibility for PipeWire
+  - polkit-kde # Authentication agent (often used with SDDM/Plasma, works for general Qt/Wayland auth)
+  - qt5-wayland
+  - qt6-wayland
+  - kitty # Already in base_packages, listed here for clarity as part of DE stack
+  - mako # Notification daemon for Wayland
+  - grim # For screenshots on Wayland
+  - slurp # For selecting a region for screenshots (used with grim)
+  - swappy # For editing screenshots
+  - rofi-wayland # Application launcher (replaces wofi as per user request)
+  # Add any other essential tools for a functional Hyprland session:
+  - imagemagick # For screen locking effects or hyprpaper
+  - libnotify # For desktop notifications (mako uses this)
+  - pavucontrol # Volume control GUI for PulseAudio/PipeWire-Pulse
+  - network-manager-applet # Or other network management GUI if not using TUI
+
+sddm_packages:
+  - sddm
+  # Consider sddm-git from AUR if the repo version has issues with Hyprland/Wayland,
+  # but for PoC, the official repository version is usually fine.
+
+# Dotfiles Configuration
+# URL of your dotfiles repository
+dotfiles_repo_url: "https://github.com/Gisleudo-Cortez/configs_and_dotfiles.git" # As per 11-deploy-dotfiles.sh
+# Directory where the dotfiles repository will be cloned
+dotfiles_clone_dir: "{{ target_user_home }}/.dotfiles_ansible_managed_clone"
+
+# List of "stow packages" (directories at the root of your dotfiles_clone_dir)
+# Ansible will mimic stow's behavior: contents of dotfiles_clone_dir/package_name/
+# will be symlinked into target_user_home/, preserving their relative paths.
+# Example: if dotfiles_clone_dir/hypr/.config/hypr/config exists,
+# it will be symlinked to target_user_home/.config/hypr/config.
+# This list should match the top-level directories in your dotfiles Git repository
+# that you intend to manage with a stow-like approach.
+# Based on user's `11-deploy-dotfiles.sh` and repository structure provided.
+stow_packages:
+  - ".zshrc"  # If this directory in your repo contains a file also named .zshrc, it'll become ~/.zshrc
+  - "fish"
+  - "hypr"
+  - "kitty"
+  - "nvim"
+  - "waybar"
+  - "starship" # For any files within the 'starship' directory in your dotfiles repo (e.g., starship/.config/starship/presets/...)
+
+# List of individual files at the root of your dotfiles repository to be symlinked.
+# This is for files not managed within a "stow package" directory.
+# Ensure `src` is relative to the root of `dotfiles_clone_dir`.
+# Ensure `dest` is the absolute path in the target user's home.
+# Based on user's repository structure and common needs.
+root_dotfiles_to_link:
+  - { name: "starship.toml config file", src: "starship.toml", dest: "{{ target_user_home }}/.config/starship.toml" }
+  - { name: "starship_cat.toml config file", src: "starship_cat.toml", dest: "{{ target_user_home }}/.config/starship_cat.toml" }
+  # Example: If you have a .gitconfig at the root of your dotfiles repo:
+  # - { name: "gitconfig", src: ".gitconfig", dest: "{{ target_user_home }}/.gitconfig" }
+  # Add your global .gitignore if you manage it this way:
+  # - { name: "gitignore_global", src: ".gitignore", dest: "{{ target_user_home }}/.gitignore_global" }
+
+# ASSUMPTIONS for dotfiles:
+# 1. The `stow_packages` list contains names of directories located at the root of your `dotfiles_repo_url`.
+# 2. The structure *within* each of these `stow_packages` directories mirrors the desired target path structure
+#    relative to `{{ target_user_home }}`. For example, to create `~/.config/nvim/init.vim`, your `nvim`
+#    stow package directory in the Git repo must contain `.config/nvim/init.vim`.
+# 3. The `root_dotfiles_to_link` list contains files located at the root of your `dotfiles_repo_url`.

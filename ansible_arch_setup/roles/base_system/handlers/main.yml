@@ -1,0 +1,6 @@
+---
+# handlers file for roles/base_system
+- name: Refresh pacman cache
+  community.general.pacman:
+    update_cache: true
+  listen: "Refresh pacman cache" # Custom listener name for clarity

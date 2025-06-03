@@ -30,17 +30,12 @@ echo "[02b-aur-packages] Preparing to install AUR packages using paru..."
 PACKAGES_TO_INSTALL_VIA_PARU=(
     "find-the-command" 
     "anydesk-bin"
-    "alvr-nvidia"
     "neofetch-git"
     "grimblast-git"
-    "plasma5-themes-sweet-full-git" 
     "waybar-module-pacman-updates-git"
     "wlr-randr-git"
-    "wlx-overlay-s-git"
     "zsh-theme-powerlevel10k-git"
-    "envision-xr-git"
     "zen-browser-bin"
-    "gameconqueror" # Often an AUR package
     "clipman" # Check if this is AUR or Chaotic
 )
 

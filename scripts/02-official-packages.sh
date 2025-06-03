@@ -24,71 +24,38 @@ run_cmd() {
     fi
 }
 
-echo "[02-official-packages] Preparing to install consolidated list of official packages..."
+echo "[02-official-packages] Preparing to install original list of official packages..."
 
-# Initial list + packages from installed_files.txt (official/chaotic-aur)
-# List curated from installed_files.txt, duplicates with original list are implicitly handled by pacman --needed
-# Some packages from installed_files.txt might be specific to Garuda edition and could be pruned if not desired.
+# Original package list from the script provided initially
 PKGS=(
-    # Shells, Terminals, Editors from original
+    # Shells, Terminals, Editors
     fish starship kitty alacritty neovim vim git stow
 
-    # GUI Apps & File Managers from original
+    # GUI Apps & File Managers
     dolphin dbeaver vlc thunderbird kate konsole obsidian obs-studio
 
-    # Development & Runtimes from original
-    nodejs npm postgresql cmake go cargo delve gopls
+    # Development & Runtimes
+    nodejs npm postgresql cmake go cargo delve gopls git # git is duplicated, pacman handles it
 
-    # Utilities & Tools from original
+    # Utilities & Tools
     qalculate-gtk kdeconnect rclone
     fzf bat eza ripgrep ripgrep-all ugrep htop yazi hyperfine
-    paru # AUR helper, assuming it's in chaotic-aur
+    paru jq grim slurp swappy dunst swaylock hypridle 
 
-    # Fonts from original
-    "ttf-jetbrains-mono" "ttf-nerd-fonts-symbols" # Explicitly quoted for clarity if needed anywhere else
+    # Fonts
+    ttf-jetbrains-mono ttf-nerd-fonts-symbols
 
-    # Containerization from original
+    # Containerization
     docker docker-buildx
-
-    # Packages from installed_files.txt 
-    "7zip" alsa-firmware alsa-utils appmenu-gtk-module ark base base-devel bash-completion
-    bind blueman bluetooth-autoconnect bridge-utils btrfs-progs bzip2
-    chromium cliphist code coreutils cryptsetup curlftpfs deluge-gtk dialog dmidecode dmraid dosfstools
-    downgrade dracut dua-cli dunst dust e2fsprogs ecryptfs-utils efibootmgr eog ethtool evince exfatprogs
-    f2fs-tools fastfetch fatresize ffmpegthumbnailer ffmpegthumbs file file-roller filesystem findutils
-    firefox foot freetype2 fscrypt fsearch fwupd galculator gcc-libs geany gestures gettext gimp
-    glibc gnome-firmware gnome-keyring gnome-logs gnome-system-monitor gnu-netcat gparted grep
-    grim grub grub-btrfs gsimplecal gstreamer-meta gtk-engine-murrine gvfs gvfs-afc gvfs-gphoto2
-    gvfs-mtp gvfs-nfs gvfs-smb gzip handbrake hyperfine hypridle hyprland hyprpicker hyprsunset
-    inetutils input-devices-support intel-ucode inxi iproute2 iptables-nft iputils jfsutils jq kanshi
-    kde-cli-tools keepassxc kvantum lhasa lib32-pipewire-jack libdvdcss libgsf libmythes libopenraw
-    libreoffice-still librsvg libva-nvidia-driver licenses linux-firmware linux-hardened linux-hardened-headers
-    linux-zen linux-zen-headers logrotate lrzip lsb-release lvm2 lxappearance lzip lzop mako man-db man-pages
-    mdadm meld memtest86+ mesa-utils micro modem-manager-gui mtools nano ncdu net-tools
-    network-manager-applet networkmanager-support nfs-utils nilfs-utils nm-connection-editor nmap
-    noto-fonts noto-fonts-cjk noto-fonts-emoji nss-mdns ntfs-3g nushell nwg-displays nwg-drawer
-    nwg-launchers nwg-look openxr os-prober-btrfs otf-font-awesome otf-font-awesome-4 pacman pacman-contrib
-    pacseek pamixer parallel pavucontrol pciutils perl-file-mimeinfo pipewire-jack pipewire-support
-    plasma-framework5 playerctl plocate polkit-gnome powertop printer-support procps-ng psmisc qbittorrent
-    qt5-imageformats qt5ct qt6ct ranger rate-mirrors rsync rust samba-support satty scanner-support
-    sdbus-cpp sddm sed shadow simple-scan slurp snapper-support snapper-tools sof-firmware sshfs
-    steam-native-runtime sudo swappy swaylock swww system-config-printer systemd systemd-sysvcompat tar
-    terminus-font thunar traceroute ttf-dejavu ttf-fantasque-sans-mono ttf-fira-sans ttf-firacode-nerd
-    ttf-liberation ttf-opensans ttf-ubuntu-font-family udiskie ufw unace unarchiver unarj unrar unzip
-    update-grub usbutils util-linux uwsm vi virt-manager-meta waybar wayland wayland-protocols-git
-    wayland-utils wdisplays wget which whois wine wireless-regdb wireless_tools wireplumber wlogout wofi
-    wpaperd wqy-zenhei wtype xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-hyprland
-    xdg-user-dirs xdg-utils xfce4-terminal xfsprogs xorg-xhost xorg-xwayland xsel xz
-    zip
 )
 
 # Brave Browser handling
-BRAVE_PACKAGE_CANDIDATES=("brave-bin" "brave-browser" "brave") 
+BRAVE_PACKAGE_CANDIDATES=("brave-bin" "brave-browser" "brave")
 BRAVE_TO_INSTALL=""
 if [[ "$DRY_RUN" == true ]]; then
     echo "[02-official-packages] DRY-RUN: Would check for Brave browser package."
     # Add a placeholder or one of the candidates for dry run output
-    PKGS_TO_INSTALL_BRAVE_DRY_RUN=("brave (selected candidate)")
+    PACKAGES_TO_INSTALL_BRAVE_DRY_RUN=("brave (selected candidate)")
 else
     for pkg_candidate in "${BRAVE_PACKAGE_CANDIDATES[@]}"; do
         if pacman -Si "$pkg_candidate" &>/dev/null; then
@@ -107,7 +74,7 @@ PACKAGES_FINAL_LIST=("${PKGS[@]}")
 if [[ -n "$BRAVE_TO_INSTALL" ]]; then
     PACKAGES_FINAL_LIST+=("$BRAVE_TO_INSTALL")
 elif [[ "$DRY_RUN" == true ]]; then
-    PACKAGES_FINAL_LIST+=("${PKGS_TO_INSTALL_BRAVE_DRY_RUN[@]}")
+    PACKAGES_FINAL_LIST+=("${PACKAGES_TO_INSTALL_BRAVE_DRY_RUN[@]}") # Use the dry run placeholder
 fi
 
 
@@ -176,7 +143,6 @@ if pacman -Qs postgresql &>/dev/null; then
             run_cmd chmod 700 "$PG_DATA_DIR"
             
             echo "[02-official-packages] Attempting to initialize PostgreSQL database cluster as user 'postgres'..."
-            # Use su for more compatibility than sudo -iu if postgres user has no proper shell temporarily
             if su - postgres -s /bin/bash -c "initdb --locale=C.UTF-8 -E UTF8 -D '$PG_DATA_DIR'"; then
                  echo "[02-official-packages] PostgreSQL database cluster initialized successfully by initdb command."
                  PG_INIT_SUCCESS=true

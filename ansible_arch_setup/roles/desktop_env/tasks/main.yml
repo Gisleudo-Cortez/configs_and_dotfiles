@@ -1,0 +1,55 @@
+---
+# tasks file for roles/desktop_env
+
+- name: Display effective user for desktop_env tasks (should be root)
+  ansible.builtin.debug:
+    msg: "Running desktop_env tasks as user: {{ ansible_effective_user_id }} with become: {{ ansible_become }}"
+
+- name: Install Hyprland related packages from official repositories
+  community.general.pacman:
+    name: "{{ hyprland_packages }}"
+    state: present
+    update_cache: true # Refresh cache before installing this batch of packages
+
+- name: Install SDDM (Display Manager) packages
+  community.general.pacman:
+    name: "{{ sddm_packages }}"
+    state: present
+    update_cache: false # Cache updated by previous task
+
+- name: Ensure Hyprland session file exists at /usr/share/wayland-sessions/hyprland.desktop
+  ansible.builtin.copy:
+    dest: /usr/share/wayland-sessions/hyprland.desktop
+    content: |
+      [Desktop Entry]
+      Name=Hyprland
+      Comment=An intelligent dynamic tiling Wayland compositor
+      Exec=Hyprland
+      Type=Application
+      DesktopNames=Hyprland
+    mode: '0644'
+    owner: root
+    group: root
+  # This ensures SDDM can find and list Hyprland as a session option.
+
+# SDDM configuration can be complex (theming, etc.).
+# For this PoC, we focus on enabling the service with its default configuration.
+# A common theme used with Hyprland is sddm-sugar-candy or similar, often from AUR.
+# If you install a theme, you would configure it in /etc/sddm.conf or /etc/sddm.conf.d/theme.conf
+# Example (requires theme package like sddm-chili-theme to be installed):
+# - name: Configure SDDM theme (example - theme must be installed)
+#   ansible.builtin.lineinfile:
+#     path: /etc/sddm.conf.d/kde_settings.conf # Arch often uses this for SDDM config overrides
+#     regexp: '^Current='
+#     line: 'Current=chili' # Replace 'chili' with your theme name
+#     create: yes # Create the file if it doesn't exist
+#     owner: root
+#     group: root
+#     mode: '0644'
+#   when: false # Disabled for PoC, enable and adapt if you install a specific theme
+
+- name: Enable and ensure SDDM service is started
+  ansible.builtin.systemd:
+    name: sddm.service
+    enabled: true # Ensure it starts on boot
+    state: started  # Ensure it is running now

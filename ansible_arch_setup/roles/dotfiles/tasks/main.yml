@@ -1,0 +1,78 @@
+---
+# tasks file for roles/dotfiles
+# These tasks should run as the target_user, not root.
+# 'become: false' is set on the role invocation in playbook.yml
+
+- name: Display effective user for dotfiles tasks (should be {{ target_user }})
+  ansible.builtin.debug:
+    msg: "Running dotfiles tasks as effective user: '{{ ansible_effective_user_id }}' for target user '{{ target_user }}'. Home: '{{ target_user_home }}'"
+
+- name: Ensure parent directory for dotfiles clone exists (e.g., ~/ or ~/Github)
+  ansible.builtin.file:
+    path: "{{ dotfiles_clone_dir | dirname }}" # Gets the parent of the clone directory
+    state: directory
+    mode: '0755' # Permissions for the parent directory
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}" # Or user's primary group
+
+- name: Clone user's dotfiles repository to {{ dotfiles_clone_dir }}
+  ansible.builtin.git:
+    repo: "{{ dotfiles_repo_url }}"
+    dest: "{{ dotfiles_clone_dir }}"
+    version: main # Or your preferred branch/tag, e.g., 'master'
+    recursive: yes # Clone submodules if your dotfiles repo uses them
+    accept_hostkey: yes # Automatically accept new SSH host keys (use with caution if repo URL is SSH)
+    # Check for changes more reliably than just 'Already up to date.'
+  register: git_clone_status
+  changed_when: >
+    git_clone_status.before != git_clone_status.after or
+    'Cloning into' in git_clone_status.stdout or
+    (git_clone_status.stdout is defined and 'Already up to date.' not in git_clone_status.stdout and 'Current branch main is up to date.' not in git_clone_status.stdout)
+
+
+- name: Ensure .config directory exists in user's home ({{ target_user_home }}/.config)
+  ansible.builtin.file:
+    path: "{{ target_user_home }}/.config"
+    state: directory
+    mode: '0755'
+    owner: "{{ target_user }}"
+    group: "{{ target_user }}"
+
+# Loop through each defined "stow package" (directory) from vars/main.yml
+- name: Process each stow package directory (mimicking stow behavior)
+  ansible.builtin.include_tasks: process_stow_package.yml
+  loop: "{{ stow_packages }}"
+  loop_control:
+    loop_var: stow_package_name # e.g., "hypr", "nvim"
+  when: stow_packages is defined and stow_packages | length > 0
+  tags:
+    - stow_processing # Tag for selectively running this part
+
+# Explicitly link root dotfiles that are not part of a stow package directory structure
+- name: Link explicitly defined root dotfiles (e.g., starship.toml)
+  vars:
+    # Ensure parent directory for the destination link exists
+    link_destination_parent_dir: "{{ item.dest | dirname }}"
+  block:
+    - name: "Ensure parent directory exists for root dotfile link: {{ link_destination_parent_dir }}"
+      ansible.builtin.file:
+        path: "{{ link_destination_parent_dir }}"
+        state: directory
+        owner: "{{ target_user }}"
+        group: "{{ target_user }}"
+        mode: '0755'
+
+    - name: "Link root dotfile: {{ item.dest }} -> {{ dotfiles_clone_dir }}/{{ item.src }}"
+      ansible.builtin.file:
+        src: "{{ dotfiles_clone_dir }}/{{ item.src }}" # Source is within the cloned repo
+        dest: "{{ item.dest }}" # Destination is absolute path (already includes target_user_home from vars)
+        owner: "{{ target_user }}"
+        group: "{{ target_user }}"
+        state: link # Create a symlink
+        force: true # Replace if dest exists and is not the correct symlink, or is a file/dir
+  loop: "{{ root_dotfiles_to_link }}"
+  loop_control:
+    label: "{{ item.name }}" # Use the 'name' field for clearer loop output
+  when: root_dotfiles_to_link is defined and root_dotfiles_to_link | length > 0
+  tags:
+    - root_dotfiles # Tag for selectively running this part
