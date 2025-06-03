@@ -45,7 +45,25 @@ PKGS=(
     imagemagick libnotify duf fastfetch cliphist
 
     # Fonts
-    ttf-jetbrains-mono ttf-nerd-fonts-symbols noto-fonts-emoji ttf-jetbrains-mono nerd-fonts
+    ttf-jetbrains-mono  # Base JetBrains Mono
+    nerd-fonts          # Group for all Nerd Fonts (includes FiraCode, symbols, etc.)
+    noto-fonts          # Main Noto family
+    noto-fonts-cjk      # Noto CJK (Chinese, Japanese, Korean)
+    noto-fonts-emoji    # Noto Color Emoji
+    noto-fonts-extra    # Additional Noto fonts
+    gsfonts             # Ghostscript fonts (URW, Nimbus, etc.)
+    ttf-fira-sans       # Fira Sans family
+    adwaita-fonts       # Adwaita (GNOME UI font)
+    ttf-dejavu          # DejaVu family
+    ttf-liberation      # Liberation fonts
+    terminus-font       # Terminus bitmap font
+    adobe-source-code-pro-fonts # Adobe Source Code Pro
+    ttf-ubuntu-font-family    # Ubuntu font family
+    cantarell-fonts     # Cantarell (GNOME font)
+    wqy-zenhei          # WenQuanYi Zen Hei (CJK)
+    otf-font-awesome    # Font Awesome icons (version 6)
+    ttf-fantasque-sans-mono # Fantasque Sans Mono (non-Nerd version)
+    ttf-opensans        # Open Sans family
 
     # Containerization
     docker docker-buildx
