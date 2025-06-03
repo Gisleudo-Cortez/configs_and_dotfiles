@@ -1,0 +1,1 @@
+./gather_data.sh .config/nvim .zshrc .config/fish .config/hypr .config/kitty .config/waybar .config/starship .config/starship.toml .config/starship_cat.toml .config/rofi
