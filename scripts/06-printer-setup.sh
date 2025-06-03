@@ -6,12 +6,11 @@ if [[ "${1:-}" == "--dry-run" ]]; then
     DRY_RUN=true
 fi
 
-# Installing packages and enabling services requires root
 if [[ "$EUID" -ne 0 ]]; then
     if [[ "$DRY_RUN" == true ]]; then
-        echo "[06-printer-setup] Warning: Not running as root, but continuing in dry-run mode."
+        echo "[06-printer-setup] Warning: Not running as root, but continuing in dry-run mode." >&2
     else 
-        echo "[06-printer-setup] Error: This script must be run as root."
+        echo "[06-printer-setup] Error: This script must be run as root." >&2
         exit 1
     fi
 fi
@@ -23,11 +22,8 @@ run_cmd() {
     fi
 }
 
-# Install CUPS (Common Unix Printing System) and related tools
 PKGS=(cups cups-pdf system-config-printer)
 run_cmd pacman -S --needed --noconfirm "${PKGS[@]}"
-
-# Enable and start the CUPS service
 run_cmd systemctl enable --now cups.service
 
 echo "[06-printer-setup] CUPS installed and service enabled."
