@@ -11,7 +11,7 @@ if [[ "$EUID" -eq 0 ]]; then
         echo "[09-python-tools] Note: Running in dry-run as root, but this script should be run as a normal user."
     else 
         echo "[09-python-tools] Skipping: This script should be run as a regular user (not as root)."
-        exit 0 
+        exit 0 # Exit 0 because this is not an error in the run-all sequence, just a skip condition.
     fi
 fi
 
@@ -24,6 +24,7 @@ run_cmd_user() {
     fi
 }
 
+# Install 'uv' (Unified Python environment tool) via official installer script
 echo "[09-python-tools] Installing 'uv' Python tool manager..."
 if [[ "$DRY_RUN" == true ]]; then
     echo "[09-python-tools] DRY-RUN: Would download and run uv installer script from astral.sh."
@@ -31,21 +32,16 @@ else
     if curl -LsSf https://astral.sh/uv/install.sh | sh; then
         echo "[09-python-tools] 'uv' installed successfully."
     else
-        echo "[09-python-tools] ERROR: Failed to install 'uv'." >&2
+        echo "[09-python-tools] ERROR: Failed to install 'uv'."
         exit 1
     fi
 fi
 
+# Ensure uv is in PATH for this script's session if just installed
+# and attempt to add ~/.local/bin to PATH in .profile for future sessions.
 USER_LOCAL_BIN="$HOME/.local/bin"
 PROFILE_FILE="$HOME/.profile"
-# Ensure the PATH export line is robust for various shells if .profile is sourced by them
-PATH_EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\"" # Keep original for grep
-ADD_TO_PROFILE_TEXT="
-# Add user's local bin to PATH if it exists and is not already in PATH
-if [ -d \"\$HOME/.local/bin\" ] && [[ \":\$PATH:\" != *\":\$HOME/.local/bin:\"* ]]; then
-    export PATH=\"\$HOME/.local/bin:\$PATH\"
-fi"
-
+PATH_EXPORT_LINE="export PATH=\"\$HOME/.local/bin:\$PATH\""
 
 if [[ ! ":$PATH:" == *":$USER_LOCAL_BIN:"* ]]; then
     export PATH="$USER_LOCAL_BIN:$PATH"
@@ -56,27 +52,29 @@ if [[ "$DRY_RUN" == true ]]; then
     echo "[09-python-tools] DRY-RUN: Would check and potentially add $USER_LOCAL_BIN to $PROFILE_FILE."
 else
     if [[ -f "$PROFILE_FILE" ]]; then
-        if ! grep -qF "$PATH_EXPORT_LINE" "$PROFILE_FILE" && ! grep -qF "\$HOME/.local/bin:\$PATH" "$PROFILE_FILE"; then # Check more broadly
+        if ! grep -qF "$PATH_EXPORT_LINE" "$PROFILE_FILE"; then
             echo "[09-python-tools] Adding $USER_LOCAL_BIN to PATH in $PROFILE_FILE."
-            echo "$ADD_TO_PROFILE_TEXT" >> "$PROFILE_FILE"
+            echo -e "\n# Add user's local bin to PATH if not already set by other means\nif [ -d \"\$HOME/.local/bin\" ] && [[ \":\$PATH:\" != *\":\$HOME/.local/bin:\"* ]]; then\n    $PATH_EXPORT_LINE\nfi" >> "$PROFILE_FILE"
         else
-            echo "[09-python-tools] $USER_LOCAL_BIN PATH export already appears in $PROFILE_FILE."
+            echo "[09-python-tools] $USER_LOCAL_BIN PATH export already in $PROFILE_FILE."
         fi
     else
         echo "[09-python-tools] $PROFILE_FILE does not exist. Creating and adding PATH."
-        echo "$ADD_TO_PROFILE_TEXT" > "$PROFILE_FILE"
+        echo -e "# Add user's local bin to PATH\nif [ -d \"\$HOME/.local/bin\" ] && [[ \":\$PATH:\" != *\":\$HOME/.local/bin:\"* ]]; then\n    $PATH_EXPORT_LINE\nfi" > "$PROFILE_FILE"
     fi
     echo "[09-python-tools] Please source $PROFILE_FILE or re-login for permanent PATH changes to take effect."
 fi
 
+
+# Install the 'ruff' Python linter using uv
 if command -v uv &> /dev/null; then
     echo "[09-python-tools] Installing 'ruff' linter using uv..."
     run_cmd_user uv tool install ruff
     echo "[09-python-tools] 'ruff' linter setup via uv complete."
 else
-    echo "[09-python-tools] 'uv' command not found after installation attempt. Skipping ruff install." >&2
+    echo "[09-python-tools] 'uv' command not found after installation attempt. Skipping ruff install."
     if [[ "$DRY_RUN" == false ]]; then
-      exit 1
+      exit 1 # Fail if uv wasn't installed properly
     fi
 fi
 

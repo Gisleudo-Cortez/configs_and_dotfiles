@@ -5,7 +5,7 @@ DRY_RUN=false
 [[ ${1:-} == "--dry-run" ]] && DRY_RUN=true
 
 if [[ $EUID -eq 0 && $DRY_RUN == false ]]; then
-  echo "[10-git-setup] ❌ Error: Run this script as a regular user, not root." >&2
+  echo "[10-git-setup] ❌ Run this script as a regular user, not root."
   exit 1
 fi
 
@@ -20,6 +20,7 @@ run_git_config() {
 
 echo "[10-git-setup] • Applying Git configuration placeholders..."
 
+# Set placeholder values or leave empty
 GIT_USER_NAME_PLACEHOLDER="Your Name"
 GIT_USER_EMAIL_PLACEHOLDER="you@example.com"
 
@@ -31,6 +32,8 @@ echo "[10-git-setup] Please configure them manually with your actual details:"
 echo "  git config --global user.name \"Your Real Name\""
 echo "  git config --global user.email \"your.email@example.com\""
 
+# Optional – enable commit signing if GPG key already exists for the placeholder email
+# Or guide the user
 echo ""
 echo "[10-git-setup] • Checking for GPG signing key..."
 if command -v gpg >/dev/null 2>&1; then
@@ -39,6 +42,8 @@ if command -v gpg >/dev/null 2>&1; then
     GPG_KEY_ID="<GPG-KEY-ID-DRY-RUN>"
     echo "DRY-RUN (user: $(whoami)) ➜ Would attempt to find GPG key for $GIT_USER_EMAIL_PLACEHOLDER"
   else
+    # Try to find a key for the placeholder email (user will change this email later)
+    # This is unlikely to find a useful key unless the user already uses the placeholder.
     GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format=long "$GIT_USER_EMAIL_PLACEHOLDER" 2>/dev/null \
                   | awk '/^sec/{if(match($0,/[0-9A-F]{16}/,m)){print m[0];exit}}')
   fi
@@ -59,7 +64,7 @@ if command -v gpg >/dev/null 2>&1; then
     echo "   4. Enable signing: git config --global commit.gpgsign true"
   fi
 else
-  echo "[10-git-setup] ⚠ GPG not installed – skipping GPG signing setup." >&2
+  echo "[10-git-setup] ⚠ GPG not installed – skipping GPG signing setup."
 fi
 
 echo "[10-git-setup] ✅ Git basic configuration guidance complete."
