@@ -39,6 +39,7 @@ STOW_PACKAGES_TO_DEPLOY=(
     "kitty"
     "nvim"
     "waybar"
+    "rofi"
     "starship"
     "starship.toml"
     "starship_cat.toml"

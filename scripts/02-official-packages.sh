@@ -80,8 +80,10 @@ run_cmd pacman -S --needed --noconfirm "${UNIQUE_PKGS_FINAL_LIST[@]}"
 
 
 echo "[02-official-packages] Configuring Docker..."
-run_cmd systemctl enable --now docker.service
+# Enable and start containerd first as Docker depends on it
 run_cmd systemctl enable --now containerd.service
+# Then enable and start Docker
+run_cmd systemctl enable --now docker.service
 SUDO_USER_EFFECTIVE="${SUDO_USER:-}"
 if [[ -z "$SUDO_USER_EFFECTIVE" && "$EUID" -eq 0 ]]; then
     SUDO_USER_EFFECTIVE=$(logname 2>/dev/null || echo "")
