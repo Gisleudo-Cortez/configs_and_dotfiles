@@ -36,7 +36,8 @@ PACKAGES_TO_INSTALL_VIA_PARU=(
     "wlr-randr-git"
     "zsh-theme-powerlevel10k-git"
     "zen-browser-bin"
-    "clipman" # Check if this is AUR or Chaotic
+    "satty"
+    "hyprsunset"
 )
 
 OVERALL_SUCCESS=true
