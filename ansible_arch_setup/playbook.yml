@@ -1,18 +1,14 @@
 ---
 - name: Setup Arch Linux Hyprland Workstation
   hosts: archlinux # Corresponds to the group in inventory.ini
-  # 'become: true' at the play level means tasks will run as root by default,
-  # unless overridden at the task or role level (e.g., for dotfiles).
-  become: true
+  become: true # Most tasks will run as root by default
   vars_files:
     - vars/main.yml # Load variables from vars/main.yml
-  # Ansible gathers facts about the remote system by default, which is usually desired.
-  # gather_facts: true
 
   pre_tasks:
-    - name: "Display effective user for pre_tasks (Play 'become' status: {{ ansible_play_become }})"
+    - name: "Display initial effective user for pre_tasks" # Simplified task name
       ansible.builtin.debug:
-        msg: "Running pre_tasks as effective user: {{ ansible_effective_user_id }}. Play-level 'become' is set to: {{ ansible_play_become }}."
+        msg: "Initial pre_tasks are running as effective user: {{ ansible_effective_user_id }}. (Play 'become' is set to 'true')."
       run_once: true # Run this debug task only once per play
 
     - name: Update pacman cache (if older than a defined interval or first run)
@@ -20,7 +16,6 @@
         update_cache: true
         upgrade: false # Do not upgrade packages here, dedicated task below
       register: pacman_cache_update # Register output to check if changes were made
-      # More reliable change detection for pacman cache update
       changed_when: "'Running transaction' in pacman_cache_update.stdout or 'refreshed' in pacman_cache_update.stdout"
       tags:
         - always # Ensure this runs regardless of other tags
@@ -45,18 +40,18 @@
     # Apply roles in logical order
     - role: base_system
       tags:
-        - base_system # Apply base_system tag to the role itself
-        - packages    # Also apply packages tag here
+        - base_system
+        - packages
     - role: desktop_env
       tags:
-        - desktop_env # Apply desktop_env tag
+        - desktop_env
         - hyprland
         - sddm
     - role: dotfiles
       become: false   # CRITICAL: Dotfiles tasks must run as the target_user, not root
       tags:
-        - dotfiles      # Apply dotfiles tag
-        - user_config # Apply user_config tag
+        - dotfiles
+        - user_config
 
   post_tasks:
     - name: Playbook finished - Display next steps reminder

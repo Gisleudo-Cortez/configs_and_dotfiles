@@ -1,9 +1,9 @@
 ---
 # tasks file for roles/desktop_env
 
-- name: "Display effective user for desktop_env tasks (Play 'become' status: {{ ansible_play_become }})"
+- name: "Display effective user for desktop_env tasks" # Simplified task name
   ansible.builtin.debug:
-    msg: "Running desktop_env tasks as effective user: {{ ansible_effective_user_id }}. Play-level 'become' is set to: {{ ansible_play_become }} (tasks in this role will use become)."
+    msg: "Running desktop_env tasks as effective user: {{ ansible_effective_user_id }}. (Tasks in this role use 'become')."
 
 - name: Install Hyprland related packages from official repositories
   community.general.pacman:
@@ -30,7 +30,6 @@
     mode: '0644'
     owner: root
     group: root
-  # This ensures SDDM can find and list Hyprland as a session option.
 
 - name: Enable and ensure SDDM service is started
   ansible.builtin.systemd:
