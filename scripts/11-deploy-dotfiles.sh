@@ -41,6 +41,7 @@ STOW_PACKAGES_TO_DEPLOY=(
     "kitty"
     "nvim" 
     "waybar"
+    "rofi"
 )
 # --- End Configuration ---
 
