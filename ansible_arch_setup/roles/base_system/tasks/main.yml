@@ -1,9 +1,9 @@
 ---
 # tasks file for roles/base_system
 
-- name: Display effective user for base_system tasks (should be root)
+- name: "Display effective user for base_system tasks (Play 'become' status: {{ ansible_play_become }})"
   ansible.builtin.debug:
-    msg: "Running base_system tasks as user: {{ ansible_effective_user_id }} with become: {{ ansible_become }}"
+    msg: "Running base_system tasks as effective user: {{ ansible_effective_user_id }}. Play-level 'become' is set to: {{ ansible_play_become }} (tasks in this role will use become)."
 
 # Task to ensure multilib is enabled (mirroring 00-enable-repos.sh logic)
 # Idempotently uncomment the [multilib] section and its Include line in /etc/pacman.conf
@@ -21,19 +21,6 @@
     path: /etc/pacman.conf
     # This complex regexp attempts to find a commented 'Include' line that appears
     # *after* a '[multilib]' line and before any subsequent section or EOF.
-    # (?m) enables multi-line mode for ^ and $.
-    # (^\[multilib\]\n(?:.*\n)*?^#\s*(Include\s*=\s*\/etc\/pacman.d\/mirrorlist))$
-    #  Group 1: [multilib] and everything up to the commented Include line
-    #  Group 2: The commented Include line itself (capture the 'Include = ...' part)
-    # The goal is to uncomment only the Include specific to multilib.
-    # A simpler, though potentially less precise, regexp would be:
-    # regexp: '^#\s*(Include\s*=\s*\/etc\/pacman.d\/mirrorlist)'
-    # line: 'Include = /etc/pacman.d/mirrorlist'
-    # For now, using a more targeted approach, assuming the structure is somewhat predictable.
-    # If `pacman.conf` has multiple commented `Include` lines, this needs to be specific.
-    # One common pattern is that the multilib section is often at the end.
-    # This task will uncomment the *first* commented "Include = /etc/pacman.d/mirrorlist"
-    # found after "[multilib]".
     regexp: '(?s)(^\[multilib\](?:(?!^\[).)*?)^#\s*(Include\s*=\s*/etc/pacman.d/mirrorlist)'
     replace: '\1\2' # \1 is everything from [multilib] up to the line before #Include, \2 is the Include line without #
     backrefs: yes
@@ -45,8 +32,6 @@
 - name: Ensure multilib 'Include' line is present and uncommented (alternative strategy - currently disabled)
   ansible.builtin.replace:
     path: /etc/pacman.conf
-    # Original problematic regexp line:
-    # regexp: '^(#\s*Include\s*=\s*\/etc\/pacman.d\/mirrorlist)\s*(\n^\s*\[multilib\])' # Comment removed here
     regexp: '^(#\s*Include\s*=\s*\/etc\/pacman.d\/mirrorlist)\s*(\n^\s*\[multilib\])'
     replace: 'Include = /etc/pacman.d/mirrorlist\n[multilib]'
   when: false # This alternative task remains disabled.
@@ -57,7 +42,7 @@
 # These commands will be run with 'become' (sudo) privileges by Ansible.
 - name: Check if Chaotic-AUR GPG key {{ item }} is already imported
   ansible.builtin.command: "pacman-key --list-keys {{ item }}" # Check specific key
-  register: gpg_key_check_results # Changed register name for clarity
+  register: gpg_key_check_results
   loop: "{{ chaotic_aur_gpg_keys }}"
   changed_when: false # This task only checks, doesn't change state
   failed_when: false  # Do not fail playbook if key is not found (rc will be non-zero from pacman-key)

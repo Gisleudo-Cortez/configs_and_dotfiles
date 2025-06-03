@@ -10,9 +10,9 @@
   # gather_facts: true
 
   pre_tasks:
-    - name: Display effective user for pre_tasks (should be root due to become:true)
+    - name: "Display effective user for pre_tasks (Play 'become' status: {{ ansible_play_become }})"
       ansible.builtin.debug:
-        msg: "Running pre_tasks as user: {{ ansible_effective_user_id }} with become: {{ ansible_become }}"
+        msg: "Running pre_tasks as effective user: {{ ansible_effective_user_id }}. Play-level 'become' is set to: {{ ansible_play_become }}."
       run_once: true # Run this debug task only once per play
 
     - name: Update pacman cache (if older than a defined interval or first run)
