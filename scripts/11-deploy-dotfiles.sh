@@ -37,7 +37,7 @@ STOW_PACKAGES_SUBDIR="" # Empty if packages are at the root of the cloned repo
 STOW_PACKAGES_TO_DEPLOY=(
     "zshrc"
     "fish"
-#   "hypr" fix files to work on a fresh install
+    "hypr" 
     "kitty"
     "nvim" 
     "waybar"

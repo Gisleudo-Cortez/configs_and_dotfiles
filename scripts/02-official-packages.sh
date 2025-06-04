@@ -32,7 +32,7 @@ PKGS=(
     fish starship kitty alacritty neovim vim git stow zsh
 
     # GUI Apps & File Managers
-    dolphin dbeaver vlc thunderbird kate konsole obsidian obs-studio firefox ark
+    dolphin dbeaver vlc thunderbird kate konsole obsidian obs-studio firefox ark libreoffice-fresh-pt-br
 
     # Development & Runtimes
     nodejs npm postgresql cmake go cargo delve gopls
