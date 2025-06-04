@@ -11,7 +11,7 @@
 
     "modules-left": ["hyprland/workspaces", "hyprland/window"],
     "modules-center": ["custom/updates"],
-    "modules-right": ["backlight", "temperature", "cpu", "memory", "battery", "pulseaudio", "network", "tray", "idle_inhibitor", "clock"],
+    "modules-right": ["backlight", "temperature", "cpu", "memory", "battery", "pulseaudio", "network", "tray", "clock"],
 
  // Modules configuration
 
@@ -42,16 +42,7 @@
 	"icon":true,
 	"icon-size" : 20
     },
-    "idle_inhibitor": {
-        "format": "{icon}",
-       "format-icons": {
-            "activated": "  ",
-            "deactivated": "  ",
-        },
-        "on-click":"exec ~/.config/hypr/scripts/idle_inhibitor.sh",
-
-    },
-    "tray": {
+        "tray": {
         "icon-size": 20,
         "spacing": 5
     },

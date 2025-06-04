@@ -193,7 +193,8 @@ alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollam
 alias ds "dust -d 2"
 alias dua "dua interactive"
 ## abbreviations
-abbr ya yazi
+abbr yal "yazi ~/Documents/Lonam/"
+abbr yag "yazi ~/Documents/GEG/"
 abbr sfl "sftp -r lonam:Documents/LONAM/"
 abbr sfg "sftp -r lonam:Documents/GEG/"
 abbr gtal "./gather_data.sh .config/nvim .zshrc .config/fish .config/hypr .config/kitty .config/waybar .config/starship .config/starship.toml .config/starship_cat.toml"
