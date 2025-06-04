@@ -38,7 +38,7 @@ PKGS=(
     nodejs npm postgresql cmake go cargo delve gopls
 
     # Utilities & Tools
-    qalculate-gtk kdeconnect rclone rsync
+    qalculate-gtk kdeconnect rclone rsync 7zip
     fzf bat eza ripgrep ripgrep-all ugrep htop yazi hyperfine
     paru jq grim slurp swappy dunst swaylock hypridle rofi-wayland
     brightnessctl playerctl udiskie unzip pacman-contrib parallel

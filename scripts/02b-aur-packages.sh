@@ -33,6 +33,7 @@ PACKAGES_TO_INSTALL_VIA_PARU=(
     "neofetch-git"
     "grimblast-git"
     "waybar-module-pacman-updates-git"
+    "wine-stable"
     "wlr-randr-git"
     "zsh-theme-powerlevel10k-git"
     "zen-browser-bin"
