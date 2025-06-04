@@ -11,7 +11,7 @@
 
     "modules-left": ["hyprland/workspaces", "hyprland/window"],
     "modules-center": ["custom/updates"],
-    "modules-right": ["backlight", "temperature", "cpu", "memory", "battery", "pulseaudio", "network", "tray", "idle_inhibitor", "clock","custom/power"],
+    "modules-right": ["backlight", "temperature", "cpu", "memory", "battery", "pulseaudio", "network", "tray", "idle_inhibitor", "clock"],
 
  // Modules configuration
 
@@ -60,15 +60,14 @@
         "format": " {:%A/%B -- %d/%m/%Y  %H:%M:%S}",
         //"max-length": 200
         "interval": 1,
-        "on-click": "~/.config/waybar/scripts/OCV",
     },
     "cpu": {
         "format": " 🖳{usage}% ",
-        "on-click": "foot -e htop"
+        "on-click": "kitty -e htop"
     },
     "memory": {
         "format": " 🖴{: >3}% ",
-        "on-click": "foot -e htop"
+        "on-click": "kitty -e htop"
     },
     "temperature": {
         "thermal-zone": 7,  // Check with: # cat /sys/class/hwmon/hwmon*/temp1_input
@@ -109,6 +108,27 @@
         "format-alt": " {ifname}: {ipaddr}/{cidr} ",
         "family": " ipv4 ",
         "tooltip-format-wifi": "   {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits} ",
+	"custom/wifi-menu": {
+    "exec": "~/.config/waybar/scripts/current_wifi_status.sh", // This script provides the text and tooltip
+    "return-type": "json",
+    "interval": 5, // How often to update the status (in seconds)
+    // "format": "{}", // Optional: if current_wifi_status.sh outputs a "text" field,
+                       // Waybar will use that. You can add static elements here if needed.
+                       // e.g., "format": "WiFi: {}", if the script only outputs the SSID.
+    
+    "on-click": "", // Set to an empty string. This ensures left-click does nothing,
+                    // or at least doesn't execute a script that would change the format.
+                    // Alternatively, you can remove this line entirely if no left-click action is desired.
+
+    "on-click-right": "~/.config/waybar/scripts/wifi_menu.sh", // Execute your Wi-Fi menu script on right-click.
+
+    // The tooltip is handled by the "current_wifi_status.sh" script,
+    // which should output a "tooltip" field in its JSON.
+    // Example output from current_wifi_status.sh:
+    // {"text": "MySSID", "tooltip": "Connected to MySSID | Signal: 75%"}
+    // If not using an exec script for dynamic display, you could set a static tooltip:
+    // "tooltip": "Right-click to manage Wi-Fi connections",
+},
         "tooltip-format-ethernet": "  {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits} ",
         //"min-length": 2,
         //"max-length": 2,
@@ -123,23 +143,8 @@
        },
        "exec-if": "which waybar-module-pacman-updates",
        "exec": "waybar-module-pacman-updates --interval-seconds 5 --network-interval-seconds 7200 --network-interval-seconds",
-       "on-click": "foot -e update"
+       "on-click": "kitty -e update"
    },
-    "custom/power": {
-      	"format":" ⏻ ",
-       	"on-click": "nwgbar",
-      	"tooltip": false,
-   },
-    "custom/launcher": {
-    "format":"  ",
-    	"on-click": "exec nwg-drawer -c 7 -is 70 -spacing 23",
-    	"tooltip": false,
-     },
-     "custom/network_traffic": {
-             "exec": "~/.config/waybar/scripts/network_traffic.sh",
-             "return-type": "json",
-             "format-ethernet": "{icon} {ifname} ⇣{bandwidthDownBytes} ⇡{bandwidthUpBytes}",    // optional
-},
     "pulseaudio": {
         "scroll-step": 3, // %, can be a float
         "format": "{icon} {volume}% {format_source}",
@@ -159,8 +164,7 @@
             "car": "",
             "default": ["", "", ""]
         },
-        "on-click": "footclient -T waybar_alsamixer -e alsamixer -M",
-        "on-click-right": "pavucontrol"
+        "on-click": "pavucontrol"
         },
         // https://github.com/chubin/wttr.in
         "custom/weather": {

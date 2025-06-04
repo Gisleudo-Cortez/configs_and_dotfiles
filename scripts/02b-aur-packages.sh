@@ -38,6 +38,12 @@ PACKAGES_TO_INSTALL_VIA_PARU=(
     "zen-browser-bin"
     "satty"
     "hyprsunset"
+    # Themes
+    "gruvbox-material-gtk-theme-git"
+    "catppuccin-gtk-theme-macchiato"
+    "catppuccin-gtk-theme-latte"
+    "catppuccin-gtk-theme-frappe"
+    "material-gtk-theme-git"
 )
 
 OVERALL_SUCCESS=true

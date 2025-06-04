@@ -42,7 +42,7 @@ PKGS=(
     fzf bat eza ripgrep ripgrep-all ugrep htop yazi hyperfine
     paru jq grim slurp swappy dunst swaylock hypridle rofi-wayland
     brightnessctl playerctl udiskie unzip pacman-contrib parallel
-    imagemagick libnotify duf fastfetch cliphist
+    imagemagick libnotify duf fastfetch cliphist yad python-pywal
 
     # Fonts
     ttf-jetbrains-mono  # Base JetBrains Mono
