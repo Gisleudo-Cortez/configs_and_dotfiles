@@ -178,7 +178,6 @@ end
 
 # Custom aliases
 alias cls='clear'
-alias config_fish='nvim ~/.config/fish/config.fish'
 alias backup_all='bash /home/nero/Documents/Estudos/Bash_Scripts/backup_all.sh'
 alias backup_loja='bash /home/nero/Documents/Estudos/Bash_Scripts/back_up_loja.sh'
 alias backup_pessoal='bash /home/nero/Documents/Estudos/Bash_Scripts/back_up_pessoal.sh'
@@ -192,6 +191,10 @@ alias estudos_env='source $estudos/estudos/bin/activate.fish'
 alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollama_update_models.sh'
 alias ds "dust -d 2"
 alias dua "dua interactive"
+alias config_fish='nvim ~/.config/fish/config.fish'
+alias config_way="nvim ~/.config/waybar/"
+alias config_hy="nvim ~/.config/hypr/"
+alias config_kt-"nvim ~/.config/kitty/"
 ## abbreviations
 abbr yal "yazi ~/Documents/Lonam/"
 abbr yag "yazi ~/Documents/GEG/"
