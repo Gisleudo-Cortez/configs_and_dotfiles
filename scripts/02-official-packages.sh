@@ -24,6 +24,15 @@ run_cmd() {
     fi
 }
 
+run_cmd_eval() {
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "DRY-RUN ➜ $*"
+    else
+        echo "EXECUTING ➜ $*"
+        eval "$*"
+    fi
+}
+
 echo "[02-official-packages] Preparing to install/update official packages..."
 
 # Combined and updated package list
@@ -73,7 +82,7 @@ PKGS=(
     gst-plugin-pipewire wireplumber pavucontrol pamixer
 
     # Networking & Bluetooth
-    networkmanager network-manager-applet bluez bluez-utils blueman
+    networkmanager network-manager-applet iwd bluez bluez-utils blueman # Ensured iwd is here
 
     # Display Manager (SDDM)
     sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
@@ -216,5 +225,51 @@ if pacman -Qs postgresql &>/dev/null; then
 else
     echo "[02-official-packages] PostgreSQL not in package list or not installed. Skipping PostgreSQL configuration."
 fi
+
+# --- NetworkManager with iwd backend Configuration ---
+echo "[02-official-packages] Configuring NetworkManager with iwd backend..."
+
+# 1. Ensure NetworkManager, iwd, and network-manager-applet are installed (already handled by PKGS list and pacman -S --needed)
+
+# 2. Configure NM to use iwd
+NM_CONF_DIR="/etc/NetworkManager/conf.d"
+NM_WIFI_BACKEND_CONF="$NM_CONF_DIR/wifi_backend.conf"
+WIFI_BACKEND_CONTENT="[device]\nwifi.backend=iwd"
+
+echo "[02-official-packages] Creating NetworkManager wifi_backend.conf for iwd..."
+if [[ "$DRY_RUN" == true ]]; then
+    echo "DRY-RUN ➜ Would create $NM_WIFI_BACKEND_CONF with content:"
+    echo "$WIFI_BACKEND_CONTENT"
+else
+    mkdir -p "$NM_CONF_DIR"
+    echo -e "$WIFI_BACKEND_CONTENT" > "$NM_WIFI_BACKEND_CONF"
+    chmod 644 "$NM_WIFI_BACKEND_CONF"
+fi
+
+# 3. Enable the right services, disable the rest
+echo "[02-official-packages] Enabling NetworkManager.service and iwd.service..."
+run_cmd systemctl enable --now NetworkManager.service
+run_cmd systemctl enable --now iwd.service
+
+echo "[02-official-packages] Disabling potentially conflicting network services..."
+SERVICES_TO_DISABLE=(
+    "wpa_supplicant.service"
+    "systemd-networkd.service"
+    "systemd-networkd.socket"
+)
+for service_to_disable in "${SERVICES_TO_DISABLE[@]}"; do
+    # Check if service exists before trying to disable, to avoid errors if not present
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "DRY-RUN ➜ Would check and disable $service_to_disable if it exists and is active/enabled."
+    elif systemctl list-unit-files --type=service | grep -q "^${service_to_disable}"; then
+        run_cmd systemctl disable --now "$service_to_disable"
+    elif [[ "$service_to_disable" == *.socket ]] && systemctl list-unit-files --type=socket | grep -q "^${service_to_disable}"; then
+         run_cmd systemctl disable --now "$service_to_disable"
+    else
+        echo "[02-official-packages] Service/Socket $service_to_disable not found or already inactive. Skipping disable for it."
+    fi
+done
+# --- End NetworkManager Configuration ---
+
 
 echo "[02-official-packages] Package installation and basic service configuration complete."
