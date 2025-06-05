@@ -1,0 +1,168 @@
+{
+    "layer": "top", // Waybar at top layer
+    "position": "top", // Waybar position (top|bottom|left|right)
+    "height": 40,
+//    "width":1900,
+    "margin": "0 0 0 0",
+    "spacing":0,
+
+    // Choose the order of the modules
+    // Add according to your wishes: "custom/weather"
+
+    "modules-left": ["hyprland/workspaces", "hyprland/window"],
+    "modules-center": ["custom/updates"],
+    "modules-right": ["backlight", "temperature", "cpu", "memory", "battery", "pulseaudio", "network", "tray", "clock"],
+
+ // Modules configuration
+
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "on-click": "activate",
+    "all-outputs": true,
+    "sort-by-number": true,
+    "format-icons": {
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "8": "8",
+      "9": "9",
+      "10": "10",
+      "focused": "",
+      "default": ""
+    },
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1",
+    },
+    "hyprland/window": {
+        "format": "{}",
+	"icon":true,
+	"icon-size" : 20
+    },
+        "tray": {
+        "icon-size": 20,
+        "spacing": 5
+    },
+    "clock": {
+        "tooltip-format": "<big>{:%A, %d.%B %Y }</big>\n<tt><small>{calendar}</small></tt>",
+        "format": " {:%A/%B -- %d/%m/%Y  %H:%M:%S}",
+        //"max-length": 200
+        "interval": 1,
+    },
+    "cpu": {
+        "format": " 🖳{usage}% ",
+        "on-click": "kitty -e htop"
+    },
+    "memory": {
+        "format": " 🖴{: >3}% ",
+        "on-click": "kitty -e htop"
+    },
+    "temperature": {
+        "thermal-zone": 7,  // Check with: # cat /sys/class/hwmon/hwmon*/temp1_input
+        "hwmon-path": "/sys/class/hwmon/hwmon7/temp1_input",
+        "critical-threshold": 80,
+        "format-critical": " {temperatureC}°C ",
+        "format": " {temperatureC}°C "
+    },
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": " {icon} {percent: >3}% ",
+        "format-icons": ["", ""],
+        "on-scroll-down": "brightnessctl -c backlight set 1%-",
+        "on-scroll-up": "brightnessctl -c backlight set +1%",
+        "on-click": "~/.config/waybar/scripts/backlight-hint.sh"
+    },
+    "battery": {
+        "states": {
+            // "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity: >3}%",
+        "format-icons": ["", "", "", "", ""]
+        // "format-good": "", // An empty format will hide the module
+        // "format-full": "",
+        //"format-icons": ["", "", "", "", "", "", "", "", "", ""]
+        //"format": "&#x202b;{icon}&#x202c; {capacity}%",
+        //"format-icons": ["ﱉ","ﱊ","ﱌ","ﱍ","ﱋ"]
+    },
+      "network": {
+    "interface": "wlp2s0",
+    "format": "{ifname}",
+    "format-wifi": "{essid} ({signalStrength}%) ",
+    "format-ethernet": "{ipaddr}/{cidr} 󰊗",
+    "format-disconnected": "Disconnected !!!!", //An empty format will hide the module.
+    "tooltip-format": "{ifname} via {gwaddr} 󰊗",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+    "tooltip-format-ethernet": "{ifname} ",
+    "tooltip-format-disconnected": "Disconnected",
+    "max-length": 50
+	},	
+	"custom/wifi-menu": {
+    "exec": "~/.config/waybar/scripts/current_wifi_status.sh", // This script provides the text and tooltip
+    "return-type": "json",
+    "interval": 5, // How often to update the status (in seconds)
+    // "format": "{}", // Optional: if current_wifi_status.sh outputs a "text" field,
+                       // Waybar will use that. You can add static elements here if needed.
+                       // e.g., "format": "WiFi: {}", if the script only outputs the SSID.
+    
+    "on-click": "", // Set to an empty string. This ensures left-click does nothing,
+                    // or at least doesn't execute a script that would change the format.
+                    // Alternatively, you can remove this line entirely if no left-click action is desired.
+
+    "on-click-right": "~/.config/waybar/scripts/wifi_menu.sh", // Execute your Wi-Fi menu script on right-click.
+
+    // The tooltip is handled by the "current_wifi_status.sh" script,
+    // which should output a "tooltip" field in its JSON.
+    // Example output from current_wifi_status.sh:
+    // {"text": "MySSID", "tooltip": "Connected to MySSID | Signal: 75%"}
+    // If not using an exec script for dynamic display, you could set a static tooltip:
+    // "tooltip": "Right-click to manage Wi-Fi connections",
+},
+        "tooltip-format-ethernet": "  {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits} ",
+        //"min-length": 2,
+        //"max-length": 2,
+        "on-click": "nm-connection-editor"
+    },
+   "custom/updates": {
+       "format": "{} {icon}",
+       "return-type": "json",
+       "format-icons": {
+           "has-updates": "󱍷",
+           "updated": "󰂪",
+       },
+       "exec-if": "which waybar-module-pacman-updates",
+       "exec": "waybar-module-pacman-updates --interval-seconds 5 --network-interval-seconds 7200 --network-interval-seconds",
+       "on-click": "kitty -e sudo pacman -Syu"
+   },
+    "pulseaudio": {
+        "scroll-step": 3, // %, can be a float
+        "format": "{icon} {volume}% {format_source}",
+        "format-bluetooth": "{volume}% {icon} {format_source}",
+        "format-bluetooth-muted": " {icon} {format_source}",
+        "format-muted": " {format_source}",
+        //"format-source": "{volume}% ",
+        //"format-source-muted": "",
+        "format-source": "",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+        },
+        // https://github.com/chubin/wttr.in
+        "custom/weather": {
+        "exec": "curl 'https://wttr.in/Essen?format=2'",
+        "interval": 900,
+	    "on-click": "yad --html --uri='https://wttr.in/Essen' --center --fixed --width=1000 --height=680 --timeout=60 --timeout-indicator=right"
+        },
+    }
