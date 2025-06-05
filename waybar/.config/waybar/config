@@ -53,31 +53,31 @@
 		"tooltip": true
 	},
 	"clock": {
-		"tooltip-format": "<big>{:%A, %d.%B %Y }</big>\n<tt><small>{calendar}</small></tt>",
-		"format": " {:%A/%B -- %d/%m/%Y  %H:%M:%S}",
+		"tooltip-format": "<big>{:%A, %d.%B %Y }</big>\n<tt><small>{calendar}</small></tt> ",
+		"format": "   {:%A/%B -- %d/%m/%Y  %H:%M:%S}",
 		"interval": 1
 	},
 	"cpu": {
-		"format": " 🖳{usage}% ",
+		"format": " 🖳 {usage}% ",
 		"tooltip": true
 	},
 	"memory": {
-		"format": " 🖴{: >3}% ",
+		"format": " 🖴 {: >3}% ",
 		"tooltip": true
 	},
 	"temperature": {
 		"thermal-zone": 7,
 		"hwmon-path": "/sys/class/hwmon/hwmon7/temp1_input",
 		"critical-threshold": 80,
-		"format-critical": " {temperatureC}°C ",
-		"format": " {temperatureC}°C ",
+		"format-critical": " {temperatureC} °C ",
+		"format": " {temperatureC} °C ",
 		"tooltip": true
 	},
 	"backlight": {
 		"format": " {icon} {percent: >3}% ",
 		"format-icons": [
-			"",
-			""
+			"  ",
+			"  "
 		],
 		"on-scroll-down": "brightnessctl -c backlight set 1%-",
 		"on-scroll-up": "brightnessctl -c backlight set +1%",
@@ -91,33 +91,33 @@
 		},
 		"format": "{icon} {capacity: >3}%",
 		"format-icons": [
-			"",
-			"",
-			"",
-			"",
-			""
+			"  ",
+			"  ",
+			"  ",
+			"  ",
+			"  "
 		],
 		"tooltip": true
 	},
 	"pulseaudio": {
 		"scroll-step": 3,
-		"format": "{icon} {volume}% {format_source}",
-		"format-bluetooth": "{volume}% {icon} {format_source}",
-		"format-bluetooth-muted": " {icon} {format_source}",
-		"format-muted": " {format_source}",
-		"format-source": "",
-		"format-source-muted": "",
+		"format": " {icon}  {volume} % {format_source} ",
+		"format-bluetooth": " {volume} % {icon}  {format_source} ",
+		"format-bluetooth-muted": "   {icon}  {format_source} ",
+		"format-muted": "   {format_source} ",
+		"format-source": "  ",
+		"format-source-muted": "  ",
 		"format-icons": {
-			"headphone": "",
-			"hands-free": "",
-			"headset": "",
-			"phone": "",
-			"portable": "",
-			"car": "",
+			"headphone": "  ",
+			"hands-free": "  ",
+			"headset": "  ",
+			"phone": "  ",
+			"portable": "  ",
+			"car": "  ",
 			"default": [
-				"",
-				"",
-				""
+				"  ",
+				"  ",
+				"  "
 			]
 		},
 		"on-click-right": "pavucontrol",

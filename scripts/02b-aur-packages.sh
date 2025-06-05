@@ -45,6 +45,7 @@ PACKAGES_TO_INSTALL_VIA_PARU=(
     "catppuccin-gtk-theme-latte"
     "catppuccin-gtk-theme-frappe"
     "material-gtk-theme-git"
+    "gtk-cyberpunk-neon-theme-git"
 )
 
 OVERALL_SUCCESS=true
