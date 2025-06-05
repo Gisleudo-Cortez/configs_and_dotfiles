@@ -194,7 +194,7 @@ alias dua "dua interactive"
 alias config_fish='nvim ~/.config/fish/config.fish'
 alias config_way="nvim ~/.config/waybar/"
 alias config_hy="nvim ~/.config/hypr/"
-alias config_kt-"nvim ~/.config/kitty/"
+alias config_kt="nvim ~/.config/kitty/"
 ## abbreviations
 abbr yal "yazi ~/Documents/Lonam/"
 abbr yag "yazi ~/Documents/GEG/"
