@@ -191,16 +191,16 @@ alias estudos_env='source $estudos/estudos/bin/activate.fish'
 alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollama_update_models.sh'
 alias ds "dust -d 2"
 alias dua "dua interactive"
-alias config_fish='nvim ~/.config/fish/config.fish'
-alias config_way="nvim ~/.config/waybar/"
-alias config_hy="nvim ~/.config/hypr/"
-alias config_kt="nvim ~/.config/kitty/"
 ## abbreviations
 abbr yal "yazi ~/Documents/Lonam/"
 abbr yag "yazi ~/Documents/GEG/"
 abbr sfl "sftp -r lonam:Documents/LONAM/"
 abbr sfg "sftp -r lonam:Documents/GEG/"
 abbr gtal "./gather_data.sh .config/nvim .zshrc .config/fish .config/hypr .config/kitty .config/waybar .config/starship .config/starship.toml .config/starship_cat.toml"
+abbr cff 'nvim ~/.config/fish/'
+abbr cfw "nvim ~/.config/waybar/"
+abbr cfh "nvim ~/.config/hypr/"
+abbr cfk "nvim ~/.config/kitty/"
 
 ## git 
 # --- Status & Diffing ---
