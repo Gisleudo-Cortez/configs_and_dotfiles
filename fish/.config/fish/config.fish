@@ -191,6 +191,7 @@ alias estudos_env='source $estudos/estudos/bin/activate.fish'
 alias ollama_update_models='bash /home/nero/Documents/Estudos/Bash_Scripts/ollama_update_models.sh'
 alias ds "dust -d 2"
 alias dua "dua interactive"
+alias upd "sudo pacman -Syu --noconfirm"
 ## abbreviations
 abbr yal "yazi ~/Documents/Lonam/"
 abbr yag "yazi ~/Documents/GEG/"
