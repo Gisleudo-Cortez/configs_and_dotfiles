@@ -1,5 +1,4 @@
 # I Have forked the HyDE theme and will be using it as a base for my customization.
-## I will no longer be updating this repo
 
 # THIS CONFIG WORKS ONLY ON MY CURRENT SYSTEM
 # USING THIS ON ANY OTHER INSTALL IS LIKELY TO BREAK IT
