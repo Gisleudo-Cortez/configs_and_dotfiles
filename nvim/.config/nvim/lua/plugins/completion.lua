@@ -41,12 +41,14 @@ return {
 						end
 					end, { "i", "s" }),
 				}),
+				-- Updated sources to prioritize LSP over snippets by grouping them.
 				sources = cmp.config.sources({
-					{ name = "nvim_lsp_signature_help"},
 					{ name = "nvim_lsp" },
+					{ name = "nvim_lsp_signature_help" },
+				}, {
 					{ name = "luasnip" },
-					{ name = "path" },
 					{ name = "buffer" },
+					{ name = "path" },
 				}),
 				window = {
 					completion = cmp.config.window.bordered(),

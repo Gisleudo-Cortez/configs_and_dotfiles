@@ -6,10 +6,8 @@ return {
 		cmd = "Mason",
 		opts = {
 			ensure_installed = {
-				"debugpy",
 				"codelldb",
 				"js-debug-adapter",
-				"pyright",
 				"ruff",
 			},
 			ui = {
@@ -27,8 +25,8 @@ return {
 		opts = {
 			ensure_installed = {
 				"rust_analyzer",
-				"pyright",
 				"ruff",
+				"pyright",
 				"gopls",
 				"ts_ls",
 				"lua_ls",
@@ -67,14 +65,6 @@ return {
 				bufmap("i", "<C-h>", vim.lsp.buf.signature_help, "Signature Help")
 			end
 
-			local function get_python_path()
-				local cwd = vim.fn.getcwd()
-				if vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
-					return cwd .. "/.venv/bin/python"
-				end
-				return vim.fn.exepath("python") or "python"
-			end
-
 			local default_opts = {
 				on_attach = on_attach,
 				capabilities = capabilities,
@@ -87,27 +77,16 @@ return {
 						},
 					},
 				},
-				pyright = {
-					settings = {
-						python = {
-							pythonPath = get_python_path(),
-						},
-					},
-				},
+				-- pyright-specific settings are no longer needed
 			}
 
+			-- This setup loop now correctly handles all servers installed by mason-lspconfig,
+			-- including ruff, without needing a separate configuration block.
 			mason_lspconfig.setup()
 			for _, server in ipairs(mason_lspconfig.get_installed_servers()) do
 				local opts = vim.tbl_deep_extend("force", default_opts, server_settings[server] or {})
 				lspconfig[server].setup(opts)
 			end
-
-			-- Updated: use 'ruff' instead of deprecated 'ruff-lsp'
-			lspconfig.ruff.setup({
-				on_attach = on_attach,
-				capabilities = capabilities,
-				init_options = { settings = { args = {} } },
-			})
 		end,
 	},
 }
