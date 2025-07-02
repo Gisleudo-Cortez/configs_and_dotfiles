@@ -1,27 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Source the helper functions
+source "$(dirname "$0")/helpers.sh"
+
 DRY_RUN=false
 if [[ "${1:-}" == "--dry-run" ]]; then
     DRY_RUN=true
 fi
 
-# Needs root to install packages
-if [[ "$EUID" -ne 0 ]]; then
-    if [[ "$DRY_RUN" == true ]]; then
-        echo "[03-hyprland-stack] Warning: Not running as root, but continuing in dry-run mode."
-    else 
-        echo "[03-hyprland-stack] Error: This script must be run as root."
-        exit 1
-    fi
-fi
-
-run_cmd() {
-    echo "[03-hyprland-stack] Running: $*"
-    if [[ "$DRY_RUN" != true ]]; then
-        "$@"
-    fi
-}
+need_root
 
 # Packages for Hyprland and related components
 PKGS=(

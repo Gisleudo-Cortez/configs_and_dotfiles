@@ -1,92 +1,65 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Source the helper functions
+source "$(dirname "$0")/helpers.sh"
+
 DRY_RUN=false
 if [[ "${1:-}" == "--dry-run" ]]; then
     DRY_RUN=true
 fi
 
-# This script is intended to run as a normal user.
-# Paru will use sudo internally when needed.
-if [[ "$EUID" -eq 0 && "$DRY_RUN" == false ]]; then
-    echo "[02b-aur-packages] Error: This script should be run as a regular user, not as root."
-    echo "[02b-aur-packages] run-all.sh should delegate this script to run as the non-root user."
-    exit 1
-fi
+need_user
 
-run_cmd_user_eval() {
-    if [[ "$DRY_RUN" == true ]]; then
-        echo "DRY-RUN (user: $(whoami)) ➜ $*"
-    else
-        echo "EXECUTING (user: $(whoami)) ➜ $*"
-        eval "$*"
-    fi
+# --- Package List ---
+
+get_aur_packages() {
+    local pkgs=(
+        "find-the-command"
+        "anydesk-bin"
+        "neofetch-git"
+        "grimblast-git"
+        "waybar-module-pacman-updates-git"
+        "wine-stable"
+        "wlr-randr-git"
+        "zsh-theme-powerlevel10k-git"
+        "zen-browser-bin"
+        "satty"
+        "hyprsunset"
+        # Themes
+        "gruvbox-material-gtk-theme-git"
+        "catppuccin-gtk-theme-macchiato"
+        "catppuccin-gtk-theme-latte"
+        "catppuccin-gtk-theme-frappe"
+        "material-gtk-theme-git"
+        "gtk-cyberpunk-neon-theme-git"
+    )
+    echo "${pkgs[@]}"
 }
 
-echo "[02b-aur-packages] Preparing to install AUR packages using paru..."
+# --- Main Logic ---
 
-# Define the list of AUR packages to install here using paru.
-# Add more packages to this array as needed.
-PACKAGES_TO_INSTALL_VIA_PARU=(
-    "find-the-command" 
-    "anydesk-bin"
-    "neofetch-git"
-    "grimblast-git"
-    "waybar-module-pacman-updates-git"
-    "wine-stable"
-    "wlr-randr-git"
-    "zsh-theme-powerlevel10k-git"
-    "zen-browser-bin"
-    "satty"
-    "hyprsunset"
-    # Themes
-    "gruvbox-material-gtk-theme-git"
-    "catppuccin-gtk-theme-macchiato"
-    "catppuccin-gtk-theme-latte"
-    "catppuccin-gtk-theme-frappe"
-    "material-gtk-theme-git"
-    "gtk-cyberpunk-neon-theme-git"
-)
-
-OVERALL_SUCCESS=true
-
-if ! command -v paru &> /dev/null; then
-    echo "[02b-aur-packages] Error: 'paru' AUR helper is not installed or not found in PATH."
-    echo "[02b-aur-packages] 'paru' is required to install the following AUR packages: ${PACKAGES_TO_INSTALL_VIA_PARU[*]}"
-    echo "[02b-aur-packages] Please ensure 'paru' is installed (e.g., via script 02-official-packages.sh from chaotic-aur)."
-    echo "[02b-aur-packages] Skipping installation of these AUR packages."
-    # If paru is essential for these packages, we mark overall success as false.
-    if [[ "${#PACKAGES_TO_INSTALL_VIA_PARU[@]}" -gt 0 ]]; then
-        OVERALL_SUCCESS=false
+main() {
+    if ! command -v paru &>/dev/null; then
+        echo "[02b-aur-packages] Error: 'paru' AUR helper is not installed."
+        exit 1
     fi
-else
-    echo "[02b-aur-packages] Found 'paru'. Processing packages: ${PACKAGES_TO_INSTALL_VIA_PARU[*]}"
-    for PACKAGE_NAME in "${PACKAGES_TO_INSTALL_VIA_PARU[@]}"; do
-        echo ""
-        echo "[02b-aur-packages] --- Processing AUR package with paru: $PACKAGE_NAME ---"
-        
-        if [[ "$DRY_RUN" == true ]]; then
-            echo "DRY-RUN (user: $(whoami)) ➜ paru -S --noconfirm --needed $PACKAGE_NAME"
-            echo "[02b-aur-packages] '$PACKAGE_NAME' assumed successful for dry run."
-        elif paru -S --noconfirm --needed "$PACKAGE_NAME"; then
-            echo "[02b-aur-packages] '$PACKAGE_NAME' installed successfully using paru."
-        else
-            echo "[02b-aur-packages] FAILED to install '$PACKAGE_NAME' using paru."
-            OVERALL_SUCCESS=false # Mark overall script as having at least one failure
-        fi
-    done
-fi
 
-echo ""
-if [[ "$OVERALL_SUCCESS" == true ]]; then
-    echo "[02b-aur-packages] All specified AUR packages processed successfully (or skipped if paru was missing but no packages were listed)."
-else
-    echo "[02b-aur-packages] One or more AUR packages FAILED to install or were SKIPPED due to missing paru."
-    # We only exit with 1 if there were packages to install and an issue occurred.
-    # If PACKAGES_TO_INSTALL_VIA_PARU was empty, OVERALL_SUCCESS would remain true.
-    if [[ "${#PACKAGES_TO_INSTALL_VIA_PARU[@]}" -gt 0 ]]; then
-        exit 1 # Indicate failure to run-all.sh
+    local aur_packages
+    aur_packages=$(get_aur_packages)
+
+    if [[ -z "$aur_packages" ]]; then
+        echo "[02b-aur-packages] No AUR packages to install."
+        exit 0
     fi
-fi
 
-echo "[02b-aur-packages] AUR package processing complete."
+    echo "[02b-aur-packages] Installing AUR packages: ${aur_packages}"
+    if ! run_cmd_user paru -S --needed --noconfirm $aur_packages; then
+        echo "[02b-aur-packages] One or more AUR packages failed to install."
+        exit 1
+    fi
+
+    echo "[02b-aur-packages] AUR package installation complete."
+}
+
+main
