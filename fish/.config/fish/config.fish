@@ -27,19 +27,10 @@ if test -f ~/.fish_profile
   source ~/.fish_profile
 end
 
-# Add ~/.local/bin to PATH
-if test -d ~/.local/bin
-    if not contains -- ~/.local/bin $PATH
-        set -p PATH ~/.local/bin
-    end
-end
-
-# Add depot_tools to PATH
-if test -d ~/Applications/depot_tools
-    if not contains -- ~/Applications/depot_tools $PATH
-        set -p PATH ~/Applications/depot_tools
-    end
-end
+## Add local binaries and tools to PATH
+fish_add_path ~/.local/bin
+fish_add_path ~/Applications/depot_tools
+fish_add_path ~/.cargo/bin/ 
 
 ## Starship prompt
 if status --is-interactive
@@ -277,6 +268,48 @@ alias gcleani "git clean -fd -i"                # Remove untracked files and dir
 alias gcfgl "git config --local --list"         # List local git config
 alias gcfgg "git config --global --list"        # List global git config
 alias gcfgse "git config --global --edit"       # Edit global git config
+
+## Docker
+# --- Containers ---
+alias dps='docker ps'                 # List running containers
+alias dpsa='docker ps -a'             # List all containers
+alias dstart='docker start'           # Start a stopped container
+alias dstop='docker stop'             # Stop a running container
+alias dlogs='docker logs'             # View logs of a container
+alias dlogsf='docker logs -f'         # Follow logs of a container
+alias dex='docker exec -it'           # Execute a command in a running container (interactive)
+alias drun='docker run -it --rm'      # Run a container interactively and remove it on exit
+alias dins='docker inspect'           # Inspect a container or image
+
+# --- Images ---
+alias dimg='docker images'            # List all images
+alias drmi='docker image rm'          # Remove an image
+alias drmif='docker image rm -f'      # Force remove an image
+alias dbld='docker build -t'          # Build an image from the current directory, with a tag
+alias dhist='docker history'          # Show history of an image
+alias dpull='docker pull'             # Pull an image or a repository from a registry
+alias dpush='docker push'             # Push an image or a repository to a registry
+
+# --- Cleanup ---
+alias drm='docker rm'                 # Remove a stopped container
+alias drmf='docker rm -f'             # Force remove a container (stops if running)
+alias dprunec='docker container prune -f' # Remove all stopped containers
+alias dprunei='docker image prune -af' # Remove all unused images
+alias dprunev='docker volume prune -f' # Remove all unused volumes
+alias dprunes='docker system prune -af' # Remove all unused containers, networks, and images. USE WITH CAUTION!
+
+# --- Docker Compose ---
+alias dc='docker compose'             # Base docker compose command
+alias dcu='docker compose up'         # Create and start containers
+alias dcud='docker compose up -d'     # Create and start containers in detached mode
+alias dcd='docker compose down'       # Stop and remove containers, networks
+alias dcdv='docker compose down --volumes' # Stop and remove containers, networks, and volumes
+alias dcr='docker compose restart'    # Restart services
+alias dcl='docker compose logs'       # View output from services
+alias dclf='docker compose logs -f'   # Follow log output
+alias dcb='docker compose build'      # Build or rebuild services
+alias dcpull='docker compose pull'    # Pull service images
+alias dcex='docker compose exec'      # Execute a command in a running service
 
 # Custom functions 
 function unzip_all
