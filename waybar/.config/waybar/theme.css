@@ -1,10 +1,27 @@
 @define-color bar-bg rgba(0, 0, 0, 0);
 
-@define-color main-bg #13131D;
-@define-color main-fg #FFFFFF;
+@define-color main-bg #091833;
+/* Deep navy blue */
+@define-color main-fg #b589d6;
+/* Softer purple-pink */
 
-@define-color wb-act-bg #6AA9C9;
-@define-color wb-act-fg #EFEFF5;
+@define-color wb-act-bg #03edf9;
+/* Electric cyan */
+@define-color wb-act-fg #321959;
+/* Dark purple */
 
-@define-color wb-hvr-bg #020817;
-@define-color wb-hvr-fg #ae00f3;
+@define-color wb-hvr-bg #72f1b8;
+/* Mint neon */
+@define-color wb-hvr-fg #321959;
+/* Dark purple */
+
+/* Optional palette */
+@define-color blue #133e7c;
+@define-color cyan #0abdc6;
+@define-color pink #ea00d9;
+@define-color purple #711c91;
+@define-color yellow #ffff00;
+@define-color green #00ff00;
+@define-color red #ff0000;
+@define-color orange #f57800;
+@define-color white #d7d7d5;
