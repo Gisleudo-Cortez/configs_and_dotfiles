@@ -14,7 +14,7 @@ need_root
 # Install Steam and NVIDIA proprietary drivers (including 32-bit libs for Steam) and Vulkan support
 PKGS=(
     steam
-    nvidia nvidia-utils nvidia-settings
+    nvidia-utils nvidia-settings
     lib32-nvidia-utils 
     vulkan-icd-loader lib32-vulkan-icd-loader
 )

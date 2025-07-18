@@ -33,7 +33,7 @@ get_packages() {
         adobe-source-code-pro-fonts ttf-ubuntu-font-family cantarell-fonts wqy-zenhei
         otf-font-awesome ttf-fantasque-sans-mono ttf-opensans
         # Containerization
-        docker docker-buildx
+        docker docker-buildx fuse-overlayfs iptables-nft
         # System & Audio
         pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse
         gst-plugin-pipewire wireplumber pavucontrol pamixer
@@ -64,8 +64,17 @@ install_packages() {
 
 configure_docker() {
     echo "[02-official-packages] Configuring Docker..."
-    run_cmd systemctl enable --now docker.service
+
+    # Ensure required kernel modules are loaded for Docker.
+    echo "[02-official-packages] Ensuring kernel modules for Docker are configured and loaded..."
+    local docker_modules_conf="/etc/modules-load.d/docker.conf"
+    run_cmd bash -c "printf 'overlay\niptable_nat\n' > '$docker_modules_conf'"
+    run_cmd modprobe overlay
+    run_cmd modprobe iptable_nat
+
+    # Enable and start container services.
     run_cmd systemctl enable --now containerd.service
+    run_cmd systemctl enable --now docker.service
     
     local sudo_user
     sudo_user="${SUDO_USER:-$(logname 2>/dev/null || echo "")}"
@@ -152,19 +161,23 @@ configure_networkmanager() {
 # --- Main Logic ---
 
 main() {
-    local all_packages
-    all_packages=$(get_packages)
-    
+    # Word-split the output of get_packages into an array
+    local all_packages_arr=($(get_packages))
+
     local brave_pkg
     brave_pkg=$(pacman -Si brave-browser 2>/dev/null && echo "brave-browser" || echo "")
-    
-    local final_pkg_list=("$all_packages" "$brave_pkg")
-    
+
+    # Combine the package lists, ensuring brave_pkg is only added if it's not empty
+    local final_pkg_list=("${all_packages_arr[@]}")
+    if [[ -n "$brave_pkg" ]]; then
+        final_pkg_list+=("$brave_pkg")
+    fi
+
     install_packages "${final_pkg_list[@]}"
     configure_docker
     configure_postgresql
     configure_networkmanager
-    
+
     echo "[02-official-packages] Package installation and basic service configuration complete."
 }
 

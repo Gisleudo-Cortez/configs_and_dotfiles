@@ -54,7 +54,11 @@ main() {
 
     for script in "${USER_SCRIPTS[@]}"; do
         echo -e "\n[run-all] === Running $script (as user: $target_user) ==="
-        run_cmd_user "$SCRIPT_DIR/$script" $DRY_RUN_FLAG
+        if [[ "${DRY_RUN:-false}" == true ]]; then
+            echo "DRY-RUN ➜ sudo -u $target_user $SCRIPT_DIR/$script $DRY_RUN_FLAG"
+        else
+            sudo -u "$target_user" "$SCRIPT_DIR/$script" $DRY_RUN_FLAG
+        fi
         echo "[run-all] === Completed $script ==="
     done
 

@@ -54,7 +54,7 @@ main() {
     fi
 
     echo "[02b-aur-packages] Installing AUR packages: ${aur_packages}"
-    if ! run_cmd_user paru -S --needed --noconfirm $aur_packages; then
+    if ! paru -S --needed --noconfirm $aur_packages; then
         echo "[02b-aur-packages] One or more AUR packages failed to install."
         exit 1
     fi

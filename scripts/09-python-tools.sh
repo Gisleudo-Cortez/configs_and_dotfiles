@@ -11,9 +11,15 @@ fi
 
 need_user
 
+# Ensure the user owns their own .local directory
+echo "[09-python-tools] Ensuring correct ownership of ~/.local..."
+if [[ -d "$HOME/.local" ]]; then
+    run_cmd sudo chown -R "$(whoami):$(whoami)" "$HOME/.local"
+fi
+
 # Install 'uv' (Unified Python environment tool)
 echo "[09-python-tools] Installing 'uv' Python tool manager..."
-if ! run_cmd_user bash -c "curl -LsSf https://astral.sh/uv/install.sh | sh"; then
+if ! bash -c "curl -LsSf https://astral.sh/uv/install.sh | sh"; then
     echo "[09-python-tools] ERROR: Failed to install 'uv'."
     exit 1
 fi
@@ -34,7 +40,7 @@ echo -e "\n    export PATH=\"\$HOME/.local/bin:\$PATH\"\n"
 # Install 'ruff' linter using uv
 if command -v uv &>/dev/null; then
     echo "[09-python-tools] Installing 'ruff' linter using uv..."
-    run_cmd_user uv tool install ruff
+    run_cmd uv tool install ruff
     echo "[09-python-tools] 'ruff' linter setup via uv complete."
 else
     echo "[09-python-tools] 'uv' command not found after installation attempt. Skipping ruff install."

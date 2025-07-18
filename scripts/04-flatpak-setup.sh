@@ -15,6 +15,6 @@ need_root
 run_cmd pacman -S --needed --noconfirm flatpak
 
 # Add Flathub repository for Flatpak (system-wide)
-run_cmd flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+run_cmd flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 echo "[04-flatpak-setup] Flatpak installed and Flathub repository added."

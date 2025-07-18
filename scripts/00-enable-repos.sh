@@ -54,8 +54,8 @@ else
         fi
     done
 
-    KEYRING_URL="https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst"
-    MIRRORLIST_URL="https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst"
+    KEYRING_URL="https://builds.garudalinux.org/chaotic-aur/chaotic-keyring.pkg.tar.zst"
+    MIRRORLIST_URL="https://builds.garudalinux.org/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst"
 
     if pacman -Qs "$CHAOTIC_KEYRING_PKG" &>/dev/null && pacman -Qs "$CHAOTIC_MIRRORLIST_PKG" &>/dev/null; then
         echo "[00-enable-repos] $CHAOTIC_KEYRING_PKG and $CHAOTIC_MIRRORLIST_PKG already installed."

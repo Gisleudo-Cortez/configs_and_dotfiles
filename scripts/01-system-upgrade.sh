@@ -13,6 +13,6 @@ need_root
 
 # Update package databases and perform a full system upgrade
 echo "[01-system-upgrade] Performing full system upgrade (pacman -Syu --noconfirm)..."
-run_cmd pacman -Syu --noconfirm
+run_cmd pacman -Syu linux linux-headers iptables-nft --noconfirm
 
 echo "[01-system-upgrade] System upgrade process complete."
