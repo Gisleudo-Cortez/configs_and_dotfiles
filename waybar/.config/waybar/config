@@ -2,7 +2,9 @@
 	"layer": "top",
 	"position": "top",
 	"modules-left": [
-		"hyprland/workspaces"
+		"hyprland/workspaces",
+		"clock"
+
 	],
 	"modules-center": [
 		"custom/updates",
@@ -18,8 +20,7 @@
 		"network",
 		"bluetooth",
 		"tray",
-		"clock"
-	],
+			],
 	"hyprland/workspaces": {
 		"format": "{icon}",
 		"on-click": "activate",
