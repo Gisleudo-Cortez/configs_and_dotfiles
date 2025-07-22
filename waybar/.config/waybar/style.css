@@ -34,7 +34,7 @@
 }
 
 window#waybar {
-	background: rgba(173, 216, 230, 0);
+	background: @bar-bg;
 }
 
 tooltip {
