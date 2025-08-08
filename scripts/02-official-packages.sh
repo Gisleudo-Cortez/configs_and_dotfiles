@@ -13,51 +13,28 @@ need_root
 
 # --- Package Lists ---
 
-get_packages() {
-    local pkgs=(
-        # Shells, Terminals, Editors
-        fish starship kitty alacritty neovim vim git stow zsh
-        # GUI Apps & File Managers
-        dolphin dbeaver vlc thunderbird kate konsole obsidian obs-studio firefox ark libreoffice-fresh-pt-br
-        # Development & Runtimes
-        nodejs npm postgresql cmake go cargo delve gopls
-        # Utilities & Tools
-        qalculate-gtk kdeconnect rclone rsync 7zip
-        fzf bat eza ripgrep ripgrep-all ugrep htop yazi hyperfine qt6-virtualkeyboard
-        paru jq grim slurp swappy dunst swaylock hypridle rofi-wayland
-        brightnessctl playerctl udiskie unzip pacman-contrib parallel
-        imagemagick libnotify duf fastfetch cliphist yad python-pywal
-        # Fonts
-        ttf-jetbrains-mono nerd-fonts noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra
-        gsfonts ttf-fira-sans adwaita-fonts ttf-dejavu ttf-liberation terminus-font
-        adobe-source-code-pro-fonts ttf-ubuntu-font-family cantarell-fonts wqy-zenhei
-        otf-font-awesome ttf-fantasque-sans-mono ttf-opensans
-        # Containerization
-        docker docker-buildx fuse-overlayfs iptables-nft
-        # System & Audio
-        pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse
-        gst-plugin-pipewire wireplumber pavucontrol pamixer
-        # Networking & Bluetooth
-        networkmanager network-manager-applet iwd bluez bluez-utils blueman
-        # Display Manager (SDDM)
-        sddm qt5-quickcontrols qt5-quickcontrols2 qt5-graphicaleffects
-        # Window Manager Related (Hyprland ecosystem)
-        swww wlogout hyprpicker
-        # Desktop Integration & Dependencies
-        polkit-gnome xdg-desktop-portal-gtk xdg-user-dirs archlinux-xdg-menu
-        qt5-imageformats ffmpegthumbs kde-cli-tools
-        # Theming
-        nwg-look qt5ct qt6ct kvantum qt5-wayland qt6-wayland
-        # Other Applications
-        nwg-displays
-    )
-    echo "${pkgs[@]}"
+# Reads a list of packages from the 'packages-official.txt' file.
+# The file should contain one package name per line.
+# Lines starting with '#' and empty lines are ignored.
+get_packages_from_file() {
+    local package_file
+    package_file="$(dirname "$0")/packages-official.txt"
+    if [[ ! -f "$package_file" ]]; then
+        echo "[02-official-packages] Error: Package file not found at '$package_file'"
+        return 1
+    fi
+    # Read file, filter out comments and empty lines
+    grep -v -E '^\s*#|^\s*$' "$package_file"
 }
 
 # --- Installation Functions ---
 
 install_packages() {
     local pkgs_to_install=("$@")
+    if [[ ${#pkgs_to_install[@]} -eq 0 ]]; then
+        echo "[02-official-packages] No packages to install."
+        return
+    fi
     echo "[02-official-packages] Attempting to install/update official packages..."
     run_cmd pacman -S --needed --noconfirm "${pkgs_to_install[@]}"
 }
@@ -161,13 +138,19 @@ configure_networkmanager() {
 # --- Main Logic ---
 
 main() {
-    # Word-split the output of get_packages into an array
-    local all_packages_arr=($(get_packages))
+    # Read packages from the file into an array
+    local all_packages_arr
+    mapfile -t all_packages_arr < <(get_packages_from_file)
+    if [[ $? -ne 0 || ${#all_packages_arr[@]} -eq 0 ]]; then
+        echo "[02-official-packages] Could not read packages from file or package file is empty. Exiting."
+        return 1
+    fi
 
+    # Check for brave-browser separately
     local brave_pkg
     brave_pkg=$(pacman -Si brave-browser 2>/dev/null && echo "brave-browser" || echo "")
 
-    # Combine the package lists, ensuring brave_pkg is only added if it's not empty
+    # Combine the package lists
     local final_pkg_list=("${all_packages_arr[@]}")
     if [[ -n "$brave_pkg" ]]; then
         final_pkg_list+=("$brave_pkg")

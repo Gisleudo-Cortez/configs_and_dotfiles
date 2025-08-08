@@ -13,28 +13,19 @@ need_user
 
 # --- Package List ---
 
-get_aur_packages() {
-    local pkgs=(
-        "find-the-command"
-        "anydesk-bin"
-        "neofetch-git"
-        "grimblast-git"
-        "waybar-module-pacman-updates-git"
-        "wine-stable"
-        "wlr-randr-git"
-        "zsh-theme-powerlevel10k-git"
-        "zen-browser-bin"
-        "satty"
-        "hyprsunset"
-        # Themes
-        "gruvbox-material-gtk-theme-git"
-        "catppuccin-gtk-theme-macchiato"
-        "catppuccin-gtk-theme-latte"
-        "catppuccin-gtk-theme-frappe"
-        "material-gtk-theme-git"
-        "gtk-cyberpunk-neon-theme-git"
-    )
-    echo "${pkgs[@]}"
+# Reads a list of AUR packages from the 'packages-aur.txt' file.
+# The file should contain one package name per line.
+# Lines starting with '#' and empty lines are ignored.
+get_aur_packages_from_file() {
+    local package_file
+    package_file="$(dirname "$0")/packages-aur.txt"
+    if [[ ! -f "$package_file" ]]; then
+        echo "[02b-aur-packages] Error: Package file not found at '$package_file'"
+        return 1
+    fi
+    # Read file, filter out comments and empty lines
+    grep -v -E '^\s*#|^\s*
+ "$package_file"
 }
 
 # --- Main Logic ---
@@ -45,16 +36,16 @@ main() {
         exit 1
     fi
 
+    # Read packages from the file into an array
     local aur_packages
-    aur_packages=$(get_aur_packages)
-
-    if [[ -z "$aur_packages" ]]; then
-        echo "[02b-aur-packages] No AUR packages to install."
-        exit 0
+    mapfile -t aur_packages < <(get_aur_packages_from_file)
+    if [[ $? -ne 0 || ${#aur_packages[@]} -eq 0 ]]; then
+        echo "[02b-aur-packages] Could not read packages from file or package file is empty. Exiting."
+        return 1
     fi
 
-    echo "[02b-aur-packages] Installing AUR packages: ${aur_packages}"
-    if ! paru -S --needed --noconfirm $aur_packages; then
+    echo "[02b-aur-packages] Installing AUR packages: ${aur_packages[*]}"
+    if ! paru -S --needed --noconfirm "${aur_packages[@]}"; then
         echo "[02b-aur-packages] One or more AUR packages failed to install."
         exit 1
     fi

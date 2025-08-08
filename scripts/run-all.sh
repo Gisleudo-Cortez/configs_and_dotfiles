@@ -19,7 +19,6 @@ ROOT_SCRIPTS=(
     "00-enable-repos.sh"
     "01-system-upgrade.sh"
     "02-official-packages.sh"
-    "03-hyprland-stack.sh"
     "04-flatpak-setup.sh"
     "05-appimage-setup.sh"
     "06-printer-setup.sh"
