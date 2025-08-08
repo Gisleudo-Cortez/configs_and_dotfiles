@@ -44,7 +44,7 @@ get_packages() {
         # Window Manager Related (Hyprland ecosystem)
         swww wlogout hyprpicker
         # Desktop Integration & Dependencies
-        polkit-gnome xdg-desktop-portal-gtk xdg-user-dirs
+        polkit-gnome xdg-desktop-portal-gtk xdg-user-dirs archlinux-xdg-menu
         qt5-imageformats ffmpegthumbs kde-cli-tools
         # Theming
         nwg-look qt5ct qt6ct kvantum qt5-wayland qt6-wayland
