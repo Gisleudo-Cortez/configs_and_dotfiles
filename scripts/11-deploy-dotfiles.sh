@@ -22,6 +22,7 @@ STOW_PACKAGES_TO_DEPLOY=(
     "nvim"
     "waybar"
     "rofi"
+    "starship"
 )
 
 # --- Main Logic ---
