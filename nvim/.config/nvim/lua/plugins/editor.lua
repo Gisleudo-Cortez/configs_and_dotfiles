@@ -30,20 +30,24 @@ return {
 		event = "VeryLazy",
 		config = function()
 			local wk = require("which-key")
-			wk.setup({})
-			wk.register({
-				b = { name = "Buffer" },
-				f = { name = "Find" },
-				t = { name = "Terminal" },
-			}, {
-				prefix  = "<leader>",
-				mode    = "n",
-				noremap = true,
-				silent  = true,
-			})
+			wk.setup({}) -- keep defaults
+
+			-- New list-style spec (recommended by which-key)
+			wk.add({
+				{ "<leader>b",  group = "Buffer",        remap = false },
+				{ "<leader>f",  group = "Find",          remap = false },
+				{ "<leader>t",  group = "Terminal",      remap = false },
+				-- (Optional) add labels for your existing mappings so the popup looks nicer:
+				{ "<leader>w",  desc = "Save file" },
+				{ "<leader>wq", desc = "Save & quit" },
+				{ "<leader>bd", desc = "Delete buffer" },
+				{ "<leader>ff", desc = "Find Files" },
+				{ "<leader>fg", desc = "Live Grep" },
+				{ "<leader>fb", desc = "Find Buffers" },
+				{ "<leader>tt", desc = "Toggle terminal" },
+			}, { mode = "n" })
 		end,
 	},
-
 	{
 		"akinsho/toggleterm.nvim",
 		keys = {
