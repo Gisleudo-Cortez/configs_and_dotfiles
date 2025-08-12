@@ -28,4 +28,9 @@ require("lazy").setup({
 	change_detection = { enabled = true, notify = true },
 	checker = { enabled = true, concurrency = 20 },
 	ui = { border = "rounded" },
+	performance = {
+		rtp = {
+			disabled_plugins = { "matchparen", "tarPlugin", "tohtml", "tutor", "zipPlugin" },
+		},
+	},
 })

@@ -1,8 +1,12 @@
 -- Debugging (DAP and UI + adapters for Python, Go, JS)
 return {
-	{ "mfussenegger/nvim-dap" },
+	-- Load core DAP on first debug keypress
+	{ "mfussenegger/nvim-dap",           keys = { "<F5>", "<F6>", "<F9>", "<F10>", "<F11>", "<F12>" } },
+
+	-- DAP UI (loads when requested or with VeryLazy)
 	{
 		"rcarriga/nvim-dap-ui",
+		event = "VeryLazy",
 		dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
 		config = function()
 			local dap   = require("dap")
@@ -22,6 +26,8 @@ return {
 			map("n", "<F12>", dap.step_out, { desc = "Debug: Step Out" })
 		end,
 	},
+
+	-- Python
 	{
 		"mfussenegger/nvim-dap-python",
 		ft = "python",
@@ -54,13 +60,15 @@ return {
 			require("dap-python").setup(python_path)
 		end,
 	},
+
+	-- Go
 	{
 		"leoluz/nvim-dap-go",
 		ft = "go",
-		config = function()
-			require("dap-go").setup()
-		end,
+		config = function() require("dap-go").setup() end,
 	},
+
+	-- JavaScript/TypeScript (vscode-js)
 	{
 		"mxsdev/nvim-dap-vscode-js",
 		ft = { "javascript", "typescript" },
@@ -83,8 +91,7 @@ return {
 			end
 		end,
 	},
-	{
-		"theHamsta/nvim-dap-virtual-text",
-		opts = {},
-	},
+
+	-- Virtual text
+	{ "theHamsta/nvim-dap-virtual-text", opts = {} },
 }

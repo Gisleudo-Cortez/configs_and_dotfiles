@@ -21,6 +21,7 @@ return {
 			},
 		},
 	},
+
 	{
 		"williamboman/mason-lspconfig.nvim",
 		dependencies = { "williamboman/mason.nvim" },
@@ -45,15 +46,24 @@ return {
 			automatic_installation = true,
 		},
 	},
+
 	{
 		"neovim/nvim-lspconfig",
 		dependencies = { "williamboman/mason-lspconfig.nvim" },
 		config = function()
+			-- Global diagnostics UI
+			vim.diagnostic.config({
+				underline = true,
+				virtual_text = { spacing = 2, prefix = "●" },
+				signs = true,
+				severity_sort = true,
+			})
+
 			local lspconfig = require("lspconfig")
 			local mason_lspconfig = require("mason-lspconfig")
-
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
-			local on_attach = function(_, bufnr)
+
+			local on_attach = function(client, bufnr)
 				local bufmap = function(mode, lhs, rhs, desc)
 					vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
 				end
@@ -65,6 +75,10 @@ return {
 				bufmap("n", "[d", vim.diagnostic.goto_prev, "Previous Diagnostic")
 				bufmap("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
 				bufmap("i", "<C-h>", vim.lsp.buf.signature_help, "Signature Help")
+
+				if client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
+					vim.lsp.inlay_hint(bufnr, true)
+				end
 			end
 
 			local function get_python_path()
@@ -75,38 +89,41 @@ return {
 				return vim.fn.exepath("python") or "python"
 			end
 
-			local default_opts = {
-				on_attach = on_attach,
-				capabilities = capabilities,
-			}
-			local server_settings = {
-				lua_ls = {
-					settings = {
-						Lua = {
-							diagnostics = { globals = { "vim" } },
-						},
-					},
-				},
-				pyright = {
-					settings = {
-						python = {
-							pythonPath = get_python_path(),
-						},
-					},
-				},
-			}
-
 			mason_lspconfig.setup()
-			for _, server in ipairs(mason_lspconfig.get_installed_servers()) do
-				local opts = vim.tbl_deep_extend("force", default_opts, server_settings[server] or {})
-				lspconfig[server].setup(opts)
-			end
 
-			-- Updated: use 'ruff' instead of deprecated 'ruff-lsp'
-			lspconfig.ruff.setup({
-				on_attach = on_attach,
-				capabilities = capabilities,
-				init_options = { settings = { args = {} } },
+			mason_lspconfig.setup_handlers({
+				-- default handler for all servers
+				function(server)
+					lspconfig[server].setup({
+						on_attach = on_attach,
+						capabilities = capabilities,
+					})
+				end,
+
+				-- overrides
+				["lua_ls"] = function()
+					lspconfig.lua_ls.setup({
+						on_attach = on_attach,
+						capabilities = capabilities,
+						settings = { Lua = { diagnostics = { globals = { "vim" } } } },
+					})
+				end,
+
+				["pyright"] = function()
+					lspconfig.pyright.setup({
+						on_attach = on_attach,
+						capabilities = capabilities,
+						settings = { python = { pythonPath = get_python_path() } },
+					})
+				end,
+
+				["ruff"] = function()
+					lspconfig.ruff.setup({
+						on_attach = on_attach,
+						capabilities = capabilities,
+						init_options = { settings = { args = {} } },
+					})
+				end,
 			})
 		end,
 	},

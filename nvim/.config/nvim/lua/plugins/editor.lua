@@ -9,8 +9,8 @@ return {
 				"bash", "c", "css", "html", "javascript", "json", "lua", "python",
 				"rust", "go", "typescript", "vim", "yaml", "sql", "markdown", "java",
 			},
-			highlight        = { enable = true },
-			indent           = { enable = true },
+			highlight = { enable = true },
+			indent = { enable = true },
 		},
 	},
 	{
@@ -23,25 +23,27 @@ return {
 		event = "InsertEnter",
 		opts = {}, -- use default settings
 	},
+
+	-- which-key (FIXED: proper spec)
 	{
+		"folke/which-key.nvim",
+		event = "VeryLazy",
+		config = function()
+			local wk = require("which-key")
+			wk.setup({})
+			wk.register({
+				b = { name = "Buffer" },
+				f = { name = "Find" },
+				t = { name = "Terminal" },
+			}, {
+				prefix  = "<leader>",
+				mode    = "n",
+				noremap = true,
+				silent  = true,
+			})
+		end,
 	},
-	"folke/which-key.nvim",
-	event = "VeryLazy",
-	config = function()
-		local wk = require("which-key")
-		wk.setup({}) -- mantém sua configuração padrão
-		-- Novo formato de registro de grupos
-		wk.register({
-			b = { name = "Buffer" }, -- agrupa <leader>b*
-			f = { name = "Find" }, -- agrupa <leader>f*
-			t = { name = "Terminal" }, -- agrupa <leader>t*
-		}, {
-			prefix  = "<leader>", -- prefixo comum
-			mode    = "n", -- mapeamento em modo normal
-			noremap = true, -- garante não-recursividade
-			silent  = true, -- evita eco de comandos
-		})
-	end,
+
 	{
 		"akinsho/toggleterm.nvim",
 		keys = {
@@ -49,11 +51,9 @@ return {
 		},
 		opts = {
 			size = 15,
-			open_mapping = nil, -- disable built-in mapping (using our custom mapping)
+			open_mapping = nil,
 			shade_terminals = true,
 			direction = "horizontal",
 		},
 	},
-
-
 }

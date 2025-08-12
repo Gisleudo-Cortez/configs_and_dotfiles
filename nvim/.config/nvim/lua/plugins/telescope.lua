@@ -1,8 +1,14 @@
 -- Fuzzy finder (Telescope)
 return {
+	-- Core
 	{
 		"nvim-telescope/telescope.nvim",
-		dependencies = { "nvim-lua/plenary.nvim" },
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			-- Extensions
+			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make", cond = vim.fn.executable("make") == 1 },
+			{ "nvim-telescope/telescope-ui-select.nvim" },
+		},
 		cmd = "Telescope",
 		keys = {
 			{ "<leader>ff", function() require("telescope.builtin").find_files() end, desc = "Find Files" },
@@ -24,8 +30,16 @@ return {
 						},
 					},
 				},
+				extensions = {
+					["ui-select"] = require("telescope.themes").get_dropdown({}),
+				},
 			}
+		end,
+		config = function(_, opts)
+			local telescope = require("telescope")
+			telescope.setup(opts)
+			pcall(telescope.load_extension, "fzf")
+			pcall(telescope.load_extension, "ui-select")
 		end,
 	},
 }
-

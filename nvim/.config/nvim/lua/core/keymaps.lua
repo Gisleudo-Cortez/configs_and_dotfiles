@@ -26,4 +26,3 @@ map("n", "<leader>j", ":m .+1<CR>==", opts)
 map("n", "<leader>k", ":m .-2<CR>==", opts)
 
 -- Terminal (toggleterm plugin will handle <leader>tt mapping; see plugin config)
-
