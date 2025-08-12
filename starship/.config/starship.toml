@@ -4,7 +4,8 @@ format = """\
   󰣇 \
   $directory\
   $git_branch$git_commit$git_state $git_status\
-  $character\n
+  $character\
+  $cmd_duration\n
 """
 right_format = """
 $singularity\
@@ -92,16 +93,22 @@ continuation_prompt = '▶▶ '
 # none
 
 #NTOE: you can customize the symbol(s, e.g:
-# [character]
-# success_symbol = "[  ]($bold fg:#f8f8f2)"
-# error_symbol = "[ ➤ ]($bold fg:#fb4934)"
+[character]
+success_symbol = "[  ]($bold fg:#f8f8f2)"
+error_symbol = "[ Failed ➤ ]($blink fg:#fb4934)"
 
 [directory]
 disabled = false
 format = "[$path](bold fg:#8be9fd)"
 truncate_to_repo = false
-home_symbol = "" 
-#home_symbol = "" 
+truncation_length = 0
+home_symbol = "" 
+
+[cmd_duration]
+min_time = 0                      
+format = '[[ $duration ](fg:#FFFF00 bold)]($style)'
+style = ""                       
+show_notifications = true       
 
 [git_branch]
 format = " [  $branch](fg:#9198a1)"
@@ -117,7 +124,7 @@ style = "bg:#394260"
 [time]
 disabled = false
 format = '[[  $time ](fg:#a0a9cb )]($style)'
-time_format = "%R"                            # Hour:Minute Format
+time_format = '%H:%M:%S'   # Hour:Minute Format
 
 [deno]
 format = " [deno](italic) [ ](green bold)"
