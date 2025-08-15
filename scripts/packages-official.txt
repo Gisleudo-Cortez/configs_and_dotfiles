@@ -73,6 +73,7 @@ python-pywal
 figlet
 toilet
 lolcat
+reflector
 
 # Fonts
 ttf-jetbrains-mono
