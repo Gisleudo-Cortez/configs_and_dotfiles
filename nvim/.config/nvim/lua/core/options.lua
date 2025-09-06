@@ -1,5 +1,6 @@
 local opt            = vim.opt
-opt.termguicolors    = true -- 24‑bit colour
+
+opt.termguicolors    = true -- 24-bit colour
 opt.number           = true
 opt.relativenumber   = true
 opt.hlsearch         = false
@@ -22,3 +23,6 @@ opt.undofile         = true
 
 vim.g.mapleader      = " "
 vim.g.maplocalleader = " "
+
+-- Indent scope line color (adjust for Catppuccin-Mocha)
+vim.api.nvim_set_hl(0, "IblScope", { fg = "#a6adc8" }) -- Matches Mocha "overlay0"
