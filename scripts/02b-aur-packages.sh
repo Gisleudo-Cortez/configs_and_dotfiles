@@ -24,8 +24,7 @@ get_aur_packages_from_file() {
         return 1
     fi
     # Read file, filter out comments and empty lines
-    grep -v -E '^\s*#|^\s*
- "$package_file"
+    grep -v -E '^\s*#|^\s*$' "$package_file"
 }
 
 # --- Main Logic ---
@@ -45,9 +44,11 @@ main() {
     fi
 
     echo "[02b-aur-packages] Installing AUR packages: ${aur_packages[*]}"
-    if ! paru -S --needed --noconfirm "${aur_packages[@]}"; then
-        echo "[02b-aur-packages] One or more AUR packages failed to install."
-        exit 1
+    if ! run_cmd paru -S --needed --noconfirm "${aur_packages[@]}"; then
+        if [[ "$DRY_RUN" == false ]]; then
+             echo "[02b-aur-packages] One or more AUR packages failed to install."
+             exit 1
+        fi
     fi
 
     echo "[02b-aur-packages] AUR package installation complete."

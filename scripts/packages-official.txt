@@ -48,7 +48,6 @@ htop
 yazi
 hyperfine
 qt6-virtualkeyboard
-paru
 jq
 grim
 slurp
@@ -100,7 +99,6 @@ ttf-opensans
 docker
 docker-buildx
 fuse-overlayfs
-iptables-nft
 
 # System & Audio
 pipewire

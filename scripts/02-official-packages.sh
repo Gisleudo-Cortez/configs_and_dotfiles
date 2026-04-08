@@ -14,8 +14,6 @@ need_root
 # --- Package Lists ---
 
 # Reads a list of packages from the 'packages-official.txt' file.
-# The file should contain one package name per line.
-# Lines starting with '#' and empty lines are ignored.
 get_packages_from_file() {
     local package_file
     package_file="$(dirname "$0")/packages-official.txt"
@@ -85,6 +83,7 @@ configure_postgresql() {
         run_cmd chown -R postgres:postgres "$pg_data_dir"
         run_cmd chmod -R 700 "$pg_data_dir"
     else
+        # Safety check: ensure dir exists before moving it
         if [[ -d "$pg_data_dir" ]]; then
             local backup_dir="${pg_data_dir}.bak.$(date +%Y%m%d%H%M%S)"
             echo "[02-official-packages] WARNING: Moving existing '$pg_data_dir' to '$backup_dir'."
@@ -100,7 +99,8 @@ configure_postgresql() {
             echo "[02-official-packages] PostgreSQL database cluster initialized successfully."
         else
             echo "[02-official-packages] Error: 'initdb' command FAILED. PostgreSQL service will not be started."
-            return
+            # If real run fails, return. Dry run continues.
+            [[ "$DRY_RUN" == false ]] && return
         fi
     fi
 

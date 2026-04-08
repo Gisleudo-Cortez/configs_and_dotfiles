@@ -16,6 +16,8 @@ return {
 			diagnostics = { enable = true },
 			git = { enable = true },
 		},
+		filters = {
+			dotfiles = false,
+		},
 	},
 }
-

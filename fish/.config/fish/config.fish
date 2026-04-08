@@ -302,3 +302,11 @@ set -gx PATH $HOME/.cargo/bin $PATH
 
 # change editor to nvim 
 set -gx EDITOR /usr/bin/nvim
+
+# Generated for envman. Do not edit.
+test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
+
+# Added by LM Studio CLI (lms)
+set -gx PATH $PATH /home/nero/.lmstudio/bin
+# End of LM Studio CLI section
+

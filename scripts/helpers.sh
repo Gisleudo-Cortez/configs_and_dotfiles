@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Shared helper functions for installation scripts
 
-# This script is meant to be sourced, not executed directly.
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "This script should be sourced, not executed directly."
     exit 1
@@ -9,9 +8,7 @@ fi
 
 # --- Logging and Command Execution ---
 
-# A helper to run commands safely.
-# It respects DRY_RUN and prints the command being executed.
-# Usage: run_cmd command arg1 "arg 2"
+# Run commands safely; respects DRY_RUN.
 run_cmd() {
     if [[ "${DRY_RUN:-false}" == true ]]; then
         echo "DRY-RUN ➜ $*"
@@ -21,24 +18,32 @@ run_cmd() {
     fi
 }
 
-# A helper to run commands as the non-root user who invoked sudo.
-# Respects DRY_RUN.
-# Usage: run_cmd_user command arg1 "arg 2"
+# Run commands as the non-root user.
+# Fix: Checks if we are already that user to avoid nested/redundant sudo calls.
 run_cmd_user() {
     local target_user="${SUDO_USER:-$(whoami)}"
+    local current_user
+    current_user=$(whoami)
+
+    # Use arguments as the command description
+    local cmd_str="$*"
+
     if [[ "${DRY_RUN:-false}" == true ]]; then
-        echo "DRY-RUN (as user: ${target_user}) ➜ $*"
+        echo "DRY-RUN (as user: ${target_user}) ➜ $cmd_str"
     else
-        echo "EXECUTING (as user: ${target_user}) ➜ $*"
-        sudo -u "${target_user}" --preserve-env=PATH,HOME -- "$@"
+        echo "EXECUTING (as user: ${target_user}) ➜ $cmd_str"
+        if [[ "$current_user" == "$target_user" ]]; then
+            # We are already the correct user; run directly
+            "$@"
+        else
+            # We are (presumably) root; drop privileges
+            sudo -u "${target_user}" --preserve-env=PATH,HOME -- "$@"
+        fi
     fi
 }
 
-
 # --- Pre-flight Checks ---
 
-# Ensures the script is run as root, exiting if not.
-# Respects DRY_RUN.
 need_root() {
     local script_name
     script_name=$(basename "${BASH_SOURCE[1]}")
@@ -52,8 +57,6 @@ need_root() {
     fi
 }
 
-# Ensures the script is run as a regular user, not root.
-# Respects DRY_RUN.
 need_user() {
     local script_name
     script_name=$(basename "${BASH_SOURCE[1]}")
