@@ -1,91 +1,110 @@
+-- lua/plugins/editor.lua
 return {
+	-- 1. Flash.nvim: Lightning fast motions
+	{
+		"folke/flash.nvim",
+		event = "VeryLazy",
+		opts = {},
+		keys = {
+			{ "s",  mode = { "n", "x", "o" }, function() require("flash").jump() end,       desc = "Flash" },
+			{ "S",  mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+			{ "Sc", mode = { "n" },           function() require("flash").ascent() end,     desc = "Flash Ascent" },
+		},
+	},
+
+	-- 2. Mini.surround: Efficiently manipulate quotes/brackets/tags
+	{
+		"echasnovski/mini.surround",
+		version = "*",
+		config = function()
+			require("mini.surround").setup()
+		end,
+	},
+
+
+	-- 3. Treesitter (Optimized for lazy.nvim)
 	{
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
 		event = { "BufReadPost", "BufNewFile" },
 		opts = {
-			ensure_installed = {
-				"bash", "c", "css", "html", "javascript", "json", "lua", "python",
-				"rust", "go", "typescript", "vim", "yaml", "sql", "markdown", "java",
-			},
+			ensure_installed = { "lua", "python", "rust", "javascript", "typescript", "go", "vim", "vimdoc", "regex", "bash" },
 			highlight = { enable = true },
 			indent = { enable = true },
-			matchup = { enable = true }, -- 🔄 Enable integration with vim-matchup
-		},
-	},
-	{
-		"andymass/vim-matchup", -- 🔄 Highlight matching blocks/delimiters
-		event = { "BufReadPost", "BufNewFile" },
-		init = function()
-			vim.g.matchup_matchparen_offscreen = { method = "popup" } -- show offscreen matches in popup
-			vim.g.matchup_override_vimtex = 1
-		end,
-	},
-	{
-		"lewis6991/gitsigns.nvim",
-		event = { "BufReadPre", "BufNewFile" },
-		opts = {}, -- use default settings
-	},
-	{
-		"windwp/nvim-autopairs",
-		event = "InsertEnter",
-		opts = {}, -- use default settings
-	},
-	{
-		"folke/which-key.nvim",
-		event = "VeryLazy",
-		config = function()
-			local wk = require("which-key")
-			wk.setup({})
-			wk.add({
-				{ "<leader>b",  group = "Buffer",        remap = false },
-				{ "<leader>f",  group = "Find",          remap = false },
-				{ "<leader>t",  group = "Terminal",      remap = false },
-				{ "<leader>w",  desc = "Save file" },
-				{ "<leader>wq", desc = "Save & quit" },
-				{ "<leader>bd", desc = "Delete buffer" },
-				{ "<leader>ff", desc = "Find Files" },
-				{ "<leader>fg", desc = "Live Grep" },
-				{ "<leader>fb", desc = "Find Buffers" },
-				{ "<leader>tt", desc = "Toggle terminal" },
-			}, { mode = "n" })
-		end,
-	},
-	{
-		"akinsho/toggleterm.nvim",
-		keys = {
-			{ "<leader>tt", "<cmd>ToggleTerm<CR>", desc = "Toggle terminal" },
-		},
-		opts = {
-			size = 15,
-			open_mapping = nil,
-			shade_terminals = true,
-			direction = "horizontal",
-		},
-	},
-	{
-		"lukas-reineke/indent-blankline.nvim", -- 📏 Indent and scope guides
-		main = "ibl",
-		event = { "BufReadPost", "BufNewFile" },
-		opts = {
-			indent = {
-				char = "│",
-			},
-			scope = {
-				enabled = true,
-				show_start = true,
-				show_end = true,
-			},
-			exclude = {
-				filetypes = {
-					"help",
-					"dashboard",
-					"lazy",
-					"mason",
-					"nvimtree",
-					"terminal",
+			incremental_selection = {
+				enable = true,
+				keymaps = {
+					init_selection = "<C-space>",
+					node_incremental = "<C-space>",
+					scope_incremental = "<cr>",
+					node_decremental = "<bs>",
 				},
 			},
 		},
+		config = function(_, opts)
+			-- We wrap the require in a pcall (protected call) to prevent
+			-- crashing if the plugin is still being initialized.
+			local status_ok, configs = pcall(require, "nvim-treesitter.configs")
+			if not status_ok then
+				return
+			end
+			configs.setup(opts)
+		end,
 	},
+
+
+
+	-- 4. Statusline & Tabline (Final - Shows Open Tabs)
+	{
+		"nvim-lualine/lualine.nvim",
+		dependencies = {
+			"nvim-tree/nvim-web-devicons", -- For file icons
+		},
+		config = function()
+			require("lualine").setup({
+				options = {
+					globalstatus = true,
+					theme = "auto",
+					component_separators = { left = "", right = "" },
+					section_separators = { left = "", right = "" },
+					disabled_filetypes = { statusline = {} },
+				},
+				sections = {
+					lualine_a = {},
+					lualine_b = {},
+					-- Bottom statusline shows current file with relative path
+					lualine_c = { { 'filename', path = 2, shorting_target = 40 } },
+					lualine_x = {},
+					lualine_y = {},
+					lualine_z = { 'location' },
+				},
+				-- Top tabline shows all open tabs/buffers
+
+				tabline = {
+					lualine_a = {},
+					lualine_b = {},
+					lualine_c = {
+						{
+							'buffers',
+							show_fileicons = true, -- Show file icons in tabs
+							show_filename_only = true, -- Show full path (or set to true for just filename)
+							mode = 'tabs', -- Alternative: 'tabs' for numbered tabs
+							buffers_colors = {
+								active = { fg = '#FFFFFF', bg = '#007ACC' },
+								inactive = { fg = '#6A737D', bg = '#F3F4F5' }
+							},
+						},
+					},
+					lualine_x = {},
+					lualine_y = {},
+					lualine_z = {},
+				},
+
+			})
+		end,
+	},
+
+
+
+
 }

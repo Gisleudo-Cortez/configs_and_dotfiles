@@ -1,46 +1,60 @@
 -- lua/plugins/lsp.lua
 return {
-	-- 1. Mason: installer for LSP/DAP/linters/formatters
 	{
 		"williamboman/mason.nvim",
 		cmd = "Mason",
 		opts = {
-			ensure_installed = { "debugpy", "pyright", "ruff" },
+			ensure_installed = { "debugpy" }, -- Only non-LSP tools here
 		},
 	},
 
-	-- 2. Mason LSP Config & Server Setup
 	{
 		"williamboman/mason-lspconfig.nvim",
 		dependencies = {
 			"williamboman/mason.nvim",
 			"neovim/nvim-lspconfig",
+			"hrsh7th/cmp-nvim-lsp", -- Ensure capabilities are available
 		},
 		config = function()
 			local lspconfig = require("lspconfig")
 			local mason_lspconfig = require("mason-lspconfig")
 			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-			-- Helper: Find the correct python path for uv/venv
-			local function get_python_path(workspace)
-				-- 1. Look for a .venv in the current project
-				local venv_path = vim.fs.joinpath(workspace, ".venv", "bin", "python")
-				if vim.fn.executable(venv_path) == 1 then
-					return venv_path
+			-- Robust Python Path Detection
+			local function get_python_path()
+				local root = vim.fs.dirname(vim.fs.find({ '.git', 'pyproject.toml', 'setup.py' },
+					{ upward = true })[1])
+				if root then
+					local venv_paths = {
+						vim.fs.joinpath(root, ".venv", "bin", "python"),
+						vim.fs.joinpath(root, "venv", "bin", "python"),
+					}
+					for _, path in ipairs(venv_paths) do
+						if vim.fn.executable(path) == 1 then return path end
+					end
 				end
-				-- 2. Fallback to system python
-				return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
+				return vim.fn.exepath("python3") or "python"
 			end
 
-			local on_attach = function(_, bufnr)
-				local function bufmap(mode, lhs, rhs, desc)
-					vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+			local on_attach = function(client, bufnr)
+				local map = function(mode, lhs, rhs, desc)
+					vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = "LSP: " .. desc })
 				end
-				bufmap("n", "gd", vim.lsp.buf.definition, "Go to Definition")
-				bufmap("n", "K", vim.lsp.buf.hover, "Hover")
-				bufmap("n", "<leader>ca", vim.lsp.buf.code_action, "Code Actions")
-				bufmap("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
-				bufmap("n", "gr", vim.lsp.buf.references, "References")
+
+				-- Standard Navigation
+				map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
+				map("n", "gr", vim.lsp.buf.references, "References")
+				map("n", "gI", vim.lsp.buf.implementation, "Implementation")
+				map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
+
+				-- Editing
+				map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+				map("n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
+
+				-- Diagnostics (Modern addition)
+				map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
+				map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
+				map("n", "<leader>e", vim.diagnostic.open_float, "Show Diagnostic Error")
 			end
 
 			mason_lspconfig.setup({
@@ -52,12 +66,12 @@ return {
 							capabilities = capabilities,
 						}
 
-						-- Specific config for Pyright to use the detected venv
 						if server_name == "pyright" then
-							opts.before_init = function(_, config)
-								config.settings.python.pythonPath = get_python_path(
-								config.root_dir)
-							end
+							opts.settings = {
+								python = {
+									pythonPath = get_python_path(),
+								}
+							}
 						end
 
 						lspconfig[server_name].setup(opts)
