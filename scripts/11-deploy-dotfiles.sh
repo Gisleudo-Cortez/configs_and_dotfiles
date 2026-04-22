@@ -19,6 +19,9 @@ STOW_PACKAGES_TO_DEPLOY=(
     "fish"
     "nvim"
     "starship"
+    "hypr"
+    "kitty"
+    "waybar"
 )
 
 # --- Main Logic ---
@@ -46,7 +49,7 @@ main() {
     for pkg in "${STOW_PACKAGES_TO_DEPLOY[@]}"; do
         if [[ -d "$pkg" ]]; then
             echo "[11-deploy-dotfiles] Stowing package: $pkg"
-            run_cmd_user stow -Rvt "$HOME" --adopt "$pkg"
+            run_cmd_user stow -Svt "$HOME" --adopt "$pkg"
         else
             echo "[11-deploy-dotfiles] Warning: Stow package directory '$pkg' not found. Skipping."
         fi

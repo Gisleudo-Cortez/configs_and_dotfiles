@@ -1,4 +1,5 @@
 -- Bootstrap Lazy.nvim plugin manager and load core configurations and plugins
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
@@ -8,29 +9,33 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Safe require: does not throw error if module is missing
+-- Safe require helper
 local function srequire(mod)
 	local ok, pkg = pcall(require, mod)
 	if not ok then vim.notify("Failed loading " .. mod, vim.log.levels.WARN) end
 	return ok and pkg or nil
 end
-_G.srequire = srequire -- make global for reuse in configs
 
--- Load core settings and keymaps before plugins
+-- ⚠️ Load core settings BEFORE lazy.setup() (NOT as plugins!)
 require("core.options")
 require("core.keymaps")
--- (Optional module core.path_display was removed as its functionality was redundant)
 
--- Setup plugins via lazy.nvim
-require("lazy").setup({
-	{ import = "plugins" }
-}, {
-	change_detection = { enabled = true, notify = true },
-	checker = { enabled = true, concurrency = 20 },
-	ui = { border = "rounded" },
-	performance = {
-		rtp = {
-			disabled_plugins = { "matchparen", "tarPlugin", "tohtml", "tutor", "zipPlugin" },
+-- Setup plugins via lazy.nvim - DON'T import "core" again!
+local function setup_lazy()
+	require("lazy").setup({
+		{ import = "plugins" }, -- Only load plugin specs, NOT config files
+
+	}, {
+		change_detection = { enabled = true, notify = false },
+		checker = { enabled = true, concurrency = 20 },
+		ui = { border = "rounded" },
+		performance = {
+			rtp = {
+				disabled_plugins = { "matchparen", "tarPlugin", "tohtml", "tutor", "zipPlugin" },
+			},
 		},
-	},
-})
+	})
+end
+
+-- Run setup now (not as a plugin import!)
+setup_lazy()

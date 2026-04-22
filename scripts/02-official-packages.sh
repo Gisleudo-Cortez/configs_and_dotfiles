@@ -158,7 +158,7 @@ main() {
 
     install_packages "${final_pkg_list[@]}"
     configure_docker
-    configure_postgresql
+    
     configure_networkmanager
 
     echo "[02-official-packages] Package installation and basic service configuration complete."

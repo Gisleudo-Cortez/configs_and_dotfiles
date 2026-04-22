@@ -1,6 +1,17 @@
--- Define keymaps for better navigation and editing
-local map = vim.keymap.set
+-- lua/core/keymaps.lua
+
+local map  = vim.keymap.set
 local opts = { noremap = true, silent = true }
+
+if not vim.g.mapleader then
+	vim.g.mapleader = " "
+end
+
+-- FIX: Removed the <Space> -> noice.cmd("leader") mapping.
+-- That API does not exist, so pressing Space in normal mode errored before
+-- which-key could intercept it, silently breaking every leader keymap.
+-- which-key.nvim shows hints automatically after the leader timeout — no
+-- manual binding is needed here.
 
 -- Window navigation
 map("n", "<C-h>", "<C-w>h", opts)
@@ -24,5 +35,3 @@ map("v", "J", ":m '>+1<CR>gv=gv", opts)
 map("v", "K", ":m '<-2<CR>gv=gv", opts)
 map("n", "<leader>j", ":m .+1<CR>==", opts)
 map("n", "<leader>k", ":m .-2<CR>==", opts)
-
--- Terminal (toggleterm plugin will handle <leader>tt mapping; see plugin config)

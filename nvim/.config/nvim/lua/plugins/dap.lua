@@ -1,4 +1,15 @@
 -- Debugging (DAP and UI + adapters for Python, Go, JS)
+
+-- Safe require helper (srequire is not global; define it locally here)
+local function srequire(mod)
+	local ok, pkg = pcall(require, mod)
+	if not ok then
+		vim.notify("Failed loading " .. mod, vim.log.levels.WARN)
+		return nil
+	end
+	return pkg
+end
+
 return {
 	-- Load core DAP on first debug keypress
 	{ "mfussenegger/nvim-dap",           keys = { "<F5>", "<F6>", "<F9>", "<F10>", "<F11>", "<F12>" } },

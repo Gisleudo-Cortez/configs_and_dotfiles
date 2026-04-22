@@ -2,25 +2,36 @@
 	"layer": "top",
 	"position": "top",
 	"modules-left": [
-		"hyprland/workspaces",
 		"clock"
-
 	],
 	"modules-center": [
-		"custom/updates",
+		"hyprland/workspaces",
 		"hyprland/window"
 	],
 	"modules-right": [
+		"custom/audio-sink",
 		"backlight",
 		"temperature",
 		"cpu",
 		"memory",
 		"battery",
-		"pulseaudio",
 		"network",
 		"bluetooth",
-		"tray",
-			],
+		"tray"
+	],
+
+	"custom/audio-sink": {
+		"format": "{}",
+		"exec": "~/.config/waybar/scripts/wireplumber-audio.sh display",
+		"interval": 0,
+		"on-click": "~/.config/waybar/scripts/wireplumber-audio.sh select",
+		"on-click-right": "pavucontrol",
+		"on-scroll-up": "~/.config/waybar/scripts/wireplumber-audio.sh up",
+		"on-scroll-down": "~/.config/waybar/scripts/wireplumber-audio.sh down",
+		"tooltip-format": "{icon} {volume}%\n\nActive Device: {output_name}\n\nLeft-click: Select device | Right-click: Mixer | Scroll: Adjust volume",
+		"escape": true
+	},
+
 	"hyprland/workspaces": {
 		"format": "{icon}",
 		"on-click": "activate",
@@ -43,29 +54,35 @@
 		"on-scroll-up": "hyprctl dispatch workspace e+1",
 		"on-scroll-down": "hyprctl dispatch workspace e-1"
 	},
+
 	"hyprland/window": {
 		"format": "{}",
 		"icon": true,
 		"icon-size": 20
 	},
+
 	"tray": {
 		"icon-size": 20,
 		"spacing": 5,
 		"tooltip": true
 	},
+
 	"clock": {
-		"tooltip-format": "<big>{:%A, %d.%B %Y }</big>\n<tt><small>{calendar}</small></tt> ",
+		"tooltip-format": "<big>{:%A, %d.%B %Y }</big>\n<tt><small>{calendar}</small></tt>",
 		"format": "   {:%A/%B  %d/%m/%Y  --    %H:%M:%S}",
 		"interval": 1
 	},
+
 	"cpu": {
-		"format": " 🖳 {usage}% ",
+		"format": " 🖳 {usage}%",
 		"tooltip": true
 	},
+
 	"memory": {
-		"format": " 🖴 {: >3}% ",
+		"format": " 🖴 {: >3}%",
 		"tooltip": true
 	},
+
 	"temperature": {
 		"thermal-zone": 7,
 		"hwmon-path": "/sys/class/hwmon/hwmon7/temp1_input",
@@ -74,69 +91,41 @@
 		"format": " {temperatureC} °C ",
 		"tooltip": true
 	},
+
 	"backlight": {
-		"format": " {icon} {percent: >3}% ",
-		"format-icons": [
-			"  ",
-			"  "
-		],
+		"format": "{icon} {percent: >3}%",
+		"format-icons": ["  ", "  "],
 		"on-scroll-down": "brightnessctl -c backlight set 1%-",
 		"on-scroll-up": "brightnessctl -c backlight set +1%",
 		"on-click": "~/.config/waybar/scripts/backlight-hint.sh",
 		"tooltip": true
 	},
+
 	"battery": {
 		"states": {
 			"warning": 30,
 			"critical": 15
 		},
 		"format": "{icon} {capacity: >3}%",
-		"format-icons": [
-			"  ",
-			"  ",
-			"  ",
-			"  ",
-			"  "
-		],
+		"format-icons": ["  ", "  ", "  ", "  ", "  "],
 		"tooltip": true
 	},
-	"pulseaudio": {
-		"scroll-step": 3,
-		"format": " {icon}  {volume} % {format_source} ",
-		"format-bluetooth": " {volume} % {icon}  {format_source} ",
-		"format-bluetooth-muted": "   {icon}  {format_source} ",
-		"format-muted": "   {format_source} ",
-		"format-source": "  ",
-		"format-source-muted": "  ",
-		"format-icons": {
-			"headphone": "  ",
-			"hands-free": "  ",
-			"headset": "  ",
-			"phone": "  ",
-			"portable": "  ",
-			"car": "  ",
-			"default": [
-				"  ",
-				"  ",
-				"  "
-			]
-		},
-		"on-click-right": "pavucontrol",
-		"tooltip": true
-	},
+
 	"network": {
-		"interface": "wlan0",
-		"format": " {ifname} ",
-		"format-wifi": " {essid} ({signalStrength}%)  ",
-		"format-ethernet": " {ipaddr}/{cidr} 󰊗 ",
+		"exec": "~/.config/waybar/scripts/network-interface.sh status",
+		"interval": 5,
+		"format-wifi": "{essid} ({signalStrength}%)  ",
+		"format-ethernet": "{ipaddr}/{cidr} 󰊗 ",
 		"format-disconnected": " Disconnected ",
-		"tooltip-format": " {ifname} via {gwaddr} 󰊗 ",
-		"tooltip-format-wifi": " {essid} ({signalStrength}%)  ",
-		"tooltip-format-ethernet": " {ifname}  ",
+		"tooltip-format": "{ifname} via {gwaddr} 󰊗",
+		"tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+		"tooltip-format-ethernet": "{ipaddr}/{cidr} 󰊗",
 		"tooltip-format-disconnected": " Disconnected ",
 		"max-length": 50,
-		"on-click-right": "nm-connection-editor"
+		"on-click-right": "nm-connection-editor",
+		"escape": true
 	},
+
 	"bluetooth": {
 		"format": " {num_connections}",
 		"tooltip-format": "{controller_alias}\n{num_connections} connected\n\n{device_enumerate}",
@@ -144,29 +133,8 @@
 		"tooltip-format-enumerate-connected-battery": "{device_alias}\t{icon} {device_battery_percentage}%",
 		"format-connected": " {num_connections}",
 		"format-connected-battery": " {num_connections}",
-		"format-icons": [
-			"󰥇",
-			"󰤾",
-			"󰤿",
-			"󰥀",
-			"󰥁",
-			"󰥂",
-			"󰥃",
-			"󰥄",
-			"󰥅",
-			"󰥆",
-			"󰥈"
-		],
+		"format-icons": ["󰥇", "󰤾", "󰤿", "󰥀", "󰥁", "󰥂", "󰥃", "󰥄", "󰥅", "󰥆", "󰥈"],
 		"on-click-right": "blueman-manager",
 		"tooltip": true
-	},
-	"custom/updates": {
-		"format": "{text} 󱍷",
-		"return-type": "json",
-		"exec": "waybar-module-pacman-updates",
-		"on-click": "kitty -e sudo pacman -Syu",
-		"interval": 3600,
-		"tooltip": true,
-		"tooltip-format": "{tooltip}"
 	}
 }
