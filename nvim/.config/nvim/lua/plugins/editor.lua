@@ -1,172 +1,125 @@
+-- ============================================================================
 -- lua/plugins/editor.lua
-
+-- ----------------------------------------------------------------------------
+-- Editing-layer plugins that aren't strictly LSP / completion / UI.
+-- ============================================================================
 return {
-	-- 1. Flash.nvim: Lightning fast motions
-	{
-		"folke/flash.nvim",
-		event = "VeryLazy",
-		opts = {},
-		keys = {
-			{
-				"s",
-				mode = { "n", "x", "o" },
-				function()
-					require("flash").jump()
-				end,
-				desc = "Flash",
-			},
-			{
-				"S",
-				mode = { "n", "x", "o" },
-				function()
-					require("flash").treesitter()
-				end,
-				desc = "Flash Treesitter",
-			},
-			{
-				"Sc",
-				mode = { "n" },
-				function()
-					require("flash").remote()
-				end,
-				desc = "Flash Remote",
-			},
-		},
-	},
+  -- ── Autopairs ────────────────────────────────────────────────────────────
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    opts = {
+      check_ts = true,                        -- treesitter-aware
+      ts_config = { lua = { "string" }, javascript = { "template_string" } },
+      fast_wrap = {
+        map = "<M-e>",                        -- Alt-e to surround next thing
+        chars = { "{", "[", "(", '"', "'" },
+        pattern = [=[[%'%"%)%>%]%)%}%,]]=],
+        end_key = "$",
+        keys = "qwertyuiopzxcvbnmasdfghjkl",
+        check_comma = true,
+        highlight = "Search",
+        highlight_grey = "Comment",
+      },
+    },
+  },
 
-	-- 2. Mini.surround: Efficiently manipulate quotes/brackets/tags
-	{
-		"echasnovski/mini.surround",
-		version = "*",
-		config = function()
-			require("mini.surround").setup()
-		end,
-	},
+  -- ── Surround (cs, ds, ys — built-in `gc` covers comments) ──────────────
+  {
+    "kylechui/nvim-surround",
+    version = "*",
+    event = "VeryLazy",
+    opts = {},
+  },
 
-	-- 3. Treesitter
-	{
-		"nvim-treesitter/nvim-treesitter",
-		build = ":TSUpdate",
-		event = { "BufReadPost", "BufNewFile" },
-		opts = {
-			ensure_installed = {
-				"lua",
-				"python",
-				"rust",
-				"javascript",
-				"typescript",
-				"go",
-				"vim",
-				"vimdoc",
-				"regex",
-				"bash",
-				"qmljs", -- QML
-				"hyprlang", -- Hyprland config
-			},
-			highlight = { enable = true },
-			indent = { enable = true },
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "<C-space>",
-					node_incremental = "<C-space>",
-					scope_incremental = "<cr>",
-					node_decremental = "<bs>",
-				},
-			},
-		},
-		config = function(_, opts)
-			local ok, configs = pcall(require, "nvim-treesitter.configs")
-			if not ok then
-				return
-			end
-			configs.setup(opts)
-		end,
-	},
+  -- ── TODO / FIXME / HACK highlighting ────────────────────────────────────
+  {
+    "folke/todo-comments.nvim",
+    cmd = { "TodoTrouble", "TodoTelescope", "TodoLocList", "TodoQuickFix" },
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = { signs = true },
+    keys = {
+      { "]t", function() require("todo-comments").jump_next() end, desc = "Next todo" },
+      { "[t", function() require("todo-comments").jump_prev() end, desc = "Prev todo" },
+      { "<leader>st", "<cmd>TodoTelescope<CR>", desc = "Search todos" },
+      { "<leader>xt", "<cmd>TodoTrouble<CR>",   desc = "Todos (Trouble)" },
+    },
+  },
 
-	-- 4. Statusline & Tabline
-	{
-		"nvim-lualine/lualine.nvim",
-		dependencies = { "nvim-tree/nvim-web-devicons" },
-		config = function()
-			require("lualine").setup({
-				options = {
-					globalstatus = true,
-					theme = "auto",
-					component_separators = { left = "", right = "" },
-					section_separators = { left = "", right = "" },
-					disabled_filetypes = { statusline = {} },
-				},
-				sections = {
-					lualine_a = {},
-					lualine_b = {},
-					lualine_c = { { "filename", path = 2, shorting_target = 40 } },
-					lualine_x = {},
-					lualine_y = {},
-					lualine_z = { "location" },
-				},
-				tabline = {
-					lualine_a = {},
-					lualine_b = {},
-					lualine_c = {
-						{
-							"buffers",
-							show_fileicons = true,
-							show_filename_only = true,
-							mode = 0,
-							buffers_color = {
-								active = { fg = "#FFFFFF", bg = "#007ACC" },
-								inactive = { fg = "#6A737D", bg = "#F3F4F5" },
-							},
-						},
-					},
-					lualine_x = {},
-					lualine_y = {},
-					lualine_z = {},
-				},
-			})
-		end,
-	},
+  -- ── Trouble: pretty list for diagnostics / quickfix / LSP locations ───
+  {
+    "folke/trouble.nvim",
+    cmd = { "Trouble" },
+    opts = { focus = true },
+    keys = {
+      { "<leader>xX", "<cmd>Trouble diagnostics toggle<CR>",                         desc = "Diagnostics (Trouble)" },
+      { "<leader>xL", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>",            desc = "Buffer Diagnostics (Trouble)" },
+      { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<CR>",                 desc = "Symbols (Trouble)" },
+      { "<leader>cS", "<cmd>Trouble lsp toggle focus=false win.position=right<CR>",  desc = "LSP refs/defs (Trouble)" },
+      { "<leader>xl", "<cmd>Trouble loclist toggle<CR>",                             desc = "Location list (Trouble)" },
+      { "<leader>xQ", "<cmd>Trouble qflist toggle<CR>",                              desc = "Quickfix list (Trouble)" },
+    },
+  },
 
-	-- 5. Mini.icons
-	{
-		"echasnovski/mini.icons",
-		event = "VeryLazy",
-		opts = {},
-		config = function()
-			require("mini.icons").setup({})
-		end,
-	},
+  -- ── Flash: motion on steroids (s / S for leap-style jumps) ─────────────
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    opts = {},
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
+      { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
+      { "r", mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
+      { "R", mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<C-s>", mode = { "c" },       function() require("flash").toggle() end,            desc = "Toggle Flash Search" },
+    },
+  },
 
-	-- 6. nvim-autopairs: Treesitter-aware bracket/quote auto-closing
-	--    Chosen over mini.pairs (no TS context, no cmp hook) and
-	--    ultimate-autopair (more config, marginal gain).
-	{
-		"windwp/nvim-autopairs",
-		event = "InsertEnter",
-		dependencies = { "hrsh7th/nvim-cmp" },
-		config = function()
-			local autopairs = require("nvim-autopairs")
-			local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-			local cmp = require("cmp")
+  -- ── Comments (extra bindings on top of Neovim's built-in `gc`) ─────────
+  {
+    "JoosepAlviste/nvim-ts-context-commentstring",
+    event = "VeryLazy",
+    opts = { enable_autocmd = false },
+    init = function()
+      -- Hook treesitter-aware commentstring into Neovim's built-in gc.
+      vim.g.skip_ts_context_commentstring_module = true
+      local get_option = vim.filetype.get_option
+      vim.filetype.get_option = function(filetype, option)
+        return option == "commentstring"
+            and require("ts_context_commentstring.internal").calculate_commentstring()
+            or get_option(filetype, option)
+      end
+    end,
+  },
 
-			autopairs.setup({
-				-- Won't insert pairs inside strings or comments
-				check_ts = true,
-				ts_config = {
-					lua = { "string" },
-					python = { "string" },
-					rust = { "string" },
-				},
-				-- <M-e> wraps the next expression in the chosen pair
-				fast_wrap = { map = "<M-e>" },
-				-- Prevents double-closing when a snippet already contains the closing char
-				enable_check_bracket_line = false,
-			})
+  -- ── Indent context (shows `function foo()` at top when it scrolls out) ─
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    event = { "BufReadPost", "BufNewFile" },
+    opts = { mode = "cursor", max_lines = 3 },
+    keys = {
+      { "<leader>ut", function()
+          local tsc = require("treesitter-context")
+          tsc.toggle()
+          vim.notify("Treesitter context " .. (tsc.enabled() and "on" or "off"))
+        end, desc = "Toggle treesitter context" },
+    },
+  },
 
-			-- Inserts `()` after confirming a callable from cmp.
-			-- Fires after LuaSnip expansion, so there is no conflict.
-			cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-		end,
-	},
+  -- ── Better yank / put history with system-clipboard awareness ─────────
+  {
+    "gbprod/yanky.nvim",
+    dependencies = { "kkharji/sqlite.lua", enabled = false },  -- pure-lua history
+    event = "VeryLazy",
+    opts = { ring = { history_length = 100 } },
+    keys = {
+      { "<leader>fy", "<cmd>YankyRingHistory<CR>", desc = "Yank history" },
+      { "y",  "<Plug>(YankyYank)",          mode = { "n", "x" }, desc = "Yank" },
+      { "p",  "<Plug>(YankyPutAfter)",      mode = { "n", "x" }, desc = "Put after" },
+      { "P",  "<Plug>(YankyPutBefore)",     mode = { "n", "x" }, desc = "Put before" },
+      { "<C-p>", "<Plug>(YankyPreviousEntry)", desc = "Cycle yank history backward" },
+      { "<C-n>", "<Plug>(YankyNextEntry)",     desc = "Cycle yank history forward" },
+    },
+  },
 }
