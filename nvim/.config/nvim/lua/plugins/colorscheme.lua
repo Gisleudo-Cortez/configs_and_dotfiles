@@ -28,6 +28,7 @@ return {
         hl.LineNr            = { fg = c.fg_gutter }
         hl.CursorLineNr      = { fg = c.orange, bold = true }
         hl.WinSeparator      = { fg = c.border, bg = "NONE" }
+        hl["@lsp.type.unresolvedReference.rust"] = {}   -- rust_analyzer false-positive on built-in macros
       end,
     },
     config = function(_, opts)
