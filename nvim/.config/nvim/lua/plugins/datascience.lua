@@ -45,12 +45,12 @@ return {
   -- ── image.nvim ─────────────────────────────────────────────────────────
   {
     "3rd/image.nvim",
-    build = false,                           -- no post-install step
+    build = false, -- no post-install step
     event = "VeryLazy",
-    cond = is_kitty,                         -- only load under Kitty
+    cond = is_kitty, -- only load under Kitty
     opts = {
-      backend = "kitty",                     -- best backend for the Kitty terminal
-      processor = "magick_cli",              -- requires imagemagick on PATH
+      backend = "kitty", -- best backend for the Kitty terminal
+      processor = "magick_cli", -- requires imagemagick on PATH
       integrations = {
         markdown = {
           enabled = true,
@@ -61,7 +61,8 @@ return {
         },
         neorg = { enabled = false },
       },
-      max_width = 100, max_height = 20,
+      max_width = 100,
+      max_height = 20,
       max_width_window_percentage = nil,
       max_height_window_percentage = 40,
       window_overlap_clear_enabled = true,
@@ -75,34 +76,50 @@ return {
     version = "^1.0.0",
     build = ":UpdateRemotePlugins",
     cmd = {
-      "MoltenInit", "MoltenEvaluateLine", "MoltenEvaluateVisual", "MoltenEvaluateOperator",
-      "MoltenEvaluateArgument", "MoltenReevaluateCell", "MoltenDelete", "MoltenShowOutput",
-      "MoltenHideOutput", "MoltenRestart", "MoltenInterrupt", "MoltenInfo",
-      "MoltenImagePopup", "MoltenExportOutput", "MoltenImportOutput",
+      "MoltenInit",
+      "MoltenEvaluateLine",
+      "MoltenEvaluateVisual",
+      "MoltenEvaluateOperator",
+      "MoltenEvaluateArgument",
+      "MoltenReevaluateCell",
+      "MoltenDelete",
+      "MoltenShowOutput",
+      "MoltenHideOutput",
+      "MoltenRestart",
+      "MoltenInterrupt",
+      "MoltenInfo",
+      "MoltenImagePopup",
+      "MoltenExportOutput",
+      "MoltenImportOutput",
     },
     ft = { "python", "quarto", "markdown" },
     init = function()
       -- image provider — fall back gracefully if not in Kitty
-      vim.g.molten_image_provider        = is_kitty and "image.nvim" or "none"
+      vim.g.molten_image_provider = is_kitty and "image.nvim" or "none"
       vim.g.molten_output_win_max_height = 20
-      vim.g.molten_auto_open_output      = false    -- manual — quieter
-      vim.g.molten_wrap_output           = true
-      vim.g.molten_virt_text_output      = true     -- show output as virtual text next to cell
-      vim.g.molten_virt_lines_off_by_1   = true
+      vim.g.molten_auto_open_output = false -- manual — quieter
+      vim.g.molten_wrap_output = true
+      vim.g.molten_virt_text_output = true -- show output as virtual text next to cell
+      vim.g.molten_virt_lines_off_by_1 = true
       vim.g.molten_use_border_highlights = true
     end,
     keys = {
-      { "<leader>ji", "<cmd>MoltenInit<CR>",               desc = "Initialize molten" },
-      { "<leader>je", ":MoltenEvaluateOperator<CR>",       desc = "Evaluate operator"  },
-      { "<leader>jl", ":MoltenEvaluateLine<CR>",           desc = "Evaluate line"      },
-      { "<leader>jr", ":MoltenReevaluateCell<CR>",         desc = "Re-eval cell"       },
-      { "<leader>jv", ":<C-u>MoltenEvaluateVisual<CR>gv",  desc = "Evaluate selection",  mode = "v" },
-      { "<leader>jd", ":MoltenDelete<CR>",                 desc = "Delete cell"        },
-      { "<leader>jo", ":MoltenShowOutput<CR>",             desc = "Show output"        },
-      { "<leader>jh", ":MoltenHideOutput<CR>",             desc = "Hide output"        },
-      { "<leader>js", ":noautocmd MoltenEnterOutput<CR>",  desc = "Enter output scroll"},
-      { "<leader>jI", ":MoltenInterrupt<CR>",              desc = "Interrupt kernel"   },
-      { "<leader>jR", ":MoltenRestart!<CR>",               desc = "Restart kernel"     },
+      { "<leader>ji", "<cmd>MoltenInit<CR>", desc = "Initialize molten" },
+      { "<leader>je", ":MoltenEvaluateOperator<CR>", desc = "Evaluate operator" },
+      { "<leader>jl", ":MoltenEvaluateLine<CR>", desc = "Evaluate line" },
+      { "<leader>jr", ":MoltenReevaluateCell<CR>", desc = "Re-eval cell" },
+      {
+        "<leader>jv",
+        ":<C-u>MoltenEvaluateVisual<CR>gv",
+        desc = "Evaluate selection",
+        mode = "v",
+      },
+      { "<leader>jd", ":MoltenDelete<CR>", desc = "Delete cell" },
+      { "<leader>jo", ":MoltenShowOutput<CR>", desc = "Show output" },
+      { "<leader>jh", ":MoltenHideOutput<CR>", desc = "Hide output" },
+      { "<leader>js", ":noautocmd MoltenEnterOutput<CR>", desc = "Enter output scroll" },
+      { "<leader>jI", ":MoltenInterrupt<CR>", desc = "Interrupt kernel" },
+      { "<leader>jR", ":MoltenRestart!<CR>", desc = "Restart kernel" },
     },
   },
 
@@ -112,11 +129,11 @@ return {
     event = "BufAdd *.ipynb",
     opts = {
       -- Neovim sees .ipynb as these formats; round-trip transparently.
-      style = "markdown",        -- or "hydrogen" for `# %%` cell markers in .py
+      style = "markdown", -- or "hydrogen" for `# %%` cell markers in .py
       output_extension = "md",
       force_ft = "markdown",
     },
-    lazy = false,                 -- needed BEFORE the buffer is read
+    lazy = false, -- needed BEFORE the buffer is read
     priority = 100,
   },
 
@@ -140,14 +157,63 @@ return {
       },
     },
     keys = {
-      { "<leader>qp", function() require("quarto").quartoPreview() end, desc = "Quarto preview" },
-      { "<leader>qq", function() require("quarto").quartoClosePreview() end, desc = "Quarto close preview" },
-      { "<leader>qh", function() require("quarto.runner").run_cell() end,       desc = "Run cell" },
-      { "<leader>qr", function() require("quarto.runner").run_above() end,      desc = "Run above" },
-      { "<leader>qR", function() require("quarto.runner").run_all() end,        desc = "Run all" },
-      { "<leader>ql", function() require("quarto.runner").run_line() end,       desc = "Run line" },
-      { "<leader>qv", function() require("quarto.runner").run_range() end,      desc = "Run range", mode = "v" },
-      { "<leader>qa", function() require("quarto.runner").run_all(true) end,    desc = "Run all cells (of all languages)" },
+      {
+        "<leader>qp",
+        function()
+          require("quarto").quartoPreview()
+        end,
+        desc = "Quarto preview",
+      },
+      {
+        "<leader>qq",
+        function()
+          require("quarto").quartoClosePreview()
+        end,
+        desc = "Quarto close preview",
+      },
+      {
+        "<leader>qh",
+        function()
+          require("quarto.runner").run_cell()
+        end,
+        desc = "Run cell",
+      },
+      {
+        "<leader>qr",
+        function()
+          require("quarto.runner").run_above()
+        end,
+        desc = "Run above",
+      },
+      {
+        "<leader>qR",
+        function()
+          require("quarto.runner").run_all()
+        end,
+        desc = "Run all",
+      },
+      {
+        "<leader>ql",
+        function()
+          require("quarto.runner").run_line()
+        end,
+        desc = "Run line",
+      },
+      {
+        "<leader>qv",
+        function()
+          require("quarto.runner").run_range()
+        end,
+        desc = "Run range",
+        mode = "v",
+      },
+      {
+        "<leader>qa",
+        function()
+          require("quarto.runner").run_all(true)
+        end,
+        desc = "Run all cells (of all languages)",
+      },
     },
   },
 
@@ -162,14 +228,37 @@ return {
   {
     "GCBallesteros/NotebookNavigator.nvim",
     keys = {
-      { "]c", function() require("notebook-navigator").move_cell("d") end, desc = "Next cell" },
-      { "[c", function() require("notebook-navigator").move_cell("u") end, desc = "Prev cell" },
-      { "<leader>jx", function() require("notebook-navigator").run_cell() end,       desc = "Run cell" },
-      { "<leader>jn", function() require("notebook-navigator").run_and_move() end,   desc = "Run cell + advance" },
+      {
+        "]c",
+        function()
+          require("notebook-navigator").move_cell("d")
+        end,
+        desc = "Next cell",
+      },
+      {
+        "[c",
+        function()
+          require("notebook-navigator").move_cell("u")
+        end,
+        desc = "Prev cell",
+      },
+      {
+        "<leader>jx",
+        function()
+          require("notebook-navigator").run_cell()
+        end,
+        desc = "Run cell",
+      },
+      {
+        "<leader>jn",
+        function()
+          require("notebook-navigator").run_and_move()
+        end,
+        desc = "Run cell + advance",
+      },
     },
     dependencies = {
       "echasnovski/mini.comment",
-      "anuvyklack/hydra.nvim",
     },
     event = "VeryLazy",
     config = function()
@@ -191,10 +280,10 @@ return {
       keymaps = {
         textobject_field_inner = { "if", mode = { "o", "x" } },
         textobject_field_outer = { "af", mode = { "o", "x" } },
-        jump_next_field_end    = { "<Tab>",   mode = { "n", "v" } },
-        jump_prev_field_end    = { "<S-Tab>", mode = { "n", "v" } },
-        jump_next_row          = { "<Enter>", mode = { "n", "v" } },
-        jump_prev_row          = { "<S-Enter>", mode = { "n", "v" } },
+        jump_next_field_end = { "<Tab>", mode = { "n", "v" } },
+        jump_prev_field_end = { "<S-Tab>", mode = { "n", "v" } },
+        jump_next_row = { "<Enter>", mode = { "n", "v" } },
+        jump_prev_row = { "<S-Enter>", mode = { "n", "v" } },
       },
     },
     cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
@@ -206,11 +295,14 @@ return {
   -- ── render-markdown (pretty in-buffer markdown, great with quarto) ───
   {
     "MeanderingProgrammer/render-markdown.nvim",
+    enabled = false,
     ft = { "markdown", "quarto", "Avante" },
     dependencies = { "nvim-treesitter/nvim-treesitter", "echasnovski/mini.icons" },
     opts = {
       code = {
-        sign = false, width = "block", right_pad = 1,
+        sign = false,
+        width = "block",
+        right_pad = 1,
       },
       heading = { sign = false, icons = {} },
       checkbox = { enabled = true },

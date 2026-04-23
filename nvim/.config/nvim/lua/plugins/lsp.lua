@@ -38,34 +38,36 @@ return {
       run_on_start = true,
       ensure_installed = {
         -- ── Formatters ──────────────────────────────────────────────────
-        "stylua",                       -- Lua
-        "ruff",                         -- Python (format + lint)
-        "prettierd", "prettier",        -- JS/TS/HTML/CSS/JSON/YAML/Markdown
-        "gofumpt", "goimports",         -- Go
-        "rustfmt",                      -- Rust
-        "shfmt",                        -- shell
-        "sqlfluff",                     -- SQL
-        "taplo",                        -- TOML
-        "latexindent",                  -- LaTeX
-        "clang-format",                 -- C/C++/CUDA
-        "google-java-format",           -- Java
-        "ktlint",                       -- Kotlin
-        "black",                        -- fallback Python formatter
-        "isort",                        -- fallback Python import sorter
+        "stylua", -- Lua
+        "ruff", -- Python (format + lint)
+        "prettierd",
+        "prettier", -- JS/TS/HTML/CSS/JSON/YAML/Markdown
+        "gofumpt",
+        "goimports", -- Go
+        "rustfmt", -- Rust
+        "shfmt", -- shell
+        "sqlfluff", -- SQL
+        "taplo", -- TOML
+        "latexindent", -- LaTeX
+        "clang-format", -- C/C++/CUDA
+        "google-java-format", -- Java
+        "ktlint", -- Kotlin
+        "black", -- fallback Python formatter
+        "isort", -- fallback Python import sorter
 
         -- ── Linters ─────────────────────────────────────────────────────
-        "shellcheck",                   -- bash/sh/zsh
-        "markdownlint",                 -- markdown
-        "hadolint",                     -- Dockerfile
-        "yamllint",                     -- YAML
-        "tflint",                       -- Terraform
-        "chktex",                       -- LaTeX
+        "shellcheck", -- bash/sh/zsh
+        "markdownlint", -- markdown
+        "hadolint", -- Dockerfile
+        "yamllint", -- YAML
+        "tflint", -- Terraform
+        "chktex", -- LaTeX
 
         -- ── Debug adapters (DAP) ───────────────────────────────────────
-        "debugpy",                      -- Python
-        "js-debug-adapter",             -- JS/TS
-        "codelldb",                     -- C/C++/Rust
-        "delve",                        -- Go
+        "debugpy", -- Python
+        "js-debug-adapter", -- JS/TS
+        "codelldb", -- C/C++/Rust
+        "delve", -- Go
       },
     },
   },
@@ -81,42 +83,45 @@ return {
       ensure_installed = {
         -- Core data-science / finance stack
         "lua_ls",
-        "basedpyright",                 -- Python typing
-        "ruff",                         -- Python lint + format (as LSP)
-        "r_language_server",            -- R
-        "texlab",                       -- LaTeX (financial reports / papers)
-        "sqlls",                        -- SQL
+        "basedpyright", -- Python typing
+        "ruff", -- Python lint + format (as LSP)
+        "texlab", -- LaTeX (financial reports / papers)
+        "sqlls", -- SQL
 
         -- Systems / web
-        "rust_analyzer",                -- Rust
-        "gopls",                        -- Go
-        "ts_ls", "eslint",              -- TypeScript / JavaScript
-        "html", "cssls", "tailwindcss", -- Web
-        "clangd",                       -- C / C++
-        "zls",                          -- Zig
+        "rust_analyzer", -- Rust
+        "gopls", -- Go
+        "ts_ls",
+        "eslint", -- TypeScript / JavaScript
+        "html",
+        "cssls",
+        "tailwindcss", -- Web
+        "clangd", -- C / C++
+        "zls", -- Zig
 
         -- JVM / other popular
-        "jdtls",                        -- Java (basic; see nvim-jdtls for full flow)
-        "kotlin_language_server",       -- Kotlin
-        "elixirls",                     -- Elixir
-        "intelephense",                 -- PHP
+        "jdtls", -- Java (basic; see nvim-jdtls for full flow)
+        "kotlin_language_server", -- Kotlin
+        "elixirls", -- Elixir
+        "intelephense", -- PHP
         -- "ruby_lsp",                  -- uncomment if you use Ruby
         -- "omnisharp",                 -- uncomment if you use C#
 
         -- Config / data / markup
-        "jsonls", "yamlls",             -- JSON / YAML (with schemastore)
-        "taplo",                        -- TOML
-        "marksman",                     -- Markdown
-        "dockerls", "docker_compose_language_service",
-        "bashls",                       -- Bash
+        "jsonls",
+        "yamlls", -- JSON / YAML (with schemastore)
+        "taplo", -- TOML
+        "marksman", -- Markdown
+        "dockerls",
+        "docker_compose_language_service",
+        "bashls", -- Bash
 
         -- Arch + Hyprland + Kitty + Fish
-        "hyprls",                       -- Hyprland config
-        "qmlls",                        -- QML (Qt)
-        "fish_lsp",                     -- Fish shell
-        "nil_ls",                       -- Nix (handy on Arch for dev shells)
+        "hyprls", -- Hyprland config
+        "qmlls", -- QML (Qt)
+        "fish_lsp", -- Fish shell
       },
-      automatic_enable = true,           -- vim.lsp.enable() per installed server
+      automatic_enable = true, -- vim.lsp.enable() per installed server
     },
   },
 
@@ -139,7 +144,10 @@ return {
         settings = {
           Lua = {
             runtime = { version = "LuaJIT" },
-            workspace = { checkThirdParty = false, library = vim.api.nvim_get_runtime_file("", true) },
+            workspace = {
+              checkThirdParty = false,
+              library = vim.api.nvim_get_runtime_file("", true),
+            },
             completion = { callSnippet = "Replace" },
             diagnostics = { globals = { "vim", "Snacks" } },
             hint = { enable = true },
@@ -153,16 +161,20 @@ return {
       -- config).  Without this, basedpyright resolves imports against the
       -- system python and every `import pandas` turns red.
       local function get_python_path()
-        local markers = vim.fs.find({ ".git", "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt" },
-                                    { upward = true })[1]
+        local markers = vim.fs.find(
+          { ".git", "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt" },
+          { upward = true }
+        )[1]
         local root = markers and vim.fs.dirname(markers) or vim.fn.getcwd()
         for _, rel in ipairs({ ".venv/bin/python", "venv/bin/python", ".venv/Scripts/python.exe" }) do
           local p = root .. "/" .. rel
-          if vim.fn.executable(p) == 1 then return p end
+          if vim.fn.executable(p) == 1 then
+            return p
+          end
         end
         return vim.env.VIRTUAL_ENV and (vim.env.VIRTUAL_ENV .. "/bin/python")
-            or vim.fn.exepath("python3")
-            or "python"
+          or vim.fn.exepath("python3")
+          or "python"
       end
 
       vim.lsp.config("basedpyright", {
@@ -175,7 +187,9 @@ return {
               diagnosticMode = "openFilesOnly",
               useLibraryCodeForTypes = true,
               inlayHints = {
-                variableTypes = true, functionReturnTypes = true, callArgumentNames = true,
+                variableTypes = true,
+                functionReturnTypes = true,
+                callArgumentNames = true,
               },
             },
           },
@@ -188,7 +202,9 @@ return {
             lint = { select = { "E", "F", "I", "B", "UP", "SIM", "PD", "NPY" } },
           },
         },
-        on_attach = function(client) client.server_capabilities.hoverProvider = false end,
+        on_attach = function(client)
+          client.server_capabilities.hoverProvider = false
+        end,
       })
 
       -- TypeScript / JavaScript
@@ -229,13 +245,19 @@ return {
       vim.lsp.config("gopls", {
         settings = {
           gopls = {
-            gofumpt = true, completeUnimported = true, usePlaceholders = true,
+            gofumpt = true,
+            completeUnimported = true,
+            usePlaceholders = true,
             staticcheck = true,
             analyses = { unusedparams = true, shadow = true, fieldalignment = true },
             hints = {
-              assignVariableTypes = true, compositeLiteralFields = true,
-              compositeLiteralTypes = true, constantValues = true,
-              functionTypeParameters = true, parameterNames = true, rangeVariableTypes = true,
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              compositeLiteralTypes = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
             },
           },
         },
@@ -243,7 +265,9 @@ return {
 
       -- JSON / YAML (schemastore)
       vim.lsp.config("jsonls", {
-        settings = { json = { schemas = require("schemastore").json.schemas(), validate = { enable = true } } },
+        settings = {
+          json = { schemas = require("schemastore").json.schemas(), validate = { enable = true } },
+        },
       })
       vim.lsp.config("yamlls", {
         settings = {
@@ -274,12 +298,13 @@ return {
         settings = {
           texlab = {
             build = {
-              executable = "tectonic",  -- swap for "latexmk" if preferred
+              executable = "tectonic", -- swap for "latexmk" if preferred
               args = { "-X", "compile", "%f", "--synctex", "--keep-logs", "--keep-intermediates" },
-              onSave = true, forwardSearchAfter = true,
+              onSave = true,
+              forwardSearchAfter = true,
             },
             forwardSearch = {
-              executable = "zathura",    -- Arch PDF viewer of choice
+              executable = "zathura", -- Arch PDF viewer of choice
               args = { "--synctex-forward", "%l:1:%f", "%p" },
             },
             chktex = { onOpenAndSave = true, onEdit = false },
@@ -287,32 +312,23 @@ return {
         },
       })
 
-      -- R
-      vim.lsp.config("r_language_server", {
-        settings = { r = { lsp = { rich_documentation = true } } },
-      })
-
-      -- Nix
-      vim.lsp.config("nil_ls", {
-        settings = {
-          ["nil"] = {
-            formatting = { command = { "nixfmt" } },
-            nix = { flake = { autoArchive = true, autoEvalInputs = false } },
-          },
-        },
-      })
-
       -- Zig
-      vim.lsp.config("zls", { settings = { zls = { enable_inlay_hints = true, warn_style = true } } })
+      vim.lsp.config(
+        "zls",
+        { settings = { zls = { enable_inlay_hints = true, warn_style = true } } }
+      )
 
       -- Java (simple jdtls; install nvim-jdtls separately for full IDE flow)
       vim.lsp.config("jdtls", {
         settings = {
           java = {
             configuration = { updateBuildConfiguration = "interactive" },
-            completion = { favoriteStaticMembers = {
-              "org.junit.jupiter.api.Assertions.*", "org.mockito.Mockito.*",
-            } },
+            completion = {
+              favoriteStaticMembers = {
+                "org.junit.jupiter.api.Assertions.*",
+                "org.mockito.Mockito.*",
+              },
+            },
           },
         },
       })
@@ -323,21 +339,23 @@ return {
         callback = function(ev)
           local bufnr = ev.buf
           local client = vim.lsp.get_client_by_id(ev.data.client_id)
-          if not client then return end
+          if not client then
+            return
+          end
 
           local map = function(mode, lhs, rhs, desc)
             vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc, silent = true })
           end
 
-          map("n", "K",                 vim.lsp.buf.hover,           "Hover")
-          map("n", "gD",                vim.lsp.buf.declaration,     "Goto declaration")
-          map({ "n", "i" }, "<C-k>",    vim.lsp.buf.signature_help,  "Signature help")
-          map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action,   "Code action")
-          map("n", "<leader>cr",         vim.lsp.buf.rename,         "Rename symbol")
-          map("n", "<leader>rn",         vim.lsp.buf.rename,         "Rename symbol (alias)")   -- old-config alias
-          map("n", "<leader>cl",         "<cmd>LspInfo<CR>",         "LSP info")
+          map("n", "K", vim.lsp.buf.hover, "Hover")
+          map("n", "gD", vim.lsp.buf.declaration, "Goto declaration")
+          map({ "n", "i" }, "<C-k>", vim.lsp.buf.signature_help, "Signature help")
+          map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code action")
+          map("n", "<leader>cr", vim.lsp.buf.rename, "Rename symbol")
+          map("n", "<leader>rn", vim.lsp.buf.rename, "Rename symbol (alias)") -- old-config alias
+          map("n", "<leader>cl", "<cmd>LspInfo<CR>", "LSP info")
           -- Diagnostic float aliases (old config used <leader>de)
-          map("n", "<leader>de",         vim.diagnostic.open_float,  "Show diagnostic (alias)")
+          map("n", "<leader>de", vim.diagnostic.open_float, "Show diagnostic (alias)")
 
           if client:supports_method("textDocument/inlayHint") then
             map("n", "<leader>uh", function()
@@ -348,12 +366,17 @@ return {
           end
 
           if client:supports_method("textDocument/documentHighlight") then
-            local hi_group = vim.api.nvim_create_augroup("user_lsp_highlight_" .. bufnr, { clear = true })
+            local hi_group =
+              vim.api.nvim_create_augroup("user_lsp_highlight_" .. bufnr, { clear = true })
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-              buffer = bufnr, group = hi_group, callback = vim.lsp.buf.document_highlight,
+              buffer = bufnr,
+              group = hi_group,
+              callback = vim.lsp.buf.document_highlight,
             })
             vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-              buffer = bufnr, group = hi_group, callback = vim.lsp.buf.clear_references,
+              buffer = bufnr,
+              group = hi_group,
+              callback = vim.lsp.buf.clear_references,
             })
           end
         end,
