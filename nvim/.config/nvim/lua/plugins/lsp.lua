@@ -250,14 +250,15 @@ return {
         settings = {
           ["rust-analyzer"] = {
             cargo = { allFeatures = true, loadOutDirsFromCheck = true },
-            checkOnSave = { command = "clippy", extraArgs = { "--no-deps" } },
+            checkOnSave = true,
+            check = { command = "clippy", extraArgs = { "--no-deps" } },
             procMacro = { enable = true },
             inlayHints = {
-              bindingModeHints  = { enable = true },
-              chainingHints     = { enable = true },
-              closingBraceHints = { enable = true, minLines = 25 },
-              parameterHints    = { enable = true },
-              reborrowHints     = { enable = "mutable" },
+              bindingModeHints        = { enable = true },
+              chainingHints           = { enable = true },
+              closingBraceHints       = { enable = true, minLines = 25 },
+              parameterHints          = { enable = true },
+              expressionAdjustmentHints = { enable = "reborrow", mode = "postfix" },
               typeHints = {
                 enable                    = true,
                 hideClosureInitialization = false,
