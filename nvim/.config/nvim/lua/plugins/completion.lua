@@ -47,6 +47,10 @@ return {
       appearance = { nerd_font_variant = "mono" },
 
       completion = {
+        trigger = {
+          show_on_trigger_character = true,
+          show_on_keyword = true,
+        },
         accept = { auto_brackets = { enabled = true } },
         documentation = {
           auto_show = true,
@@ -74,7 +78,7 @@ return {
         default = { "lsp", "path", "snippets", "buffer" },
         providers = {
           -- Boost LSP items above buffer text
-          lsp      = { score_offset = 100 },
+          lsp      = { score_offset = 100, min_keyword_length = 0 },
           snippets = { score_offset = 80 },
           buffer   = { score_offset = 0 },
           path     = { score_offset = 50 },

@@ -211,6 +211,14 @@ return {
       vim.lsp.config("ts_ls", {
         settings = {
           typescript = {
+            suggest = {
+              completeFunctionCalls = true,      -- fill argument placeholders on accept
+              autoImports = true,
+            },
+            preferences = {
+              importModuleSpecifier = "shortest",
+              includePackageJsonAutoImports = "auto",
+            },
             inlayHints = {
               includeInlayParameterNameHints = "literals",
               includeInlayFunctionParameterTypeHints = true,
@@ -219,6 +227,14 @@ return {
             },
           },
           javascript = {
+            suggest = {
+              completeFunctionCalls = true,
+              autoImports = true,
+            },
+            preferences = {
+              importModuleSpecifier = "shortest",
+              includePackageJsonAutoImports = "auto",
+            },
             inlayHints = {
               includeInlayParameterNameHints = "all",
               includeInlayFunctionParameterTypeHints = true,
@@ -237,6 +253,11 @@ return {
             checkOnSave = { command = "clippy", extraArgs = { "--no-deps" } },
             procMacro = { enable = true },
             inlayHints = { parameterHints = { enable = true }, typeHints = { enable = true } },
+            completion = {
+              autoimport = { enable = true },
+              autoself   = { enable = true },
+              callable   = { snippets = "fill_arguments" },
+            },
           },
         },
       })
@@ -313,10 +334,16 @@ return {
       })
 
       -- Zig
-      vim.lsp.config(
-        "zls",
-        { settings = { zls = { enable_inlay_hints = true, warn_style = true } } }
-      )
+      vim.lsp.config("zls", {
+        settings = {
+          zls = {
+            enable_inlay_hints = true,
+            warn_style = true,
+            enable_snippets = true,               -- function-call snippets on accept
+            enable_argument_placeholders = true,  -- fill argument placeholders
+          },
+        },
+      })
 
       -- Java (simple jdtls; install nvim-jdtls separately for full IDE flow)
       vim.lsp.config("jdtls", {
