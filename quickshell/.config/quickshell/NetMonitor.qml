@@ -36,7 +36,7 @@ QtObject {
                 parent.sumTx += parseFloat(parts[9]) || 0
             }
         }
-        onFinished: {
+        onExited: {
             const now = Date.now() / 1000
             if (root._prevTime > 0) {
                 const dt = now - root._prevTime

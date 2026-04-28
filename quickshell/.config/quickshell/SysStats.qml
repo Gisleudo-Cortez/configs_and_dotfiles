@@ -49,7 +49,7 @@ QtObject {
                 if (m[1] === "MemAvailable") parent.avail = Number(m[2])
             }
         }
-        onFinished: {
+        onExited: {
             if (total > 0)
                 root.ramPercent = Math.round((1 - avail / total) * 100)
         }

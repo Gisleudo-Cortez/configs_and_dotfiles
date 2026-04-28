@@ -16,9 +16,9 @@ Island {
 
         // Workspace dots
         Repeater {
-            model: Hyprland.workspaces.values
+            model: Hyprland.workspaces
             delegate: Rectangle {
-                readonly property bool active: modelData.id === Hyprland.focusedWorkspace?.id
+                readonly property bool active: modelData.focused
                 width: active ? 18 : 8
                 height: 8
                 radius: 4
@@ -28,7 +28,7 @@ Island {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: Hyprland.dispatch("workspace " + modelData.id)
+                    onClicked: modelData.activate()
                 }
             }
         }
@@ -43,7 +43,7 @@ Island {
         // Window title
         Text {
             id: titleText
-            text: Hyprland.focusedClient?.title ?? ""
+            text: Hyprland.activeToplevel?.title ?? ""
             color: Colors.text
             font.family: "JetBrainsMono Nerd Font"
             font.pixelSize: Geometry.fontSize

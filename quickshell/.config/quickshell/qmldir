@@ -8,3 +8,4 @@ singleton NetMonitor 1.0 NetMonitor.qml
 singleton Holidays 1.0 Holidays.qml
 singleton NotifService 1.0 NotifService.qml
 singleton ClipService 1.0 ClipService.qml
+singleton PopupState 1.0 PopupState.qml

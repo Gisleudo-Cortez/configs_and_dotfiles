@@ -1,11 +1,14 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
+import Quickshell.Bluetooth
 
 Island {
     id: root
-    required property var bar
     implicitWidth: row.implicitWidth + Geometry.innerPad * 2
+
+    signal notifClicked
+    signal clipClicked
 
     // ── Volume ────────────────────────────────────────────────────────────
     property int volume: 0
@@ -25,26 +28,6 @@ Island {
     readonly property var _volTicker: Timer {
         interval: 2000; running: true; repeat: true; triggeredOnStart: true
         onTriggered: root._volProc.running = true
-    }
-
-    // ── Bluetooth ─────────────────────────────────────────────────────────
-    property bool btOn: false
-    property string btDevice: ""
-
-    readonly property var _btProc: Process {
-        command: ["bluetoothctl", "show"]
-        running: false
-        property bool powered: false
-        stdout: SplitParser {
-            onRead: function(line) {
-                if (line.includes("Powered: yes")) parent.powered = true
-            }
-        }
-        onFinished: { root.btOn = powered; powered = false }
-    }
-    readonly property var _btTicker: Timer {
-        interval: 5000; running: true; repeat: true; triggeredOnStart: true
-        onTriggered: root._btProc.running = true
     }
 
     // ── helpers ───────────────────────────────────────────────────────────
@@ -104,8 +87,8 @@ Island {
 
         // Bluetooth
         Text {
-            text: root.btOn ? "󰂯" : "󰂲"
-            color: root.btOn ? Colors.blue : Colors.textDim
+            text: Bluetooth.defaultAdapter.enabled ? "󰂯" : "󰂲"
+            color: Bluetooth.defaultAdapter.enabled ? Colors.blue : Colors.textDim
             font.family: "JetBrainsMono Nerd Font"
             font.pixelSize: Geometry.fontSize
         }
@@ -135,7 +118,7 @@ Island {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.bar.togglePopup("notif")
+                onClicked: root.notifClicked()
             }
         }
 
@@ -148,7 +131,7 @@ Island {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: { ClipService.refresh(); root.bar.togglePopup("clip") }
+                onClicked: { ClipService.refresh(); root.clipClicked() }
             }
         }
     }

@@ -18,7 +18,7 @@ QtObject {
                 if (line.trim()) parent.lines.push(line)
             }
         }
-        onFinished: {
+        onExited: {
             root.entries = lines.slice(0, 30)
             lines = []
             root.loading = false
@@ -31,28 +31,14 @@ QtObject {
     }
 
     readonly property var _copyProc: Process {
-        id: copyProc
+        command: ["bash", "-c", "cliphist decode | wl-copy"]
+        stdinEnabled: true
         running: false
-        property string pending: ""
     }
 
-    function copyEntry(entry) {
-        // cliphist decode <entry> | wl-copy
-        const proc = Qt.createQmlObject(
-            'import Quickshell.Io; Process { command: ["bash", "-c", "cliphist decode | wl-copy"]; running: true }',
-            root, "copyProc")
-        const inProc = Qt.createQmlObject(
-            `import Quickshell.Io; Process { command: ["cliphist", "decode"]; running: true }`,
-            root, "decodeProc")
-    }
-
-    // Simpler: pipe via shell
     function copy(entry) {
-        const escaped = entry.replace(/'/g, "'\\''")
-        const proc = Qt.createQmlObject(
-            `import Quickshell.Io; Process {
-                command: ["bash", "-c", "echo '${escaped}' | cliphist decode | wl-copy"]
-                running: true
-            }`, root, "dynCopy")
+        if (_copyProc.running) return
+        _copyProc.running = true
+        _copyProc.write(entry + "\n")
     }
 }
