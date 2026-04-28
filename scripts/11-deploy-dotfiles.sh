@@ -22,6 +22,7 @@ STOW_PACKAGES_TO_DEPLOY=(
     "hypr"
     "kitty"
     "waybar"
+    "quickshell"
 )
 
 # --- Main Logic ---
