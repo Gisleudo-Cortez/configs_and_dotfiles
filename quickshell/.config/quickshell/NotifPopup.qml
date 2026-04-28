@@ -16,8 +16,8 @@ PanelWindow {
     margins.top: Geometry.barHeight + Geometry.outerGap * 2 + 4
     margins.right: Geometry.outerGap
 
-    width: Geometry.popupWidth
-    height: Math.min(box.implicitHeight, 420)
+    implicitWidth: Geometry.popupWidth
+    implicitHeight: Math.min(box.implicitHeight, 420)
     color: "transparent"
 
     visible: PopupState.active === "notif" && PopupState.screen === screen

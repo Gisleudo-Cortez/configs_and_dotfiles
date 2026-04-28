@@ -16,8 +16,8 @@ PanelWindow {
     margins.top: Geometry.barHeight + Geometry.outerGap * 2 + 4
     margins.right: Geometry.outerGap
 
-    width: Geometry.popupWidth
-    height: toastBox.implicitHeight + Geometry.innerPad * 2
+    implicitWidth: Geometry.popupWidth
+    implicitHeight: toastBox.implicitHeight + Geometry.innerPad * 2
     color: "transparent"
 
     visible: opacity > 0
