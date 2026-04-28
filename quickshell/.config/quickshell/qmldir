@@ -1,0 +1,10 @@
+module Quickshell
+
+singleton Colors 1.0 Colors.qml
+singleton Geometry 1.0 Geometry.qml
+singleton SysStats 1.0 SysStats.qml
+singleton Battery 1.0 Battery.qml
+singleton NetMonitor 1.0 NetMonitor.qml
+singleton Holidays 1.0 Holidays.qml
+singleton NotifService 1.0 NotifService.qml
+singleton ClipService 1.0 ClipService.qml
