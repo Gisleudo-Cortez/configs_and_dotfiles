@@ -1,4 +1,4 @@
-module Quickshell
+module Shell
 
 singleton Colors 1.0 Colors.qml
 singleton Geometry 1.0 Geometry.qml
