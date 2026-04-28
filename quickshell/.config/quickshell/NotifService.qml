@@ -6,12 +6,14 @@ QtObject {
     id: root
 
     property int unreadCount: 0
+    signal notificationReceived(var notif)
 
     readonly property var _server: NotificationServer {
         keepOnReload: true
         onNotification: function(notif) {
             notif.tracked = true
             root.unreadCount++
+            root.notificationReceived(notif)
         }
     }
 
