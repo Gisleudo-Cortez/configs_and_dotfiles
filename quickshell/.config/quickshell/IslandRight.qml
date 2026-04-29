@@ -44,6 +44,21 @@ Island {
         return players[0]
     }
 
+    // ── Net + VPN shared hover state ──────────────────────────────────────
+    property bool _netHovered: false
+    property bool _vpnHovered: false
+
+    Timer {
+        id: netHoverTimer
+        interval: 400
+        onTriggered: PopupState.showHover("network", root.screen)
+    }
+
+    function _checkNetHover() {
+        if (_netHovered || _vpnHovered) netHoverTimer.start()
+        else { netHoverTimer.stop(); PopupState.clearHover("network") }
+    }
+
     // ── layout ────────────────────────────────────────────────────────────
     RowLayout {
         id: row
@@ -86,7 +101,7 @@ Island {
 
         BarSep {}
 
-        // ── Network ───────────────────────────────────────────────────────
+        // ── Network + VPN (shared hover → NetworkPopup) ───────────────────
         Item {
             id: netWidget
             implicitWidth: netRow.implicitWidth
@@ -113,21 +128,34 @@ Island {
             }
 
             HoverHandler {
-                id: netHover
-                onHoveredChanged: {
-                    if (hovered) netHoverTimer.start()
-                    else {
-                        netHoverTimer.stop()
-                        PopupState.clearHover("network")
-                    }
-                }
+                onHoveredChanged: { root._netHovered = hovered; root._checkNetHover() }
+            }
+        }
+
+        // ── VPN (Mullvad) ─────────────────────────────────────────────────
+        Item {
+            id: vpnWidget
+            implicitWidth: vpnText.implicitWidth + 6
+            implicitHeight: Geometry.barHeight
+
+            Text {
+                id: vpnText
+                anchors.centerIn: parent
+                text: "󰒄"
+                color: VpnService.connected ? Colors.green : Colors.textDim
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: Geometry.fontSize
             }
 
-            Timer {
-                id: netHoverTimer
-                interval: 400
-                onTriggered: PopupState.showHover("network", root.screen)
+            HoverHandler {
+                onHoveredChanged: { root._vpnHovered = hovered; root._checkNetHover() }
             }
+
+            ToolTip.visible: root._vpnHovered
+            ToolTip.delay: 700
+            ToolTip.text: VpnService.connected
+                          ? "Mullvad · " + VpnService.locationLabel
+                          : "Mullvad · disconnected · " + VpnService.locationLabel
         }
 
         BarSep {}

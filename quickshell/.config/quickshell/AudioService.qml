@@ -41,7 +41,7 @@ QtObject {
     }
 
     readonly property var _ticker: Timer {
-        interval: 2000
+        interval: 200
         running: true
         repeat: true
         triggeredOnStart: true
