@@ -8,9 +8,9 @@ QtObject {
     property string connectionName: ""
     property string connectionType: "none"  // "wifi" | "ethernet" | "vpn" | "none"
     property string device: ""
-    property int signal: 0       // 0-100, WiFi only
+    property int    signal: 0       // 0-100 (WiFi only)
     property string ipAddress: ""
-    property bool connected: false
+    property bool   connected: false
 
     readonly property string typeIcon: {
         switch (connectionType) {
@@ -35,57 +35,83 @@ QtObject {
         return connectionName
     }
 
-    // Single bash script: connection name/type/device, then signal (WiFi) and IP
-    readonly property var _proc: Process {
-        id: netProc
-        command: ["bash", "-c", [
-            "active=$(nmcli -t -f NAME,TYPE,DEVICE con show --active 2>/dev/null",
-            "  | grep -v ':loopback:' | head -1)",
-            "[ -z \"$active\" ] && exit 1",
-            "name=$(echo \"$active\" | cut -d: -f1)",
-            "type=$(echo \"$active\" | cut -d: -f2)",
-            "dev=$(echo  \"$active\" | cut -d: -f3)",
-            "echo \"conn:$name:$type:$dev\"",
-            "if echo \"$type\" | grep -qi wireless; then",
-            "  sig=$(nmcli -t -f IN-USE,SIGNAL dev wifi list ifname \"$dev\" --rescan no 2>/dev/null",
-            "        | grep '^\\*' | cut -d: -f2 | head -1)",
-            "  echo \"signal:${sig:-0}\"",
-            "fi",
-            "ip=$(ip -4 addr show \"$dev\" 2>/dev/null | grep 'inet ' | awk '{print $2}' | cut -d/ -f1 | head -1)",
-            "[ -n \"$ip\" ] && echo \"ip:$ip\""
-        ].join("; ")]
+    // ── Process 1: active device/connection (one line per network device) ─
+    // Format: DEVICE:TYPE:STATE:CONNECTION (connection name last so colons in
+    // name are safe — we split only the first 3 fields then rejoin the rest)
+    readonly property var _devProc: Process {
+        id: devProc
+        command: ["nmcli", "-t", "-f", "DEVICE,TYPE,STATE,CONNECTION", "dev"]
         running: false
-        property bool gotConn: false
+        property bool found: false
 
         stdout: SplitParser {
             onRead: function(line) {
-                if (line.startsWith("conn:")) {
-                    const parts = line.substring(5).split(":")
-                    root.connectionName = parts[0] ?? ""
-                    const t = (parts[1] ?? "").toLowerCase()
-                    if (t.includes("wireless") || t.includes("wifi")) root.connectionType = "wifi"
-                    else if (t.includes("vpn") || t.includes("wireguard")) root.connectionType = "vpn"
-                    else root.connectionType = "ethernet"
-                    root.device = parts[2] ?? ""
-                    root.connected = true
-                    netProc.gotConn = true
-                } else if (line.startsWith("signal:")) {
-                    root.signal = parseInt(line.substring(7)) || 0
-                } else if (line.startsWith("ip:")) {
-                    root.ipAddress = line.substring(3)
-                }
+                if (devProc.found) return
+                const parts = line.split(":")
+                if (parts.length < 4) return
+                const dev   = parts[0]
+                const type  = parts[1]
+                const state = parts[2]
+                // Rejoin remaining parts in case the connection name has colons
+                const name  = parts.slice(3).join(":")
+
+                if (state !== "connected" || !name || name === "--") return
+                if (type === "loopback" || type === "dummy" || dev.startsWith("lo")) return
+
+                root.device         = dev
+                root.connectionName = name
+                root.connected      = true
+                devProc.found       = true
+
+                if (type.includes("wireless") || type === "wifi")
+                    root.connectionType = "wifi"
+                else if (type.includes("vpn") || type.includes("wireguard"))
+                    root.connectionType = "vpn"
+                else
+                    root.connectionType = "ethernet"
             }
         }
 
-        onExited: function(code) {
-            if (code !== 0 || !gotConn) {
-                root.connected = false
+        onExited: {
+            if (!found) {
+                root.connected      = false
                 root.connectionName = ""
                 root.connectionType = "none"
-                root.signal = 0
-                root.ipAddress = ""
+                root.device         = ""
+                root.signal         = 0
             }
-            gotConn = false
+            found = false
+        }
+    }
+
+    // ── Process 2: WiFi signal for the active AP ──────────────────────────
+    // Format per line: IN-USE:SIGNAL  — "*" marks the connected AP
+    readonly property var _wifiProc: Process {
+        id: wifiProc
+        command: ["nmcli", "-t", "-f", "IN-USE,SIGNAL", "dev", "wifi",
+                  "list", "--rescan", "no"]
+        running: false
+        stdout: SplitParser {
+            onRead: function(line) {
+                if (line.startsWith("*:")) {
+                    const s = parseInt(line.substring(2))
+                    if (!isNaN(s)) root.signal = s
+                }
+            }
+        }
+    }
+
+    // ── Process 3: IP of the outgoing default interface ───────────────────
+    readonly property var _ipProc: Process {
+        id: ipProc
+        command: ["bash", "-c",
+                  "ip -4 route get 1.1.1.1 2>/dev/null | grep -oP 'src \\K[\\d.]+'"]
+        running: false
+        stdout: SplitParser {
+            onRead: function(line) {
+                const ip = line.trim()
+                if (ip) root.ipAddress = ip
+            }
         }
     }
 
@@ -94,6 +120,10 @@ QtObject {
         running: true
         repeat: true
         triggeredOnStart: true
-        onTriggered: netProc.running = true
+        onTriggered: {
+            devProc.running  = true
+            wifiProc.running = true
+            ipProc.running   = true
+        }
     }
 }

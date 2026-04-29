@@ -6,7 +6,11 @@ QtObject {
     id: root
 
     readonly property var sink: Pipewire.defaultAudioSink
-    readonly property real volume: sink?.audio?.volume ?? 0
+    // ?? 0 only guards null/undefined; use isNaN() to also guard pre-init NaN
+    readonly property real volume: {
+        const v = sink?.audio?.volume ?? 0
+        return isNaN(v) ? 0 : v
+    }
     readonly property bool muted: sink?.audio?.muted ?? false
 
     readonly property string sinkName: {
