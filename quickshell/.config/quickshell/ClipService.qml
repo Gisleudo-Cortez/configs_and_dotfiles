@@ -9,13 +9,14 @@ QtObject {
     property bool loading: false
 
     readonly property var _listProc: Process {
+        id: listProc
         command: ["cliphist", "list"]
         running: false
         property var lines: []
 
         stdout: SplitParser {
             onRead: function(line) {
-                if (line.trim()) parent.lines.push(line)
+                if (line.trim()) listProc.lines.push(line)
             }
         }
         onExited: {

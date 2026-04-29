@@ -37,6 +37,7 @@ QtObject {
 
     // RAM via /proc/meminfo
     readonly property var _ramProc: Process {
+        id: ramProc
         command: ["cat", "/proc/meminfo"]
         running: false
         property real total: 0
@@ -45,8 +46,8 @@ QtObject {
             onRead: function(line) {
                 const m = line.match(/^(\w+):\s+(\d+)/)
                 if (!m) return
-                if (m[1] === "MemTotal")     parent.total = Number(m[2])
-                if (m[1] === "MemAvailable") parent.avail = Number(m[2])
+                if (m[1] === "MemTotal")     ramProc.total = Number(m[2])
+                if (m[1] === "MemAvailable") ramProc.avail = Number(m[2])
             }
         }
         onExited: {
@@ -57,21 +58,22 @@ QtObject {
 
     // Disk via df
     readonly property var _diskProc: Process {
+        id: diskProc
         command: ["df", "-P", "/"]
         running: false
         property bool first: true
         stdout: SplitParser {
             onRead: function(line) {
-                if (parent.first) { parent.first = false; return }
+                if (diskProc.first) { diskProc.first = false; return }
                 const parts = line.trim().split(/\s+/)
                 if (parts.length >= 5)
                     root.diskPercent = parseInt(parts[4])
-                parent.first = true
+                diskProc.first = true
             }
         }
     }
 
-    // GPU via nvidia-smi
+    // GPU via nvidia-smi (gracefully shows 0% if not available)
     readonly property var _gpuProc: Process {
         command: ["nvidia-smi",
                   "--query-gpu=utilization.gpu,memory.used,memory.total",

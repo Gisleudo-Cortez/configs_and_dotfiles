@@ -7,9 +7,6 @@ QtObject {
     property real rxKbps: 0
     property real txKbps: 0
 
-    property var _prevRx: ({})
-    property var _prevTx: ({})
-
     function _fmtSpeed(kbps) {
         if (kbps >= 1024) return (kbps / 1024).toFixed(1) + " MB/s"
         return Math.round(kbps) + " KB/s"
@@ -18,22 +15,22 @@ QtObject {
     readonly property string txText: _fmtSpeed(txKbps)
 
     readonly property var _proc: Process {
+        id: netProc
         command: ["cat", "/proc/net/dev"]
         running: false
         property real sumRx: 0
         property real sumTx: 0
-        property bool header: true
         property int lineCount: 0
 
         stdout: SplitParser {
             onRead: function(line) {
-                if (parent.lineCount < 2) { parent.lineCount++; return }
+                if (netProc.lineCount < 2) { netProc.lineCount++; return }
                 const parts = line.trim().split(/\s+/)
                 if (parts.length < 10) return
                 const iface = parts[0].replace(":", "")
                 if (iface === "lo") return
-                parent.sumRx += parseFloat(parts[1]) || 0
-                parent.sumTx += parseFloat(parts[9]) || 0
+                netProc.sumRx += parseFloat(parts[1]) || 0
+                netProc.sumTx += parseFloat(parts[9]) || 0
             }
         }
         onExited: {
