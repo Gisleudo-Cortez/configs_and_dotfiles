@@ -53,6 +53,7 @@ Each package directory maps to `$HOME`. Stow creates symlinks from `~/<path>` â†
 | `rofi/` | `~/.config/rofi/` | App launcher |
 | `mako/` | `~/.config/mako/` | Notification daemon |
 | `wlogout/` | `~/.config/wlogout/` | Logout menu |
+| `quickshell/` | `~/.config/quickshell/` | Quickshell status bar (replaces waybar) |
 
 ### Hyprland config structure
 

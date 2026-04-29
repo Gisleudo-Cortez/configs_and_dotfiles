@@ -25,7 +25,7 @@ opt.splitright = true
 opt.splitkeep = "screen" -- stable viewport across splits
 opt.scrolloff = 8 -- min lines above/below cursor
 opt.sidescrolloff = 8
-opt.wrap = false -- no soft-wrap by default (toggle w/ <leader>uw)
+opt.wrap = true -- soft-wrap at window edge (no hard wrap; formatters handle line length)
 opt.linebreak = true -- if wrap is on, break at word boundaries
 opt.list = true -- show invisible chars
 opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
