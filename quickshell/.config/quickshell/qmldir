@@ -12,6 +12,7 @@ singleton AudioService 1.0 AudioService.qml
 singleton NetworkService 1.0 NetworkService.qml
 singleton DockerService 1.0 DockerService.qml
 singleton VpnService 1.0 VpnService.qml
+singleton TooltipService 1.0 TooltipService.qml
 
 # Components
 Bar 1.0 Bar.qml
@@ -31,3 +32,4 @@ MprisPopup 1.0 MprisPopup.qml
 NotifPopup 1.0 NotifPopup.qml
 NotifToast 1.0 NotifToast.qml
 StatChip 1.0 StatChip.qml
+TooltipWindow 1.0 TooltipWindow.qml

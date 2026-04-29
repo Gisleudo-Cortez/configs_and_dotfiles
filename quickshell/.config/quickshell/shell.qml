@@ -43,4 +43,8 @@ ShellRoot {
         model: Quickshell.screens
         DockerPopup { required property var modelData; screen: modelData }
     }
+    Variants {
+        model: Quickshell.screens
+        TooltipWindow { required property var modelData; screen: modelData }
+    }
 }

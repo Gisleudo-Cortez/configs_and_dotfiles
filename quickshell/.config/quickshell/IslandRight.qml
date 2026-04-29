@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import Quickshell.Bluetooth
 import Quickshell.Services.Mpris
 
@@ -8,7 +7,6 @@ Island {
     id: root
     implicitWidth: row.implicitWidth + Geometry.innerPad * 2
 
-    // Screen reference passed from Bar so hover popups know which screen they're on
     property var screen
 
     signal notifClicked
@@ -69,6 +67,7 @@ Island {
 
         // ── System stats ──────────────────────────────────────────────────
         StatChip {
+            screen: root.screen
             icon: "󰻠"
             value: SysStats.cpuPercent + "%"
             color: root._statColor(SysStats.cpuPercent, 70, 90)
@@ -76,6 +75,7 @@ Island {
         }
 
         StatChip {
+            screen: root.screen
             icon: "󰍛"
             value: SysStats.ramPercent + "%"
             color: root._statColor(SysStats.ramPercent, 70, 90)
@@ -83,6 +83,7 @@ Island {
         }
 
         StatChip {
+            screen: root.screen
             icon: "󰋊"
             value: SysStats.diskPercent + "%"
             color: root._statColor(SysStats.diskPercent, 80, 95)
@@ -91,6 +92,7 @@ Island {
 
         StatChip {
             visible: SysStats.gpuVramTotal > 0
+            screen: root.screen
             icon: "󰢮"
             value: SysStats.gpuPercent + "%"
             color: root._statColor(SysStats.gpuPercent, 70, 90)
@@ -134,7 +136,6 @@ Island {
 
         // ── VPN (Mullvad) ─────────────────────────────────────────────────
         Item {
-            id: vpnWidget
             implicitWidth: vpnText.implicitWidth + 6
             implicitHeight: Geometry.barHeight
 
@@ -148,14 +149,20 @@ Island {
             }
 
             HoverHandler {
-                onHoveredChanged: { root._vpnHovered = hovered; root._checkNetHover() }
+                id: vpnHover
+                onHoveredChanged: {
+                    root._vpnHovered = hovered
+                    root._checkNetHover()
+                    if (hovered)
+                        TooltipService.show(
+                            VpnService.connected
+                            ? "Mullvad · " + VpnService.locationLabel
+                            : "Mullvad · disconnected · " + VpnService.locationLabel,
+                            root.screen)
+                    else
+                        TooltipService.hide()
+                }
             }
-
-            ToolTip.visible: root._vpnHovered
-            ToolTip.delay: 700
-            ToolTip.text: VpnService.connected
-                          ? "Mullvad · " + VpnService.locationLabel
-                          : "Mullvad · disconnected · " + VpnService.locationLabel
         }
 
         BarSep {}
@@ -169,6 +176,7 @@ Island {
             StatChip {
                 id: dockerChip
                 anchors.centerIn: parent
+                screen: root.screen
                 icon: "󰡨"
                 value: DockerService.runningCount + ""
                 color: DockerService.runningCount > 0 ? Colors.cyan : Colors.textDim
@@ -203,28 +211,26 @@ Island {
                 }
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: Geometry.fontSize
-
-                ToolTip.visible: btHover.hovered
-                ToolTip.delay: 600
-                ToolTip.text: {
-                    if (!(Bluetooth.defaultAdapter?.enabled ?? false)) return "Bluetooth off"
-                    const devs = Bluetooth.defaultAdapter?.devices
-                    if (!devs || devs.count === 0) return "Bluetooth on · no devices"
-                    let connected = 0
-                    for (let i = 0; i < devs.count; i++) {
-                        if (devs.values[i].connected) connected++
-                    }
-                    return "Bluetooth · " + connected + " connected"
-                }
             }
 
             HoverHandler {
                 id: btHover
                 onHoveredChanged: {
-                    if (hovered) btHoverTimer.start()
-                    else {
+                    if (hovered) {
+                        btHoverTimer.start()
+                        const devs = Bluetooth.defaultAdapter?.devices
+                        let connected = 0
+                        for (let i = 0; i < (devs?.count ?? 0); i++) {
+                            if (devs.values[i].connected) connected++
+                        }
+                        const text = (Bluetooth.defaultAdapter?.enabled ?? false)
+                            ? "Bluetooth · " + connected + " connected"
+                            : "Bluetooth off"
+                        TooltipService.show(text, root.screen)
+                    } else {
                         btHoverTimer.stop()
                         PopupState.clearHover("bluetooth")
+                        TooltipService.hide()
                     }
                 }
             }
@@ -280,13 +286,19 @@ Island {
                 }
             }
 
-            HoverHandler { id: audioHover }
-            ToolTip.visible: audioHover.hovered
-            ToolTip.delay: 600
-            ToolTip.text: AudioService.sinkName + "\n" +
-                          AudioService.volPct() + "%" +
-                          (AudioService.muted ? " (muted)" : "") +
-                          "\nLeft-click: open · Scroll: ±5% · Vol icon: mute"
+            HoverHandler {
+                id: audioHover
+                onHoveredChanged: {
+                    if (hovered)
+                        TooltipService.show(
+                            AudioService.sinkName + "  " + AudioService.volPct() + "%" +
+                            (AudioService.muted ? " · muted" : "") +
+                            "\nscroll ±5%  ·  click to open",
+                            root.screen)
+                    else
+                        TooltipService.hide()
+                }
+            }
 
             MouseArea {
                 anchors.fill: parent
@@ -300,6 +312,7 @@ Island {
 
         // ── Battery ───────────────────────────────────────────────────────
         StatChip {
+            screen: root.screen
             icon: root._battIcon(Battery.percent, Battery.charging)
             value: Battery.percent + "%"
             color: root._statColor(100 - Battery.percent, 30, 10)
@@ -325,15 +338,19 @@ Island {
                 font.pixelSize: Geometry.fontSize
             }
 
-            HoverHandler { id: mediaHover }
-            ToolTip.visible: mediaHover.hovered && root._activePlayer !== null
-            ToolTip.delay: 600
-            ToolTip.text: {
-                const p = root._activePlayer
-                if (!p) return ""
-                const title = p.trackTitle || "Unknown"
-                const artist = p.trackArtist || ""
-                return (artist ? artist + " — " : "") + title
+            HoverHandler {
+                onHoveredChanged: {
+                    if (hovered && root._activePlayer !== null) {
+                        const p = root._activePlayer
+                        const artist = p.trackArtist || ""
+                        const title  = p.trackTitle  || "Unknown"
+                        TooltipService.show(
+                            (artist ? artist + " — " : "") + title,
+                            root.screen)
+                    } else {
+                        TooltipService.hide()
+                    }
+                }
             }
 
             MouseArea {
@@ -357,13 +374,19 @@ Island {
                 font.pixelSize: Geometry.fontSize
             }
 
-            HoverHandler { id: bellHover }
-            ToolTip.visible: bellHover.hovered
-            ToolTip.delay: 600
-            ToolTip.text: NotifService.unreadCount > 0
-                          ? NotifService.unreadCount + " unread notification" +
-                            (NotifService.unreadCount > 1 ? "s" : "")
-                          : "No notifications"
+            HoverHandler {
+                onHoveredChanged: {
+                    if (hovered)
+                        TooltipService.show(
+                            NotifService.unreadCount > 0
+                            ? NotifService.unreadCount + " unread notification" +
+                              (NotifService.unreadCount > 1 ? "s" : "")
+                            : "No notifications",
+                            root.screen)
+                    else
+                        TooltipService.hide()
+                }
+            }
 
             MouseArea {
                 anchors.fill: parent
@@ -386,10 +409,12 @@ Island {
                 font.pixelSize: Geometry.fontSize
             }
 
-            HoverHandler { id: clipHover }
-            ToolTip.visible: clipHover.hovered
-            ToolTip.delay: 600
-            ToolTip.text: "Clipboard history"
+            HoverHandler {
+                onHoveredChanged: {
+                    if (hovered) TooltipService.show("Clipboard history", root.screen)
+                    else         TooltipService.hide()
+                }
+            }
 
             MouseArea {
                 anchors.fill: parent

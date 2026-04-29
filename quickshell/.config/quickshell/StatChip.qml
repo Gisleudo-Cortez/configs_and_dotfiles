@@ -1,12 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 
 RowLayout {
-    property string icon: ""
-    property string value: ""
-    property color color: Colors.text
+    property string icon:    ""
+    property string value:   ""
+    property color  color:   Colors.text
     property string tooltip: ""
+    property var    screen:  null   // pass root.screen from IslandRight
     spacing: 3
 
     Text {
@@ -23,9 +23,12 @@ RowLayout {
         font.pixelSize: Geometry.fontSizeSm
     }
 
-    HoverHandler { id: chipHover }
-
-    ToolTip.visible: chipHover.hovered && tooltip !== ""
-    ToolTip.text: tooltip
-    ToolTip.delay: 700
+    HoverHandler {
+        onHoveredChanged: {
+            if (hovered && tooltip !== "")
+                TooltipService.show(tooltip, screen)
+            else
+                TooltipService.hide()
+        }
+    }
 }
