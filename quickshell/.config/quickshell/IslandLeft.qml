@@ -14,20 +14,32 @@ Island {
         anchors.rightMargin: Geometry.innerPad
         spacing: 4
 
-        // Workspace dots
+        // Workspace chips
         Repeater {
             model: Hyprland.workspaces
             delegate: Rectangle {
                 readonly property bool active: modelData.focused
-                width: active ? 18 : 8
-                height: 8
+                implicitWidth: wsLabel.implicitWidth + 10
+                implicitHeight: 18
                 radius: 4
-                color: active ? Colors.purple : Colors.textDim
-                Behavior on width { NumberAnimation { duration: 150 } }
+                color: active ? Colors.purple : "transparent"
+                border.color: active ? "transparent" : Colors.textDim
+                border.width: 1
                 Behavior on color { ColorAnimation { duration: 150 } }
+
+                Text {
+                    id: wsLabel
+                    anchors.centerIn: parent
+                    text: modelData.id
+                    color: active ? Colors.bg : Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSizeSm
+                    font.bold: active
+                }
 
                 MouseArea {
                     anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
                     onClicked: modelData.activate()
                 }
             }
