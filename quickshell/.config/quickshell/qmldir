@@ -8,6 +8,9 @@ singleton Holidays 1.0 Holidays.qml
 singleton NotifService 1.0 NotifService.qml
 singleton ClipService 1.0 ClipService.qml
 singleton PopupState 1.0 PopupState.qml
+singleton AudioService 1.0 AudioService.qml
+singleton NetworkService 1.0 NetworkService.qml
+singleton DockerService 1.0 DockerService.qml
 
 # Components
 Bar 1.0 Bar.qml
@@ -19,6 +22,10 @@ Island 1.0 Island.qml
 IslandCenter 1.0 IslandCenter.qml
 IslandLeft 1.0 IslandLeft.qml
 IslandRight 1.0 IslandRight.qml
+AudioPopup 1.0 AudioPopup.qml
+BluetoothPopup 1.0 BluetoothPopup.qml
+NetworkPopup 1.0 NetworkPopup.qml
+DockerPopup 1.0 DockerPopup.qml
 MprisPopup 1.0 MprisPopup.qml
 NotifPopup 1.0 NotifPopup.qml
 NotifToast 1.0 NotifToast.qml

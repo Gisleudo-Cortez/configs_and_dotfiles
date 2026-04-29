@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Io
+import QtQuick.Controls
 import Quickshell.Bluetooth
 import Quickshell.Services.Mpris
 
@@ -8,51 +8,15 @@ Island {
     id: root
     implicitWidth: row.implicitWidth + Geometry.innerPad * 2
 
+    // Screen reference passed from Bar so hover popups know which screen they're on
+    property var screen
+
     signal notifClicked
     signal clipClicked
     signal mediaClicked
-
-    // ── Volume ────────────────────────────────────────────────────────────
-    property int volume: 0
-    property bool muted: false
-
-    readonly property var _volProc: Process {
-        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
-        running: false
-        stdout: SplitParser {
-            onRead: function(line) {
-                const m = line.match(/([\d.]+)/)
-                if (m) root.volume = Math.round(parseFloat(m[1]) * 100)
-                root.muted = line.includes("MUTED")
-            }
-        }
-    }
-    readonly property var _volTicker: Timer {
-        interval: 2000; running: true; repeat: true; triggeredOnStart: true
-        onTriggered: root._volProc.running = true
-    }
-
-    readonly property var _muteProc: Process {
-        command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]
-        running: false
-        onExited: root._volProc.running = true
-    }
-
-    readonly property var _volAdjProc: Process {
-        command: ["true"]
-        running: false
-        onExited: root._volProc.running = true
-    }
-
-    // ── MPRIS ─────────────────────────────────────────────────────────────
-    readonly property var _activePlayer: {
-        if (!Mpris.players || Mpris.players.count === 0) return null
-        const players = Mpris.players.values
-        for (let i = 0; i < players.length; i++) {
-            if (players[i].isPlaying) return players[i]
-        }
-        return players[0]
-    }
+    signal audioClicked
+    signal dockerClicked
+    signal btClicked
 
     // ── helpers ───────────────────────────────────────────────────────────
     function _statColor(pct, warn, crit) {
@@ -71,11 +35,13 @@ Island {
         return "󰂃"
     }
 
-    function _volIcon(pct, muted) {
-        if (muted || pct === 0) return "󰝟"
-        if (pct < 40) return "󰕿"
-        if (pct < 75) return "󰖀"
-        return "󰕾"
+    readonly property var _activePlayer: {
+        if (!Mpris.players || Mpris.players.count === 0) return null
+        const players = Mpris.players.values
+        for (let i = 0; i < players.length; i++) {
+            if (players[i].isPlaying) return players[i]
+        }
+        return players[0]
     }
 
     // ── layout ────────────────────────────────────────────────────────────
@@ -86,81 +52,262 @@ Island {
         anchors.rightMargin: Geometry.innerPad
         spacing: 10
 
-        // CPU
-        StatChip { icon: ""; value: SysStats.cpuPercent + "%"; color: root._statColor(SysStats.cpuPercent, 70, 90) }
+        // ── System stats ──────────────────────────────────────────────────
+        StatChip {
+            icon: "󰻠"
+            value: SysStats.cpuPercent + "%"
+            color: root._statColor(SysStats.cpuPercent, 70, 90)
+            tooltip: "CPU  " + SysStats.cpuPercent + "%"
+        }
 
-        // RAM
-        StatChip { icon: ""; value: SysStats.ramPercent + "%"; color: root._statColor(SysStats.ramPercent, 70, 90) }
+        StatChip {
+            icon: "󰍛"
+            value: SysStats.ramPercent + "%"
+            color: root._statColor(SysStats.ramPercent, 70, 90)
+            tooltip: "RAM  " + SysStats.ramPercent + "% used"
+        }
 
-        // Disk
-        StatChip { icon: "󰋊"; value: SysStats.diskPercent + "%"; color: root._statColor(SysStats.diskPercent, 80, 95) }
+        StatChip {
+            icon: "󰋊"
+            value: SysStats.diskPercent + "%"
+            color: root._statColor(SysStats.diskPercent, 80, 95)
+            tooltip: "Disk /  " + SysStats.diskPercent + "%"
+        }
 
-        // GPU
-        StatChip { icon: "󰢮"; value: SysStats.gpuPercent + "%"; color: root._statColor(SysStats.gpuPercent, 70, 90) }
-
-        BarSep {}
-
-        // Network
-        Column {
-            spacing: 0
-            Text { text: " " + NetMonitor.txText; color: Colors.cyan;  font.family: "JetBrainsMono Nerd Font"; font.pixelSize: Geometry.fontSizeSm }
-            Text { text: " " + NetMonitor.rxText; color: Colors.green; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: Geometry.fontSizeSm }
+        StatChip {
+            visible: SysStats.gpuVramTotal > 0
+            icon: "󰢮"
+            value: SysStats.gpuPercent + "%"
+            color: root._statColor(SysStats.gpuPercent, 70, 90)
+            tooltip: "GPU  " + SysStats.gpuPercent + "% · VRAM " +
+                     (SysStats.gpuVramUsed / 1024).toFixed(1) + " / " +
+                     (SysStats.gpuVramTotal / 1024).toFixed(1) + " GB"
         }
 
         BarSep {}
 
-        // Bluetooth
-        Text {
-            text: Bluetooth.defaultAdapter?.enabled ? "󰂯" : "󰂲"
-            color: Bluetooth.defaultAdapter?.enabled ? Colors.blue : Colors.textDim
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Geometry.fontSize
-            visible: Bluetooth.defaultAdapter !== null
-        }
-
-        // Volume — click to mute, scroll to adjust
+        // ── Network ───────────────────────────────────────────────────────
         Item {
-            implicitWidth: volChip.implicitWidth
+            id: netWidget
+            implicitWidth: netRow.implicitWidth
+            implicitHeight: Geometry.barHeight
+
+            RowLayout {
+                id: netRow
+                anchors.centerIn: parent
+                spacing: 4
+
+                Text {
+                    text: NetworkService.typeIcon
+                    color: NetworkService.connected ? Colors.cyan : Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSize
+                }
+
+                Text {
+                    text: NetworkService.shortName
+                    color: NetworkService.connected ? Colors.text : Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSizeSm
+                }
+            }
+
+            HoverHandler {
+                id: netHover
+                onHoveredChanged: {
+                    if (hovered) netHoverTimer.start()
+                    else {
+                        netHoverTimer.stop()
+                        PopupState.clearHover("network")
+                    }
+                }
+            }
+
+            Timer {
+                id: netHoverTimer
+                interval: 400
+                onTriggered: PopupState.showHover("network", root.screen)
+            }
+        }
+
+        BarSep {}
+
+        // ── Docker ────────────────────────────────────────────────────────
+        Item {
+            visible: DockerService.available
+            implicitWidth: dockerChip.implicitWidth
             implicitHeight: Geometry.barHeight
 
             StatChip {
-                id: volChip
+                id: dockerChip
                 anchors.centerIn: parent
-                icon: root._volIcon(root.volume, root.muted)
-                value: root.volume + "%"
-                color: root.muted ? Colors.textDim : Colors.text
+                icon: "󰡨"
+                value: DockerService.runningCount + ""
+                color: DockerService.runningCount > 0 ? Colors.cyan : Colors.textDim
+                tooltip: "Docker · " + DockerService.runningCount + " running"
             }
 
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root._muteProc.running = true
-                onWheel: function(wheel) {
-                    if (root._volAdjProc.running) return
-                    const step = wheel.angleDelta.y > 0 ? "5%+" : "5%-"
-                    root._volAdjProc.command = ["wpctl", "set-volume", "--limit", "1.5",
-                                                "@DEFAULT_AUDIO_SINK@", step]
-                    root._volAdjProc.running = true
+                onClicked: root.dockerClicked()
+            }
+        }
+
+        // ── Bluetooth ─────────────────────────────────────────────────────
+        Item {
+            id: btWidget
+            visible: Bluetooth.defaultAdapter !== null
+            implicitWidth: btText.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            Text {
+                id: btText
+                anchors.centerIn: parent
+                text: Bluetooth.defaultAdapter?.enabled ? "󰂯" : "󰂲"
+                color: {
+                    if (!(Bluetooth.defaultAdapter?.enabled ?? false)) return Colors.textDim
+                    const devs = Bluetooth.defaultAdapter?.devices
+                    for (let i = 0; i < (devs?.count ?? 0); i++) {
+                        if (devs.values[i].connected) return Colors.blue
+                    }
+                    return Qt.rgba(0.247, 0.725, 0.976, 0.5)
+                }
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: Geometry.fontSize
+
+                ToolTip.visible: btHover.hovered
+                ToolTip.delay: 600
+                ToolTip.text: {
+                    if (!(Bluetooth.defaultAdapter?.enabled ?? false)) return "Bluetooth off"
+                    const devs = Bluetooth.defaultAdapter?.devices
+                    if (!devs || devs.count === 0) return "Bluetooth on · no devices"
+                    let connected = 0
+                    for (let i = 0; i < devs.count; i++) {
+                        if (devs.values[i].connected) connected++
+                    }
+                    return "Bluetooth · " + connected + " connected"
+                }
+            }
+
+            HoverHandler {
+                id: btHover
+                onHoveredChanged: {
+                    if (hovered) btHoverTimer.start()
+                    else {
+                        btHoverTimer.stop()
+                        PopupState.clearHover("bluetooth")
+                    }
+                }
+            }
+
+            Timer {
+                id: btHoverTimer
+                interval: 500
+                onTriggered: PopupState.showHover("bluetooth", root.screen)
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    btHoverTimer.stop()
+                    PopupState.clearHover("bluetooth")
+                    root.btClicked()
                 }
             }
         }
 
-        // Battery
+        // ── Audio ─────────────────────────────────────────────────────────
+        Item {
+            id: audioWidget
+            implicitWidth: audioRow.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            RowLayout {
+                id: audioRow
+                anchors.centerIn: parent
+                spacing: 4
+
+                Text {
+                    text: AudioService.volIcon()
+                    color: AudioService.muted ? Colors.textDim : Colors.text
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSize
+                }
+
+                Text {
+                    text: AudioService.sinkShortName
+                    color: Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSizeSm
+                    visible: AudioService.sinkShortName !== ""
+                }
+
+                Text {
+                    text: AudioService.volPct() + "%"
+                    color: AudioService.muted ? Colors.textDim : Colors.text
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSizeSm
+                }
+            }
+
+            HoverHandler { id: audioHover }
+            ToolTip.visible: audioHover.hovered
+            ToolTip.delay: 600
+            ToolTip.text: AudioService.sinkName + "\n" +
+                          AudioService.volPct() + "%" +
+                          (AudioService.muted ? " (muted)" : "") +
+                          "\nLeft-click: open · Scroll: ±5% · Vol icon: mute"
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.audioClicked()
+                onWheel: function(wheel) {
+                    AudioService.adjustVolume(wheel.angleDelta.y > 0 ? 0.05 : -0.05)
+                }
+            }
+        }
+
+        // ── Battery ───────────────────────────────────────────────────────
         StatChip {
             icon: root._battIcon(Battery.percent, Battery.charging)
             value: Battery.percent + "%"
             color: root._statColor(100 - Battery.percent, 30, 10)
+            tooltip: "Battery  " + Battery.percent + "% · " +
+                     (Battery.charging ? "Charging" : "Discharging")
+            visible: Battery.percent > 0
         }
 
         BarSep {}
 
-        // Media indicator (only when a player is present)
-        Text {
+        // ── Media ─────────────────────────────────────────────────────────
+        Item {
             visible: Mpris.players.count > 0
-            text: "󰝚"
-            color: root._activePlayer?.isPlaying ? Colors.green : Colors.textDim
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Geometry.fontSize
+            implicitWidth: mediaText.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            Text {
+                id: mediaText
+                anchors.centerIn: parent
+                text: "󰝚"
+                color: root._activePlayer?.isPlaying ? Colors.green : Colors.textDim
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: Geometry.fontSize
+            }
+
+            HoverHandler { id: mediaHover }
+            ToolTip.visible: mediaHover.hovered && root._activePlayer !== null
+            ToolTip.delay: 600
+            ToolTip.text: {
+                const p = root._activePlayer
+                if (!p) return ""
+                const title = p.trackTitle || "Unknown"
+                const artist = p.trackArtist || ""
+                return (artist ? artist + " — " : "") + title
+            }
+
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -168,12 +315,28 @@ Island {
             }
         }
 
-        // Notification bell
-        Text {
-            text: NotifService.unreadCount > 0 ? "󱅫" : "󰂚"
-            color: NotifService.unreadCount > 0 ? Colors.purple : Colors.textDim
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Geometry.fontSize
+        // ── Notification bell ─────────────────────────────────────────────
+        Item {
+            implicitWidth: bellText.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            Text {
+                id: bellText
+                anchors.centerIn: parent
+                text: NotifService.unreadCount > 0 ? "󱅫" : "󰂚"
+                color: NotifService.unreadCount > 0 ? Colors.purple : Colors.textDim
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: Geometry.fontSize
+            }
+
+            HoverHandler { id: bellHover }
+            ToolTip.visible: bellHover.hovered
+            ToolTip.delay: 600
+            ToolTip.text: NotifService.unreadCount > 0
+                          ? NotifService.unreadCount + " unread notification" +
+                            (NotifService.unreadCount > 1 ? "s" : "")
+                          : "No notifications"
+
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
@@ -181,12 +344,25 @@ Island {
             }
         }
 
-        // Clipboard
-        Text {
-            text: "󰅎"
-            color: Colors.textDim
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Geometry.fontSize
+        // ── Clipboard ─────────────────────────────────────────────────────
+        Item {
+            implicitWidth: clipText.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            Text {
+                id: clipText
+                anchors.centerIn: parent
+                text: "󰅎"
+                color: Colors.textDim
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: Geometry.fontSize
+            }
+
+            HoverHandler { id: clipHover }
+            ToolTip.visible: clipHover.hovered
+            ToolTip.delay: 600
+            ToolTip.text: "Clipboard history"
+
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor

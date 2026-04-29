@@ -27,4 +27,20 @@ ShellRoot {
         model: Quickshell.screens
         MprisPopup { required property var modelData; screen: modelData }
     }
+    Variants {
+        model: Quickshell.screens
+        AudioPopup { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens
+        BluetoothPopup { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens
+        NetworkPopup { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens
+        DockerPopup { required property var modelData; screen: modelData }
+    }
 }

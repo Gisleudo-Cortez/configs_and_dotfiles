@@ -40,11 +40,17 @@ PanelWindow {
             Item { Layout.fillWidth: true }
 
             IslandRight {
+                id: rightIsland
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                onNotifClicked:  PopupState.toggle("notif", root.screen)
+                screen: root.screen
+
+                onNotifClicked:  PopupState.toggle("notif",     root.screen)
                 onClipClicked:   { ClipService.refresh(); PopupState.toggle("clip", root.screen) }
-                onMediaClicked:  PopupState.toggle("media", root.screen)
+                onMediaClicked:  PopupState.toggle("media",     root.screen)
+                onAudioClicked:  PopupState.toggle("audio",     root.screen)
+                onDockerClicked: PopupState.toggle("docker",    root.screen)
+                onBtClicked:     PopupState.toggle("bluetooth", root.screen)
             }
         }
     }
