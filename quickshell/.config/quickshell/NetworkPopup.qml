@@ -5,6 +5,7 @@ import Quickshell.Wayland
 
 PanelWindow {
     id: root
+    readonly property var _screen: screen
 
     WlrLayershell.namespace: "quickshell:network"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -19,7 +20,7 @@ PanelWindow {
     implicitHeight: box.implicitHeight + Geometry.innerPad * 2
     color: "transparent"
 
-    visible: PopupState.hoverActive === "network" && PopupState.hoverScreen === screen
+    visible: PopupState.hoverActive === "network" && PopupState.hoverScreen === _screen
 
     Rectangle {
         anchors.fill: parent

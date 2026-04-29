@@ -5,6 +5,7 @@ import Quickshell.Wayland
 
 PanelWindow {
     id: root
+    readonly property var _screen: screen
 
     WlrLayershell.namespace: "quickshell:docker"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -19,7 +20,7 @@ PanelWindow {
     implicitHeight: Math.min(box.implicitHeight, 440)
     color: "transparent"
 
-    visible: PopupState.active === "docker" && PopupState.screen === screen
+    visible: PopupState.active === "docker" && PopupState.screen === _screen
 
     Rectangle {
         anchors.fill: parent

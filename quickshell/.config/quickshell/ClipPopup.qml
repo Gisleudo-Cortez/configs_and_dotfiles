@@ -5,6 +5,7 @@ import Quickshell.Wayland
 
 PanelWindow {
     id: root
+    readonly property var _screen: screen
     WlrLayershell.namespace: "quickshell:clip"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
@@ -18,7 +19,7 @@ PanelWindow {
     implicitHeight: Math.min(box.implicitHeight, 400)
     color: "transparent"
 
-    visible: PopupState.active === "clip" && PopupState.screen === screen
+    visible: PopupState.active === "clip" && PopupState.screen === _screen
 
     Rectangle {
         anchors.fill: parent

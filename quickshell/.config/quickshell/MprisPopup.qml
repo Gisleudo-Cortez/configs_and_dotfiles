@@ -6,6 +6,7 @@ import Quickshell.Services.Mpris
 
 PanelWindow {
     id: root
+    readonly property var _screen: screen
     WlrLayershell.namespace: "quickshell:media"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
@@ -19,7 +20,7 @@ PanelWindow {
     implicitHeight: box.implicitHeight + Geometry.innerPad * 2
     color: "transparent"
 
-    visible: PopupState.active === "media" && PopupState.screen === screen
+    visible: PopupState.active === "media" && PopupState.screen === _screen
 
     // Prefer the currently playing player; fall back to first.
     readonly property var player: {

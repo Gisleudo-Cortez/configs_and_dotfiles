@@ -20,18 +20,24 @@ PanelWindow {
     implicitHeight: Math.min(box.implicitHeight, 440)
     color: "transparent"
 
-    // Show on hover OR on click; clicking also triggers scan (handled below)
-    visible: (PopupState.active === "bluetooth" && PopupState.screen === screen)
-          || (PopupState.hoverActive === "bluetooth" && PopupState.hoverScreen === screen)
+    // Stable screen copy — avoids binding loop from PanelWindow.screen reacting to visible
+    readonly property var _screen: screen
+    visible: (PopupState.active === "bluetooth" && PopupState.screen === _screen)
+          || (PopupState.hoverActive === "bluetooth" && PopupState.hoverScreen === _screen)
 
     readonly property var adapter: Bluetooth.defaultAdapter
 
-    // Auto-start discovery when opened via click (not hover)
-    onVisibleChanged: {
-        if (visible && PopupState.active === "bluetooth" && adapter?.enabled)
-            adapter.startDiscovery()
-        if (!visible && adapter?.scanning)
-            adapter.stopDiscovery()
+    // Start scan when click-opened; stop when closed
+    // onVisibleChanged triggers a compile error — use a Connections on PopupState instead
+    Connections {
+        target: PopupState
+        function onActiveChanged() {
+            if (PopupState.active === "bluetooth" && PopupState.screen === root._screen) {
+                if (root.adapter && root.adapter.enabled) root.adapter.startDiscovery()
+            } else if (root.adapter && root.adapter.scanning) {
+                root.adapter.stopDiscovery()
+            }
+        }
     }
 
     Rectangle {
@@ -67,34 +73,40 @@ PanelWindow {
                         Layout.fillWidth: true
                     }
 
-                    // Scan status / button (only when on and click-opened)
+                    // Scan button — only visible when click-opened
                     Text {
-                        visible: (root.adapter?.enabled ?? false) &&
-                                 PopupState.active === "bluetooth"
-                        text: root.adapter?.scanning ? "󰑪 scanning" : "󰑺 scan"
-                        color: root.adapter?.scanning ? Colors.cyan : Colors.textDim
+                        visible: root.adapter !== null
+                              && root.adapter.enabled
+                              && PopupState.active === "bluetooth"
+                        text: (root.adapter !== null && root.adapter.scanning) ? "󰑪 scanning" : "󰑺 scan"
+                        color: (root.adapter !== null && root.adapter.scanning) ? Colors.cyan : Colors.textDim
                         font.family: "JetBrainsMono Nerd Font"
                         font.pixelSize: Geometry.fontSizeSm
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                if (root.adapter?.scanning) root.adapter.stopDiscovery()
-                                else root.adapter?.startDiscovery()
+                                if (root.adapter === null) return
+                                if (root.adapter.scanning) root.adapter.stopDiscovery()
+                                else root.adapter.startDiscovery()
                             }
                         }
                     }
 
                     // On/off toggle
                     Text {
-                        text: (root.adapter?.enabled ?? false) ? "on" : "off"
-                        color: (root.adapter?.enabled ?? false) ? Colors.blue : Colors.textDim
+                        visible: root.adapter !== null
+                        text: (root.adapter !== null && root.adapter.enabled) ? "on" : "off"
+                        color: (root.adapter !== null && root.adapter.enabled) ? Colors.blue : Colors.textDim
                         font.family: "JetBrainsMono Nerd Font"
                         font.pixelSize: Geometry.fontSizeSm
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: if (root.adapter) root.adapter.enabled = !root.adapter.enabled
+                            onClicked: {
+                                if (root.adapter !== null)
+                                    root.adapter.enabled = !root.adapter.enabled
+                            }
                         }
                     }
                 }
@@ -103,7 +115,7 @@ PanelWindow {
 
                 // ── No adapter ────────────────────────────────────────────
                 Text {
-                    visible: !root.adapter
+                    visible: root.adapter === null
                     text: "No Bluetooth adapter"
                     color: Colors.textDim
                     font.family: "JetBrainsMono Nerd Font"
@@ -114,7 +126,7 @@ PanelWindow {
 
                 // ── BT off ────────────────────────────────────────────────
                 Text {
-                    visible: root.adapter !== null && !(root.adapter?.enabled ?? false)
+                    visible: root.adapter !== null && !root.adapter.enabled
                     text: "Bluetooth is off"
                     color: Colors.textDim
                     font.family: "JetBrainsMono Nerd Font"
@@ -127,10 +139,10 @@ PanelWindow {
                 // ── Device list ───────────────────────────────────────────
                 Repeater {
                     id: devRepeater
-                    model: root.adapter?.devices
+                    model: (root.adapter !== null && root.adapter.enabled)
+                           ? root.adapter.devices : null
 
                     delegate: ColumnLayout {
-                        visible: root.adapter?.enabled ?? false
                         width: box.width
                         spacing: 0
 
@@ -149,13 +161,10 @@ PanelWindow {
                                 }
                                 spacing: 8
 
-                                // Connection state dot
                                 Rectangle {
                                     width: 7; height: 7; radius: 4
-                                    color: modelData.connected ? Colors.green
-                                         : modelData.state === 2 ? Colors.warning  // connecting
-                                         : Colors.textDim
-                                    opacity: modelData.connected ? 1.0 : 0.5
+                                    color: modelData.connected ? Colors.green : Colors.textDim
+                                    opacity: modelData.connected ? 1.0 : 0.4
                                 }
 
                                 ColumnLayout {
@@ -172,18 +181,11 @@ PanelWindow {
                                         elide: Text.ElideRight
                                     }
 
-                                    // Battery line (when available)
                                     RowLayout {
                                         visible: modelData.batteryAvailable
                                         spacing: 3
                                         Text {
-                                            text: "󰁹"
-                                            color: Colors.textDim
-                                            font.family: "JetBrainsMono Nerd Font"
-                                            font.pixelSize: Geometry.fontSizeSm - 1
-                                        }
-                                        Text {
-                                            text: modelData.battery + "%"
+                                            text: "󰁹 " + modelData.battery + "%"
                                             color: Colors.textDim
                                             font.family: "JetBrainsMono Nerd Font"
                                             font.pixelSize: Geometry.fontSizeSm - 1
@@ -191,7 +193,6 @@ PanelWindow {
                                     }
                                 }
 
-                                // Action button
                                 Text {
                                     text: modelData.connected   ? "disconnect"
                                         : modelData.paired      ? "connect"
@@ -203,9 +204,9 @@ PanelWindow {
                                         anchors.fill: parent
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: {
-                                            if (modelData.connected)    modelData.disconnect()
-                                            else if (modelData.paired)  modelData.connect()
-                                            else                         modelData.pair()
+                                            if (modelData.connected)   modelData.disconnect()
+                                            else if (modelData.paired) modelData.connect()
+                                            else                        modelData.pair()
                                         }
                                     }
                                 }
@@ -220,18 +221,20 @@ PanelWindow {
                         }
 
                         Rectangle {
-                            visible: parent.visible && index < devRepeater.count - 1
+                            visible: index < devRepeater.count - 1
                             Layout.fillWidth: true; height: 1
                             color: Colors.textDim; opacity: 0.1
                         }
                     }
                 }
 
-                // ── Empty state ───────────────────────────────────────────
+                // Empty state when BT on but no devices
                 Text {
-                    visible: (root.adapter?.enabled ?? false) &&
-                             (root.adapter?.devices?.count ?? 0) === 0
-                    text: root.adapter?.scanning ? "Scanning for devices…" : "No known devices"
+                    visible: root.adapter !== null
+                          && root.adapter.enabled
+                          && root.adapter.devices.count === 0
+                    text: (root.adapter !== null && root.adapter.scanning)
+                          ? "Scanning for devices…" : "No known devices"
                     color: Colors.textDim
                     font.family: "JetBrainsMono Nerd Font"
                     font.pixelSize: Geometry.fontSizeSm

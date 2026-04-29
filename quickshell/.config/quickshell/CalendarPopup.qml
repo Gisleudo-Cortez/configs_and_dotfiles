@@ -5,6 +5,7 @@ import Quickshell.Wayland
 
 PanelWindow {
     id: root
+    readonly property var _screen: screen
     WlrLayershell.namespace: "quickshell:calendar"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
@@ -18,7 +19,7 @@ PanelWindow {
     implicitHeight: calBox.implicitHeight + Geometry.innerPad * 2
     color: "transparent"
 
-    visible: PopupState.active === "calendar" && PopupState.screen === screen
+    visible: PopupState.active === "calendar" && PopupState.screen === _screen
     onVisibleChanged: if (visible) { cal.year = new Date().getFullYear(); cal.month = new Date().getMonth(); Holidays.loadYear(cal.year) }
 
     Rectangle {

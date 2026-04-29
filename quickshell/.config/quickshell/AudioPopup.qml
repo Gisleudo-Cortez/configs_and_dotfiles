@@ -6,6 +6,7 @@ import Quickshell.Services.Pipewire
 
 PanelWindow {
     id: root
+    readonly property var _screen: screen
 
     WlrLayershell.namespace: "quickshell:audio"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -20,7 +21,7 @@ PanelWindow {
     implicitHeight: Math.min(box.implicitHeight, 440)
     color: "transparent"
 
-    visible: PopupState.active === "audio" && PopupState.screen === screen
+    visible: PopupState.active === "audio" && PopupState.screen === _screen
 
     Rectangle {
         anchors.fill: parent
