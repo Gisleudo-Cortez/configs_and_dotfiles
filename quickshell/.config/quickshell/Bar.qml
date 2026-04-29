@@ -5,7 +5,6 @@ import Quickshell.Wayland
 
 PanelWindow {
     id: root
-    required property var screen
     WlrLayershell.namespace: "quickshell:bar"
     WlrLayershell.layer: WlrLayer.Top
 

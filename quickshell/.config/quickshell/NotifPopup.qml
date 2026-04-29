@@ -5,8 +5,6 @@ import Quickshell.Wayland
 
 PanelWindow {
     id: root
-    required property var screen
-
     WlrLayershell.namespace: "quickshell:notif"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None

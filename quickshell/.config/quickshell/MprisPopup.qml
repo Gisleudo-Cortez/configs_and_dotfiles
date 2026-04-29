@@ -6,8 +6,6 @@ import Quickshell.Services.Mpris
 
 PanelWindow {
     id: root
-    required property var screen
-
     WlrLayershell.namespace: "quickshell:media"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
