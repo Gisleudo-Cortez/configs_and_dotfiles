@@ -20,15 +20,10 @@ PanelWindow {
     implicitHeight: toast.implicitHeight
     color: "transparent"
 
-    // PanelWindow has no opacity property — animate an inner Item instead.
     visible: toast.opacity > 0
-
-    // Only the primary screen shows toasts
-    readonly property bool isPrimary: screen === Quickshell.screens[0]
 
     Connections {
         target: NotifService
-        enabled: root.isPrimary
         function onNotificationReceived(notif) {
             toastSummary.text = notif.summary !== "" ? notif.summary : notif.appName
             toastBody.text    = notif.body
@@ -41,6 +36,11 @@ PanelWindow {
         id: dismissTimer
         interval: 5000
         onTriggered: fadeOut.start()
+    }
+
+    Connections {
+        target: dismissTimer
+        function onRunningChanged() { if (dismissTimer.running) fadeIn.start() }
     }
 
     Item {
@@ -121,10 +121,5 @@ PanelWindow {
                 }
             }
         }
-    }
-
-    Connections {
-        target: dismissTimer
-        function onRunningChanged() { if (dismissTimer.running) fadeIn.start() }
     }
 }
