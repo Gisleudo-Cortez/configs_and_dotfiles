@@ -1,3 +1,4 @@
+# Singletons
 singleton Colors 1.0 Colors.qml
 singleton Geometry 1.0 Geometry.qml
 singleton SysStats 1.0 SysStats.qml
@@ -7,3 +8,18 @@ singleton Holidays 1.0 Holidays.qml
 singleton NotifService 1.0 NotifService.qml
 singleton ClipService 1.0 ClipService.qml
 singleton PopupState 1.0 PopupState.qml
+
+# Components
+Bar 1.0 Bar.qml
+BarSep 1.0 BarSep.qml
+CalendarPopup 1.0 CalendarPopup.qml
+ClipPopup 1.0 ClipPopup.qml
+HudCorners 1.0 HudCorners.qml
+Island 1.0 Island.qml
+IslandCenter 1.0 IslandCenter.qml
+IslandLeft 1.0 IslandLeft.qml
+IslandRight 1.0 IslandRight.qml
+MprisPopup 1.0 MprisPopup.qml
+NotifPopup 1.0 NotifPopup.qml
+NotifToast 1.0 NotifToast.qml
+StatChip 1.0 StatChip.qml

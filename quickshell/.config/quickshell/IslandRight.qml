@@ -39,6 +39,7 @@ Island {
     }
 
     readonly property var _volAdjProc: Process {
+        command: ["true"]
         running: false
         onExited: root._volProc.running = true
     }

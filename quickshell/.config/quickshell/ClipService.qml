@@ -31,15 +31,24 @@ QtObject {
         _listProc.running = true
     }
 
-    // Entry is passed as positional arg $1 to avoid stdin timing races.
+    // Entry written to stdin after process starts (onStarted fires when pipe is ready).
     readonly property var _copyProc: Process {
+        command: ["bash", "-c", "cliphist decode | wl-copy"]
+        stdinEnabled: true
         running: false
+        property string _entry: ""
+
+        onStarted: {
+            if (_entry !== "") {
+                write(_entry + "\n")
+                _entry = ""
+            }
+        }
     }
 
     function copy(entry) {
         if (_copyProc.running) return
-        _copyProc.command = ["bash", "-c",
-            "printf '%s\\n' \"$1\" | cliphist decode | wl-copy", "bash", entry]
+        _copyProc._entry = entry
         _copyProc.running = true
     }
 }
