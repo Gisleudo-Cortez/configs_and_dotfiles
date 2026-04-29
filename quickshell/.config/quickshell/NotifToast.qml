@@ -17,11 +17,11 @@ PanelWindow {
     margins.right: Geometry.outerGap
 
     implicitWidth: Geometry.popupWidth
-    implicitHeight: toastBox.implicitHeight + Geometry.innerPad * 2
+    implicitHeight: toast.implicitHeight
     color: "transparent"
 
-    visible: opacity > 0
-    opacity: 0
+    // PanelWindow has no opacity property — animate an inner Item instead.
+    visible: toast.opacity > 0
 
     // Only the primary screen shows toasts
     readonly property bool isPrimary: screen === Quickshell.screens[0]
@@ -43,81 +43,88 @@ PanelWindow {
         onTriggered: fadeOut.start()
     }
 
-    NumberAnimation on opacity {
-        id: fadeIn
-        to: 1; duration: 180; easing.type: Easing.OutCubic
-    }
-    NumberAnimation on opacity {
-        id: fadeOut
-        to: 0; duration: 300; easing.type: Easing.InCubic
+    Item {
+        id: toast
+        anchors.fill: parent
+        implicitHeight: toastBox.implicitHeight + Geometry.innerPad * 2
+        opacity: 0
+
+        NumberAnimation on opacity {
+            id: fadeIn
+            to: 1; duration: 180; easing.type: Easing.OutCubic
+        }
+        NumberAnimation on opacity {
+            id: fadeOut
+            to: 0; duration: 300; easing.type: Easing.InCubic
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: Colors.bgPopup
+            radius: Geometry.islandRadius
+            border.color: Colors.purple
+            border.width: Geometry.borderWidth
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: { fadeOut.start(); dismissTimer.stop() }
+            }
+
+            ColumnLayout {
+                id: toastBox
+                anchors { left: parent.left; right: parent.right; top: parent.top }
+                anchors.margins: Geometry.innerPad
+                spacing: 3
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text {
+                        id: toastApp
+                        text: ""
+                        color: Colors.purple
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: Geometry.fontSizeSm
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        text: "󰂚"
+                        color: Colors.textDim
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: Geometry.fontSizeSm
+                    }
+                }
+
+                Text {
+                    id: toastSummary
+                    text: ""
+                    color: Colors.text
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSize
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    visible: text !== ""
+                }
+
+                Text {
+                    id: toastBody
+                    text: ""
+                    color: Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSizeSm
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 3
+                    elide: Text.ElideRight
+                    visible: text !== ""
+                }
+            }
+        }
     }
 
     Connections {
         target: dismissTimer
         function onRunningChanged() { if (dismissTimer.running) fadeIn.start() }
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        color: Colors.bgPopup
-        radius: Geometry.islandRadius
-        border.color: Colors.purple
-        border.width: Geometry.borderWidth
-
-        MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: { fadeOut.start(); dismissTimer.stop() }
-        }
-
-        ColumnLayout {
-            id: toastBox
-            anchors { left: parent.left; right: parent.right; top: parent.top }
-            anchors.margins: Geometry.innerPad
-            spacing: 3
-
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    id: toastApp
-                    text: ""
-                    color: Colors.purple
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Geometry.fontSizeSm
-                    Layout.fillWidth: true
-                    elide: Text.ElideRight
-                }
-                Text {
-                    text: "󰂚"
-                    color: Colors.textDim
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Geometry.fontSizeSm
-                }
-            }
-
-            Text {
-                id: toastSummary
-                text: ""
-                color: Colors.text
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSize
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                visible: text !== ""
-            }
-
-            Text {
-                id: toastBody
-                text: ""
-                color: Colors.textDim
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSizeSm
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                maximumLineCount: 3
-                elide: Text.ElideRight
-                visible: text !== ""
-            }
-        }
     }
 }
