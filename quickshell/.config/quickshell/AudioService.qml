@@ -1,53 +1,94 @@
 pragma Singleton
 import QtQuick
+import Quickshell.Io
 import Quickshell.Services.Pipewire
 
 QtObject {
     id: root
 
+    // ── Device name: from PipeWire (reactive, no polling) ─────────────────
+    // PipeWire.defaultAudioSink.description gives the human-readable name.
+    // The node's SPA_PROP_volume is always 1.0 — WirePlumber stores the
+    // actual soft volume separately, so we must use wpctl for volume/mute.
     readonly property var sink: Pipewire.defaultAudioSink
-    // ?? 0 only guards null/undefined; use isNaN() to also guard pre-init NaN
-    readonly property real volume: {
-        const v = sink?.audio?.volume ?? 0
-        return isNaN(v) ? 0 : v
-    }
-    readonly property bool muted: sink?.audio?.muted ?? false
 
-    readonly property string sinkName: {
-        const d = sink?.description ?? ""
-        if (d) return d
-        return sink?.name ?? "No output"
-    }
+    readonly property string sinkName: sink?.description ?? sink?.name ?? "No output"
 
-    // Truncated name for bar display
     readonly property string sinkShortName: {
         const n = sinkName
-        // Strip common suffixes like "Analog Stereo", "Digital Stereo (IEC958)"
-        const cleaned = n.replace(/ \(.*\)$/, "").replace(/ Analog Stereo$/, "")
-                         .replace(/ Digital Stereo$/, "")
-        if (cleaned.length > 18) return cleaned.substring(0, 16) + "…"
-        return cleaned
+        const c = n.replace(/ \(.*\)$/, "")
+                   .replace(/ Analog Stereo$/, "")
+                   .replace(/ Digital Stereo$/, "")
+                   .replace(/ \+ HDMI.*$/, "")
+        return c.length > 18 ? c.substring(0, 16) + "…" : c
     }
 
+    // ── Volume/mute: via wpctl (reads WirePlumber soft volume) ────────────
+    property real volume: 0    // 0.0 – 1.5 (wpctl scale, 1.0 = 100%)
+    property bool muted:  false
+
+    readonly property var _volProc: Process {
+        id: volProc
+        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
+        running: false
+        stdout: SplitParser {
+            onRead: function(line) {
+                const m = line.match(/([\d.]+)/)
+                if (m) root.volume = parseFloat(m[1])
+                root.muted = line.includes("MUTED")
+            }
+        }
+    }
+
+    readonly property var _ticker: Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: volProc.running = true
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────
     function volIcon() {
         if (muted || volume === 0) return "󰝟"
-        if (volume < 0.4) return "󰕿"
-        if (volume < 0.75) return "󰖀"
+        if (volume < 0.4)          return "󰕿"
+        if (volume < 0.75)         return "󰖀"
         return "󰕾"
     }
 
     function volPct() { return Math.round(volume * 100) }
 
+    // ── Controls: via wpctl ───────────────────────────────────────────────
+    readonly property var _setVolProc: Process {
+        id: setVolProc
+        command: ["true"]
+        running: false
+        onExited: volProc.running = true
+    }
+
+    readonly property var _muteProc: Process {
+        id: muteProc
+        command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]
+        running: false
+        onExited: volProc.running = true
+    }
+
     function setVolume(v) {
-        if (sink?.audio) sink.audio.volume = Math.max(0, Math.min(1.5, v))
+        if (setVolProc.running) return
+        const pct = Math.round(Math.max(0, Math.min(150, v * 100)))
+        setVolProc.command = ["wpctl", "set-volume", "--limit", "1.5",
+                              "@DEFAULT_AUDIO_SINK@", pct + "%"]
+        setVolProc.running = true
     }
 
     function adjustVolume(delta) { setVolume(volume + delta) }
 
     function toggleMute() {
-        if (sink?.audio) sink.audio.muted = !sink.audio.muted
+        if (muteProc.running) return
+        muteProc.running = true
     }
 
+    // Switch default output — Pipewire API writes WirePlumber's preferred sink
     function setDefaultSink(node) {
         Pipewire.preferredDefaultAudioSink = node
     }
