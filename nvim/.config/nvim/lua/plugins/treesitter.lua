@@ -162,9 +162,14 @@ return {
     },
     config = function(_, opts)
       require("nvim-treesitter.configs").setup(opts)
-      -- Treesitter-backed folds
+      -- Treesitter-backed folds. The pcall wrapper swallows nil-node errors
+      -- that fire when formatters rewrite the buffer mid-parse.
+      _G.safe_ts_foldexpr = function()
+        local ok, val = pcall(vim.treesitter.foldexpr)
+        return ok and val or "0"
+      end
       vim.opt.foldmethod = "expr"
-      vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+      vim.opt.foldexpr = "v:lua.safe_ts_foldexpr()"
     end,
   },
 }

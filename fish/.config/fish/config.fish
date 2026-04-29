@@ -155,3 +155,10 @@ test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
 set -gx PATH $PATH /home/nero/.lmstudio/bin
 # End of LM Studio CLI section
 
+# Ollama performance settings
+set -gx OLLAMA_FLASH_ATTENTION 1
+set -gx OLLAMA_MAX_LOADED_MODELS 1
+set -gx OLLAMA_KV_CACHE_TYPE q8_0
+set -gx OLLAMA_NUM_PARALLEL 1
+set -gx OLLAMA_NUM_CTX 35000
+
