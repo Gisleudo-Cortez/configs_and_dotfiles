@@ -10,9 +10,9 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Top
 
     anchors { top: true; left: true; right: true }
-    height: Geometry.barHeight + Geometry.outerGap * 2
+    implicitHeight: Geometry.barHeight + Geometry.outerGap * 2
     color: "transparent"
-    exclusiveZone: height
+    exclusiveZone: Geometry.barHeight + Geometry.outerGap * 2
 
     Item {
         anchors.fill: parent
@@ -43,8 +43,9 @@ PanelWindow {
             IslandRight {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                onNotifClicked: PopupState.toggle("notif", root.screen)
-                onClipClicked:  { ClipService.refresh(); PopupState.toggle("clip", root.screen) }
+                onNotifClicked:  PopupState.toggle("notif", root.screen)
+                onClipClicked:   { ClipService.refresh(); PopupState.toggle("clip", root.screen) }
+                onMediaClicked:  PopupState.toggle("media", root.screen)
             }
         }
     }

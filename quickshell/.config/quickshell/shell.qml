@@ -23,4 +23,8 @@ ShellRoot {
         model: Quickshell.screens
         NotifToast { required property var modelData; screen: modelData }
     }
+    Variants {
+        model: Quickshell.screens
+        MprisPopup { required property var modelData; screen: modelData }
+    }
 }
