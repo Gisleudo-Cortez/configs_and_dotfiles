@@ -55,12 +55,4 @@ return {
     config = function() require("kitty-scrollback").setup() end,
   },
 
-  -- ─── hyprlang syntax fallback (if treesitter parser unavailable) ────────
-  -- The TS parser for hyprlang handles highlighting; this vim plugin is a
-  -- cheap fallback for filetype inference + legacy syntax.
-  {
-    "luckasRanarison/tree-sitter-hypr",
-    ft = "hyprlang",
-    lazy = true,
-  },
 }
