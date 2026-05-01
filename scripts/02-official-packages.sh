@@ -67,53 +67,6 @@ configure_docker() {
     fi
 }
 
-configure_postgresql() {
-    if ! pacman -Qs postgresql &>/dev/null; then
-        echo "[02-official-packages] PostgreSQL not installed. Skipping configuration."
-        return
-    fi
-
-    echo "[02-official-packages] Configuring PostgreSQL..."
-    local pg_data_dir="/var/lib/postgres/data"
-    
-    run_cmd systemctl enable postgresql.service
-
-    if [[ -d "$pg_data_dir" && -f "$pg_data_dir/PG_VERSION" ]]; then
-        echo "[02-official-packages] PostgreSQL data directory seems initialized. Ensuring permissions."
-        run_cmd chown -R postgres:postgres "$pg_data_dir"
-        run_cmd chmod -R 700 "$pg_data_dir"
-    else
-        # Safety check: ensure dir exists before moving it
-        if [[ -d "$pg_data_dir" ]]; then
-            local backup_dir="${pg_data_dir}.bak.$(date +%Y%m%d%H%M%S)"
-            echo "[02-official-packages] WARNING: Moving existing '$pg_data_dir' to '$backup_dir'."
-            run_cmd mv "$pg_data_dir" "$backup_dir"
-        fi
-        
-        echo "[02-official-packages] Initializing PostgreSQL database cluster..."
-        run_cmd mkdir -p "$pg_data_dir"
-        run_cmd chown postgres:postgres "$pg_data_dir"
-        run_cmd chmod 700 "$pg_data_dir"
-        
-        if run_cmd su - postgres -s /bin/bash -c "initdb --locale=C.UTF-8 -E UTF8 -D '$pg_data_dir'"; then
-            echo "[02-official-packages] PostgreSQL database cluster initialized successfully."
-        else
-            echo "[02-official-packages] Error: 'initdb' command FAILED. PostgreSQL service will not be started."
-            # If real run fails, return. Dry run continues.
-            [[ "$DRY_RUN" == false ]] && return
-        fi
-    fi
-
-    echo "[02-official-packages] Starting PostgreSQL service..."
-    run_cmd systemctl start postgresql.service
-    if [[ "$DRY_RUN" == false ]]; then
-        sleep 3
-        if ! systemctl is-active --quiet postgresql.service; then
-            echo "[02-official-packages] Error: PostgreSQL service FAILED to start."
-        fi
-    fi
-}
-
 configure_networkmanager() {
     echo "[02-official-packages] Configuring NetworkManager with iwd backend..."
     local nm_conf_dir="/etc/NetworkManager/conf.d"
@@ -135,6 +88,11 @@ configure_networkmanager() {
     done
 }
 
+configure_bluetooth() {
+    echo "[02-official-packages] Enabling Bluetooth service..."
+    run_cmd systemctl enable --now bluetooth.service
+}
+
 # --- Main Logic ---
 
 main() {
@@ -146,20 +104,13 @@ main() {
         return 1
     fi
 
-    # Check for brave-browser separately
-    local brave_pkg
-    brave_pkg=$(pacman -Si brave-browser 2>/dev/null && echo "brave-browser" || echo "")
-
-    # Combine the package lists
     local final_pkg_list=("${all_packages_arr[@]}")
-    if [[ -n "$brave_pkg" ]]; then
-        final_pkg_list+=("$brave_pkg")
-    fi
 
     install_packages "${final_pkg_list[@]}"
     configure_docker
     
     configure_networkmanager
+    configure_bluetooth
 
     echo "[02-official-packages] Package installation and basic service configuration complete."
 }

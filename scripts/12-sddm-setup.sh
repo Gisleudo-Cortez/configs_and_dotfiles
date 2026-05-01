@@ -10,9 +10,10 @@ fi
 
 need_root
 
-THEME_NAME="synth-glass"
+THEME_NAME="pixie"
 THEME_DIR="/usr/share/sddm/themes/$THEME_NAME"
 SDDM_CONF_DIR="/etc/sddm.conf.d"
+SDDM_CONF_FILE="$SDDM_CONF_DIR/10-theme.conf"
 
 main() {
     local script_dir
@@ -20,26 +21,45 @@ main() {
     local dotfiles_root
     dotfiles_root=$(git -C "$script_dir" rev-parse --show-toplevel)
 
-    echo "[12-sddm-setup] Deploying SDDM theme '$THEME_NAME' from $dotfiles_root"
+    local submodule_dir="$dotfiles_root/pixie-sddm"
 
-    # Remove manually installed theme files so stow can create symlinks
+    if [[ ! -d "$submodule_dir" ]]; then
+        echo "[12-sddm-setup] Error: pixie-sddm submodule not found at $submodule_dir"
+        echo "[12-sddm-setup] Run: git submodule update --init pixie-sddm"
+        exit 1
+    fi
+
+    # Ensure submodule files are present (not an empty init)
+    if [[ ! -f "$submodule_dir/Main.qml" ]]; then
+        echo "[12-sddm-setup] Error: pixie-sddm submodule appears empty. Run: git submodule update --init pixie-sddm"
+        exit 1
+    fi
+
+    echo "[12-sddm-setup] Installing Pixie SDDM theme from $submodule_dir"
+
+    # Remove existing non-symlink theme dir
     if [[ -d "$THEME_DIR" && ! -L "$THEME_DIR" ]]; then
-        echo "[12-sddm-setup] Removing manually installed theme dir: $THEME_DIR"
+        echo "[12-sddm-setup] Removing old theme directory: $THEME_DIR"
         run_cmd rm -rf "$THEME_DIR"
     fi
 
-    # Ensure /etc/sddm.conf.d exists
-    if [[ ! -d "$SDDM_CONF_DIR" ]]; then
-        echo "[12-sddm-setup] Creating $SDDM_CONF_DIR"
-        run_cmd mkdir -p "$SDDM_CONF_DIR"
-    fi
+    run_cmd mkdir -p "$THEME_DIR"
+    run_cmd cp -r \
+        "$submodule_dir/assets" \
+        "$submodule_dir/components" \
+        "$submodule_dir/Main.qml" \
+        "$submodule_dir/metadata.desktop" \
+        "$submodule_dir/theme.conf" \
+        "$submodule_dir/LICENSE" \
+        "$THEME_DIR/"
+    run_cmd chmod -R 755 "$THEME_DIR"
 
-    cd "$dotfiles_root"
+    run_cmd mkdir -p "$SDDM_CONF_DIR"
+    run_cmd bash -c "printf '[Theme]\nCurrent=$THEME_NAME\n' > '$SDDM_CONF_FILE'"
 
-    echo "[12-sddm-setup] Stowing sddm package to /"
-    run_cmd stow -Svt / sddm
+    run_cmd systemctl enable sddm.service
 
-    echo "[12-sddm-setup] SDDM setup complete. Theme '$THEME_NAME' is active."
+    echo "[12-sddm-setup] SDDM setup complete. Theme '$THEME_NAME' is active; will start on next reboot."
 }
 
 main

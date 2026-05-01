@@ -2,18 +2,10 @@
 find-the-command
 anydesk-bin
 grimblast-git
-waybar-module-pacman-updates-git
-wine-stable
-wlr-randr-git
-zsh-theme-powerlevel10k-git
 zen-browser-bin
-satty
-hyprsunset
+google-chrome
 
 # Themes
-gruvbox-material-gtk-theme-git
 catppuccin-gtk-theme-macchiato
 catppuccin-gtk-theme-latte
 catppuccin-gtk-theme-frappe
-material-gtk-theme-git
-gtk-cyberpunk-neon-theme-git

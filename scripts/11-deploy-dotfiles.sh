@@ -15,7 +15,6 @@ need_user
 # The script now assumes it is located in a subdirectory of the dotfiles git repository.
 # It will automatically find the git repo root.
 STOW_PACKAGES_TO_DEPLOY=(
-    "zsh"
     "fish"
     "nvim"
     "starship"
@@ -23,6 +22,10 @@ STOW_PACKAGES_TO_DEPLOY=(
     "kitty"
     "waybar"
     "quickshell"
+    "mako"
+    "rofi"
+    "wlogout"
+    "fastfetch"
 )
 
 # --- Main Logic ---

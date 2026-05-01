@@ -18,6 +18,8 @@ ROOT_SCRIPTS=(
     "00-enable-repos.sh"
     "01-system-upgrade.sh"
     "02-official-packages.sh"
+    "02a-paru-setup.sh"
+    "06-printer-setup.sh"
     "12-sddm-setup.sh"
 )
 
@@ -59,14 +61,8 @@ main() {
     for script in "${USER_SCRIPTS[@]}"; do
         echo -e "\n[run-all] === Running $script (as user: $target_user) ==="
         if [[ -x "$SCRIPT_DIR/$script" ]]; then
-            if [[ "${DRY_RUN:-false}" == true ]]; then
-                # In dry run, we still execute the script with the flag
-                # but we log exactly how we call it.
-                echo "DRY-RUN (Orchestrator) ➜ sudo -u $target_user $SCRIPT_DIR/$script $DRY_RUN_FLAG"
-                sudo -u "$target_user" "$SCRIPT_DIR/$script" $DRY_RUN_FLAG
-            else
-                sudo -u "$target_user" "$SCRIPT_DIR/$script" $DRY_RUN_FLAG
-            fi
+            [[ -n "$DRY_RUN_FLAG" ]] && echo "[run-all] DRY-RUN ➜ sudo -u $target_user $SCRIPT_DIR/$script $DRY_RUN_FLAG"
+            sudo -u "$target_user" "$SCRIPT_DIR/$script" $DRY_RUN_FLAG
         else
             echo "[run-all] Error: Script '$script' not found or not executable."
             exit 1

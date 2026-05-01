@@ -2,33 +2,28 @@
 fish
 starship
 kitty
-alacritty
 neovim
 vim
 git
 stow
-zsh
 
 # GUI Apps & File Managers
 dolphin
-dbeaver
 vlc
 thunderbird
-kate
-konsole
 obsidian
 obs-studio
 firefox
 ark
+libreoffice-fresh
 libreoffice-fresh-pt-br
 
 # Development & Runtimes
 nodejs
 npm
-postgresql
 cmake
 go
-cargo
+rust
 delve
 gopls
 
@@ -39,6 +34,7 @@ rclone
 rsync
 7zip
 fzf
+fd
 bat
 eza
 ripgrep
@@ -47,15 +43,13 @@ ugrep
 htop
 yazi
 hyperfine
-qt6-virtualkeyboard
 jq
 grim
 slurp
 swappy
-dunst
-swaylock
+satty
 hypridle
-rofi-wayland
+rofi
 brightnessctl
 playerctl
 udiskie
@@ -69,14 +63,13 @@ fastfetch
 cliphist
 yad
 python-pywal
-figlet
-toilet
-lolcat
 reflector
+nvtop
+lazygit
+wl-clipboard
 
 # Fonts
 ttf-jetbrains-mono
-nerd-fonts
 noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
@@ -90,7 +83,6 @@ terminus-font
 adobe-source-code-pro-fonts
 ttf-ubuntu-font-family
 cantarell-fonts
-wqy-zenhei
 otf-font-awesome
 ttf-fantasque-sans-mono
 ttf-opensans
@@ -98,6 +90,7 @@ ttf-opensans
 # Containerization
 docker
 docker-buildx
+docker-compose
 fuse-overlayfs
 
 # System & Audio
@@ -130,12 +123,13 @@ hyprland
 hyprpaper
 hyprlock
 waybar
-swww
+awww
 wlogout
 hyprpicker
+hyprsunset
 
 # Desktop Integration & Dependencies
-polkit-gnome
+hyprpolkitagent
 xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk
 xdg-user-dirs
