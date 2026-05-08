@@ -13,7 +13,7 @@ RowLayout {
         text: icon
         color: parent.color
         font.family: "JetBrainsMono Nerd Font"
-        font.pixelSize: Geometry.fontSize
+        font.pixelSize: Geometry.iconFontSize
         visible: icon !== ""
     }
     Text {

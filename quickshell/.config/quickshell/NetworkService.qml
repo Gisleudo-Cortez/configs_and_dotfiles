@@ -29,11 +29,7 @@ QtObject {
         return "󰤯"
     }
 
-    readonly property string shortName: {
-        if (!connected) return "offline"
-        if (connectionName.length > 14) return connectionName.substring(0, 12) + "…"
-        return connectionName
-    }
+    readonly property string shortName: connected ? connectionName : "offline"
 
     // ── Process 1: active device/connection (one line per network device) ─
     // Format: DEVICE:TYPE:STATE:CONNECTION (connection name last so colons in

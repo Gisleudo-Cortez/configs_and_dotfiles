@@ -41,7 +41,7 @@ Island {
             text: " "
             color: Colors.cyan
             font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Geometry.fontSize
+            font.pixelSize: Geometry.iconFontSize
         }
 
         Column {

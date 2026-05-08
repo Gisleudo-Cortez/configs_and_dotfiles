@@ -118,7 +118,7 @@ Island {
                     text: NetworkService.typeIcon
                     color: NetworkService.connected ? Colors.cyan : Colors.textDim
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Geometry.fontSize
+                    font.pixelSize: Geometry.iconFontSize
                 }
 
                 Text {
@@ -145,7 +145,7 @@ Island {
                 text: "󰒄"
                 color: VpnService.connected ? Colors.green : Colors.textDim
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSize
+                font.pixelSize: Geometry.iconFontSize
             }
 
             HoverHandler {
@@ -210,7 +210,7 @@ Island {
                     return Qt.rgba(0.247, 0.725, 0.976, 0.5)
                 }
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSize
+                font.pixelSize: Geometry.iconFontSize
             }
 
             HoverHandler {
@@ -267,7 +267,7 @@ Island {
                     text: AudioService.volIcon()
                     color: AudioService.muted ? Colors.textDim : Colors.text
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: Geometry.fontSize
+                    font.pixelSize: Geometry.iconFontSize
                 }
 
                 Text {
@@ -310,6 +310,45 @@ Island {
             }
         }
 
+        // ── Capslock / Numlock ────────────────────────────────────────────
+        Item {
+            id: keyLedWidget
+            implicitWidth: keyLedRow.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            RowLayout {
+                id: keyLedRow
+                anchors.centerIn: parent
+                spacing: 6
+
+                Text {
+                    text: "⇪"
+                    color: KeyLedService.capsLock ? Colors.warning : Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.iconFontSize
+                }
+
+                Text {
+                    text: "⇭"
+                    color: KeyLedService.numLock ? Colors.blue : Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.iconFontSize
+                }
+            }
+
+            HoverHandler {
+                onHoveredChanged: {
+                    if (hovered)
+                        TooltipService.show(
+                            "Caps Lock " + (KeyLedService.capsLock ? "ON" : "off") +
+                            "  ·  Num Lock " + (KeyLedService.numLock ? "ON" : "off"),
+                            root.screen)
+                    else
+                        TooltipService.hide()
+                }
+            }
+        }
+
         // ── Battery ───────────────────────────────────────────────────────
         StatChip {
             screen: root.screen
@@ -335,7 +374,7 @@ Island {
                 text: "󰝚"
                 color: root._activePlayer?.isPlaying ? Colors.green : Colors.textDim
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSize
+                font.pixelSize: Geometry.iconFontSize
             }
 
             HoverHandler {
@@ -371,7 +410,7 @@ Island {
                 text: NotifService.unreadCount > 0 ? "󱅫" : "󰂚"
                 color: NotifService.unreadCount > 0 ? Colors.purple : Colors.textDim
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSize
+                font.pixelSize: Geometry.iconFontSize
             }
 
             HoverHandler {
@@ -406,7 +445,7 @@ Island {
                 text: "󰅎"
                 color: Colors.textDim
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSize
+                font.pixelSize: Geometry.iconFontSize
             }
 
             HoverHandler {

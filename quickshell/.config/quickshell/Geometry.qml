@@ -8,6 +8,7 @@ QtObject {
     readonly property int islandRadius: 4
     readonly property int borderWidth:  1
     readonly property int iconSize:     16
+    readonly property int iconFontSize: 18
     readonly property int fontSize:     12
     readonly property int fontSizeSm:   10
     readonly property int popupWidth:   280
