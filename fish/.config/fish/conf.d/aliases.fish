@@ -58,9 +58,9 @@ alias rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
 
 # Custom aliases
 alias cls='clear'
-alias backup_all='sudo bash $HOME/Documents/Estudos/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/Bash_Scripts/backup_all.sh'
+alias backup_all='sudo bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/backup_all.sh'
 alias source_fish='source $HOME/Documents/configs_and_dotfiles/fish/.config/fish/config.fish'
-alias create_dc_folder='bash /home/nero/Documents/Estudos/Bash_Scripts/create_dc_folder.sh'
+alias create_dc_folder='bash /home/nero/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/create_dc_folder.sh'
 alias print_file='lp -d EPSON_L3210_Series'
 alias save_fish_config='cp ~/.config/fish/config.fish $pessoal/dotfiles/config.fish'
 alias estudos_env='source $estudos/estudos/bin/activate.fish'
@@ -74,6 +74,9 @@ alias upd_force='sudo pacman -Syyu --noconfirm && paru -Syyu --noconfirm'
 alias nv="nvim ."
 alias mk="mkdir -p"
 abbr mkdir "mkdir -p" # just in case i type the full command :)
+
+# Custom launch parameters
+alias anki_launch="LIBGL_ALWAYS_SOFTWARE=1 anki"
 
 # audio control
 alias audio_select="~/.config/waybar/scripts/wireplumber-audio.sh select"
