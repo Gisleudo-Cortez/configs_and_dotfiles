@@ -1,57 +1,86 @@
-/* ------------- dialog backdrop ------------- */
+/* Cyberpunk Hybrid-Cybercore wlogout theme — matches quickshell/kitty palette */
+
+* {
+	background-image: none;
+	font-size: 13px;
+	font-family: monospace;
+}
+
+/* Deep navy backdrop matching quickshell bgPopup */
 window {
-	background-color: rgba(12, 12, 12, 0.90);
-	/* translucent dark */
+	background-color: rgba(9, 24, 51, 0.92);
 }
 
-/* ------------- generic button style ------------- */
+/* Frosted-glass island buttons */
 button {
-	/* geometry */
-	min-width: 140px;
-	min-height: 140px;
-	padding: 18px 22px;
-	border-radius: 14px;
-	border: 1px solid #333542;
+	min-width:  150px;
+	min-height: 150px;
+	padding: 20px 24px;
+	margin: 10px;
+	border-radius: 16px;
 
-	/* colours */
-	background-color: #1E1E1E;
-	color: #FFFFFF;
+	background-color: rgba(9, 24, 51, 0.88);
+	color: #d4b8f0;
 
-	/* icon placement */
+	/* 1px purple border — same as quickshell Islands */
+	border: 1px solid #b589d6;
+
+	/* Soft purple outer glow */
+	box-shadow:
+		0 0 14px rgba(181, 137, 214, 0.30),
+		inset 0 1px 0 rgba(181, 137, 214, 0.08);
+
 	background-repeat: no-repeat;
-	background-position: center;
-	background-size: 28%;
+	background-position: center 32%;
+	background-size: 30%;
+
+	transition: all 0.25s cubic-bezier(0.55, 0.0, 0.28, 1.682);
 }
 
+/* Cyan accent on hover — mirrors quickshell hudGlow */
 button:hover,
-button:focus,
-button:active {
-	background-color: #2688DA;
-	/* accent when hovered */
+button:focus {
+	background-color: rgba(3, 237, 249, 0.10);
+	border-color: #03edf9;
+	color: #ffffff;
+
+	box-shadow:
+		0 0 22px rgba(3, 237, 249, 0.40),
+		0 0 44px rgba(3, 237, 249, 0.14),
+		inset 0 1px 0 rgba(3, 237, 249, 0.18);
+
+	background-size: 36%;
 	outline: none;
 }
 
-/* ------------- per-button icons ------------- */
+/* Green flash on click */
+button:active {
+	background-color: rgba(0, 255, 159, 0.14);
+	border-color: #00ff9f;
+	box-shadow: 0 0 18px rgba(0, 255, 159, 0.45);
+}
+
+/* Per-button icons — white variants from local icons dir */
 #lock {
-	background-image: url("/usr/share/wlogout/icons/lock.png");
+	background-image: url("$HOME/.config/wlogout/icons/lock_white.png");
 }
 
 #logout {
-	background-image: url("/usr/share/wlogout/icons/logout.png");
+	background-image: url("$HOME/.config/wlogout/icons/logout_white.png");
 }
 
 #suspend {
-	background-image: url("/usr/share/wlogout/icons/suspend.png");
+	background-image: url("$HOME/.config/wlogout/icons/suspend_white.png");
 }
 
 #hibernate {
-	background-image: url("/usr/share/wlogout/icons/hibernate.png");
+	background-image: url("$HOME/.config/wlogout/icons/hibernate_white.png");
 }
 
 #shutdown {
-	background-image: url("/usr/share/wlogout/icons/shutdown.png");
+	background-image: url("$HOME/.config/wlogout/icons/shutdown_white.png");
 }
 
 #reboot {
-	background-image: url("/usr/share/wlogout/icons/reboot.png");
+	background-image: url("$HOME/.config/wlogout/icons/reboot_white.png");
 }

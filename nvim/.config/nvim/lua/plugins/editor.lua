@@ -98,6 +98,37 @@ return {
     "nvim-treesitter/nvim-treesitter-context",
     event = { "BufReadPost", "BufNewFile" },
     opts = { mode = "cursor", max_lines = 3 },
+    config = function(_, opts)
+      -- Neovim 0.12's treesitter injection processing can crash with
+      -- "attempt to call method 'range' (a nil value)" on large
+      -- injection-heavy files (e.g. markdown with many code blocks).
+      -- Force sync parsing and wrap context.get in pcall as a workaround.
+      -- Must patch BEFORE setup(), since setup() calls enable() → update()
+      -- which immediately invokes context.get().
+      require("treesitter-context.config").update(opts)
+      local context = require("treesitter-context.context")
+      local original_get = context.get
+      local notified = false
+      context.get = function(winid)
+        local prev = vim.g._ts_force_sync_parsing
+        vim.g._ts_force_sync_parsing = true
+        local ok, r1, r2 = pcall(original_get, winid)
+        vim.g._ts_force_sync_parsing = prev
+        if ok then
+          return r1, r2
+        elseif not notified then
+          notified = true
+          vim.schedule(function()
+            vim.notify(
+              "nvim-treesitter-context: caught Neovim 0.12 TS crash, context disabled for this buffer",
+              vim.log.levels.WARN,
+              { title = "treesitter-context" }
+            )
+          end)
+        end
+      end
+      require("treesitter-context").setup()
+    end,
     keys = {
       { "<leader>ut", function()
           local tsc = require("treesitter-context")

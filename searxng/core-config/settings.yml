@@ -744,7 +744,7 @@ engines:
   - name: docker hub
     engine: docker_hub
     shortcut: dh
-    categories: [it, packages]
+    categories: [packages]
 
   - name: encyclosearch
     engine: json_engine
@@ -1108,7 +1108,7 @@ engines:
   - name: hackernews
     engine: hackernews
     shortcut: hn
-    disabled: true
+    categories: [it]
 
   - name: hex
     engine: hex
@@ -1325,7 +1325,6 @@ engines:
     categories: it
     shortcut: lo
     timeout: 5.0
-    disabled: true
     about:
       website: https://lobste.rs/
       wikidata_id: Q60762874
