@@ -131,6 +131,7 @@ return {
     -- can set the buffer vars. This BufReadPre handler runs first
     -- (init > config in lazy.nvim) and blocks the parse before it starts.
     vim.api.nvim_create_autocmd("BufReadPre", {
+      pattern = "*",
       callback = function(ev)
         local ok, size = pcall(vim.fn.getfsize, ev.file)
         if ok and size > 1.5 * 1024 * 1024 then
