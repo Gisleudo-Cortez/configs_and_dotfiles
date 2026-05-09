@@ -125,6 +125,21 @@ return {
     { "[[",              function() Snacks.words.jump(-vim.v.count1) end, desc = "Prev reference", mode = { "n", "t" } },
   },
   init = function()
+    -- Guard: prevent indent/scope treesitter crash on large files.
+    -- BufReadPost fires before FileType 'bigfile' in many cases, so
+    -- scope.attach() tries to parse treesitter before bigfile.setup
+    -- can set the buffer vars. This BufReadPre handler runs first
+    -- (init > config in lazy.nvim) and blocks the parse before it starts.
+    vim.api.nvim_create_autocmd("BufReadPre", {
+      callback = function(ev)
+        local ok, size = pcall(vim.fn.getfsize, ev.file)
+        if ok and size > 1.5 * 1024 * 1024 then
+          vim.b.snacks_indent = false
+          vim.b.snacks_scope = false
+        end
+      end,
+    })
+
     -- Route vim.notify through snacks on startup so early errors are pretty
     vim.api.nvim_create_autocmd("User", {
       pattern = "VeryLazy",
