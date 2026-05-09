@@ -23,7 +23,17 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
-    bigfile     = { enabled = true },
+    bigfile     = {
+      enabled = true,
+      ---@param ctx {buf: number, ft:string}
+      setup = function(ctx)
+        -- Disable indent guides and scope on big files.
+        -- Without this, indent/scope try to parse treesitter on huge buffers
+        -- and crash with "attempt to call method 'range' (a nil value)".
+        vim.b[ctx.buf].snacks_indent = false
+        vim.b[ctx.buf].snacks_scope = false
+      end,
+    },
     dashboard   = {
       enabled = true,
       preset = {
@@ -38,7 +48,16 @@ return {
       },
     },
     explorer    = { enabled = true, hidden = true },
-    indent      = { enabled = true },
+    indent      = {
+      enabled = true,
+      -- Double-guard: reject bigfile buffers even if buffer var isn't set yet
+      filter = function(buf)
+        return vim.g.snacks_indent ~= false
+          and vim.b[buf].snacks_indent ~= false
+          and vim.bo[buf].buftype == ""
+          and vim.bo[buf].filetype ~= "bigfile"
+      end,
+    },
     input       = { enabled = true },
     notifier    = { enabled = true, timeout = 3000 },
     picker      = {
