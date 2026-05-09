@@ -14,6 +14,9 @@ singleton DockerService 1.0 DockerService.qml
 singleton VpnService 1.0 VpnService.qml
 singleton TooltipService 1.0 TooltipService.qml
 singleton KeyLedService 1.0 KeyLedService.qml
+singleton CameraService 1.0 CameraService.qml
+singleton MicService 1.0 MicService.qml
+singleton UsbService 1.0 UsbService.qml
 
 # Components
 Bar 1.0 Bar.qml

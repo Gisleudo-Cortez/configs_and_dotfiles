@@ -349,6 +349,58 @@ Island {
             }
         }
 
+        // ── Camera ─────────────────────────────────────────────────────────
+        Item {
+            id: cameraWidget
+            visible: true  // always show camera indicator
+            implicitWidth: cameraChip.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            StatChip {
+                id: cameraChip
+                anchors.centerIn: parent
+                screen: root.screen
+                icon: CameraService.inUse ? "󰄀" : "󰄁"
+                value: CameraService.activeCount > 0 ? CameraService.activeCount + "" : ""
+                color: CameraService.inUse ? Colors.green : Colors.textDim
+                tooltip: CameraService.tooltipText
+            }
+        }
+
+        // ── Mic ────────────────────────────────────────────────────────────
+        Item {
+            id: micWidget
+            implicitWidth: micChip.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            StatChip {
+                id: micChip
+                anchors.centerIn: parent
+                screen: root.screen
+                icon: MicService.inUse ? "󰍬" : "󰍭"
+                value: MicService.activeCount > 1 ? "…" : (MicService.activeCount > 0 ? MicService.activeCount + "" : "")
+                color: MicService.inUse ? Colors.alert : Colors.textDim
+                tooltip: MicService.tooltipText
+            }
+        }
+
+        // ── USB storage ────────────────────────────────────────────────────
+        Item {
+            id: usbWidget
+            implicitWidth: usbChip.implicitWidth + 4
+            implicitHeight: Geometry.barHeight
+
+            StatChip {
+                id: usbChip
+                anchors.centerIn: parent
+                screen: root.screen
+                icon: "󰋊"
+                value: UsbService.activeCount > 1 ? "…" : (UsbService.available ? UsbService.activeCount + "" : "")
+                color: UsbService.available ? Colors.green : Colors.textDim
+                tooltip: UsbService.tooltipText
+            }
+        }
+
         // ── Battery ───────────────────────────────────────────────────────
         StatChip {
             screen: root.screen
