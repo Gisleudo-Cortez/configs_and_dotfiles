@@ -111,7 +111,13 @@ map("n", "<leader>ul", function() vim.wo.number = not vim.wo.number end,
 map("n", "<leader>uL", function() vim.wo.relativenumber = not vim.wo.relativenumber end,
   { desc = "Toggle relative numbers" })
 map("n", "<leader>ud", function()
-  local new_config = not vim.diagnostic.config().virtual_text
-  vim.diagnostic.config({ virtual_text = new_config, virtual_lines = false })
-  vim.notify("Diagnostics " .. (new_config and "enabled" or "disabled"))
-end, { desc = "Toggle diagnostics" })
+  -- Toggle between virtual_lines (our default) and virtual_text (classic).
+  local cfg = vim.diagnostic.config()
+  if cfg.virtual_lines and (type(cfg.virtual_lines) ~= "table" or cfg.virtual_lines ~= false) then
+    vim.diagnostic.config({ virtual_lines = false, virtual_text = { spacing = 4, source = "if_many", prefix = "●" } })
+    vim.notify("Inline diagnostics: virtual_text")
+  else
+    vim.diagnostic.config({ virtual_lines = { current_line = true }, virtual_text = false })
+    vim.notify("Inline diagnostics: virtual_lines (current line)")
+  end
+end, { desc = "Toggle diagnostics display mode" })
