@@ -26,6 +26,7 @@ STOW_PACKAGES_TO_DEPLOY=(
     "rofi"
     "wlogout"
     "fastfetch"
+    "tmux"
 )
 
 # --- Main Logic ---
