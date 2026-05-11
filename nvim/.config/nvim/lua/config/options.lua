@@ -81,11 +81,13 @@ vim.diagnostic.config({
   severity_sort = true,
   underline = { severity = vim.diagnostic.severity.ERROR },
   update_in_insert = false,
-  virtual_text = {
-    spacing = 4,
-    source = "if_many",
-    prefix = "●",
-  },
+  -- virtual_lines renders diagnostics as wrapped lines below the offending
+  -- line.  `current_line = true` keeps the buffer clean — only the line
+  -- under cursor expands.  This prevents the classic virtual_text overflow
+  -- where a long diagnostic message shoots past the right window edge.
+  virtual_lines = { current_line = true },
+  -- Keep virtual_text off so it doesn't fight with virtual_lines.
+  virtual_text = false,
   signs = {
     text = {
       [vim.diagnostic.severity.ERROR] = "E",
@@ -94,5 +96,10 @@ vim.diagnostic.config({
       [vim.diagnostic.severity.HINT] = "H",
     },
   },
-  float = { border = "rounded", source = "if_many" },
+  float = {
+    border = "rounded",
+    source = "if_many",
+    max_width = 80,          -- hard cap so floats don't explode on wide screens
+    wrap = true,
+  },
 })

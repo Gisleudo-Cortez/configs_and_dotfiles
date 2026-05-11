@@ -118,13 +118,20 @@ return {
           return r1, r2
         elseif not notified then
           notified = true
-          vim.schedule(function()
-            vim.notify(
-              "nvim-treesitter-context: caught Neovim 0.12 TS crash, context disabled for this buffer",
-              vim.log.levels.WARN,
-              { title = "treesitter-context" }
-            )
-          end)
+          -- Skip notification on bigfile buffers where TS failure is expected
+          local buf = vim.api.nvim_win_get_buf(winid or 0)
+          local skip = vim.b[buf].snacks_indent == false
+            or vim.b[buf].snacks_scope == false
+            or vim.bo[buf].filetype == "bigfile"
+          if not skip then
+            vim.schedule(function()
+              vim.notify(
+                "nvim-treesitter-context: caught Neovim 0.12 TS crash, context disabled for this buffer",
+                vim.log.levels.WARN,
+                { title = "treesitter-context" }
+              )
+            end)
+          end
         end
       end
       require("treesitter-context").setup()

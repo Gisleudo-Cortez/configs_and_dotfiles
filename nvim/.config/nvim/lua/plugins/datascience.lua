@@ -263,7 +263,7 @@ return {
     },
     event = "VeryLazy",
     config = function()
-      require("notebook-navigator").setup({ activate_hydra_keys = "<leader>jk" })
+      require("notebook-navigator").setup({ activate_hydra_keys = nil })
     end,
   },
 
