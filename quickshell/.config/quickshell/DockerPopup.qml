@@ -29,6 +29,14 @@ PanelWindow {
         border.color: Colors.border
         border.width: Geometry.borderWidth
 
+        // Miku teal top accent
+        Rectangle {
+            anchors { top: parent.top; left: parent.left; right: parent.right }
+            height: 2
+            color: Colors.cyan
+            radius: 2
+        }
+
         Flickable {
             id: flick
             anchors.fill: parent

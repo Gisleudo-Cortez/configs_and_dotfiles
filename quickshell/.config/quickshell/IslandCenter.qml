@@ -35,30 +35,20 @@ Island {
         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
         anchors.leftMargin: Geometry.innerPad
         anchors.rightMargin: Geometry.innerPad
-        spacing: 8
+        spacing: 10
 
         Text {
-            text: " "
+            text: root.timeText
             color: Colors.cyan
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Geometry.iconFontSize
+            font.family: "DSEG7 Classic Bold"
+            font.pixelSize: 18
         }
 
-        Column {
-            spacing: 0
-            Text {
-                text: root.timeText
-                color: Colors.textActive
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSize
-                font.bold: true
-            }
-            Text {
-                text: root.dateText
-                color: Colors.textDim
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSizeSm
-            }
+        Text {
+            text: root.dateText
+            color: Colors.textDim
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: Geometry.fontSizeSm
         }
     }
 

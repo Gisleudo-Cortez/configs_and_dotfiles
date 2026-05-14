@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Effects
 
-// Reusable frosted-glass pill with 1px purple border and subtle glow
+// Reusable frosted-glass pill with teal top highlight and subtle glow
 Rectangle {
     id: root
     implicitHeight: Geometry.barHeight
@@ -12,6 +12,15 @@ Rectangle {
 
     border.color: Colors.border
     border.width: Geometry.borderWidth
+
+    // Miku teal top-edge highlight
+    Rectangle {
+        anchors { top: parent.top; left: parent.left; right: parent.right }
+        height: 2
+        color: Colors.cyan
+        radius: 1
+        opacity: 0.7
+    }
 
     // Faint outer glow — blurred duplicate behind
     Rectangle {
