@@ -9,19 +9,19 @@ QtObject {
 
     // Accents
     readonly property color purple:      "#b589d6"
-    readonly property color cyan:        "#03edf9"
-    readonly property color blue:        "#65baff"
-    readonly property color green:       "#00ff9f"
-    readonly property color alert:       "#ff517d"
-    readonly property color warning:     "#ffff00"
+    readonly property color cyan:        "#00c8aa"
+    readonly property color blue:        "#00b4d8"
+    readonly property color green:       "#00dca0"
+    readonly property color alert:       "#ffb43c"
+    readonly property color warning:     "#ff8c1e"
 
     // Text
-    readonly property color text:        "#d4b8f0"
-    readonly property color textDim:     "#7a6a9a"
-    readonly property color textActive:  "#ffffff"
+    readonly property color text:        "#8cafa5"
+    readonly property color textDim:     "#5a7a70"
+    readonly property color textActive:  "#00c8aa"
 
     // Border / glow
-    readonly property color border:      "#b589d6"
-    readonly property color glow:        Qt.rgba(0.71, 0.537, 0.839, 0.4)
-    readonly property color hudGlow:     Qt.rgba(0.012, 0.929, 0.976, 0.35)
+    readonly property color border:      "#00c8aa"
+    readonly property color glow:        Qt.rgba(0.0, 0.784, 0.667, 0.4)
+    readonly property color hudGlow:     Qt.rgba(0.0, 0.706, 0.847, 0.35)
 }

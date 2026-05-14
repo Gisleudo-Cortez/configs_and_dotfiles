@@ -112,7 +112,7 @@ end
 
 ## Run fastfetch if session is interactive
 if status --is-interactive && type -q fastfetch
-   fastfetch --file ~/.config/fastfetch/lain.txt --logo-color-1 cyan --config neofetch.jsonc
+   fastfetch --file ~/.config/fastfetch/lain.txt --logo-color-1 "#00c8aa" --config neofetch.jsonc
 end
 
 
