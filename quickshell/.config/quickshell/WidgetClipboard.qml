@@ -1,3 +1,4 @@
+import QtQuick
 // Clipboard history indicator
 Item {
     id: root

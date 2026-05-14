@@ -38,7 +38,7 @@ Island {
 
         const days   = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
         const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
-        dateText = `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`
+        root.dateText = `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`
     }
 
     RowLayout {
@@ -91,22 +91,6 @@ Island {
             color: Colors.text
             font.family: "JetBrainsMono Nerd Font"
             font.pixelSize: 14
-
-            transform: Scale {
-                id: dateScale
-                origin.x: dateText.width / 2
-                origin.y: dateText.height / 2
-            }
-
-            Behavior on text {
-                SequentialAnimation {
-                    NumberAnimation { target: dateScale; property: "xScale"; to: 0.85; duration: 80; easing.type: Easing.InOutQuad }
-                    NumberAnimation { target: dateScale; property: "yScale"; to: 0.85; duration: 80; easing.type: Easing.InOutQuad }
-                    PropertyAction {}
-                    NumberAnimation { target: dateScale; property: "xScale"; to: 1.0; duration: 120; easing.type: Easing.OutBack }
-                    NumberAnimation { target: dateScale; property: "yScale"; to: 1.0; duration: 120; easing.type: Easing.OutBack }
-                }
-            }
         }
     }
 
