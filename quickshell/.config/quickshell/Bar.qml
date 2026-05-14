@@ -41,6 +41,7 @@ PanelWindow {
             IslandLeft {
                 Layout.fillHeight: true
                 Layout.preferredWidth: implicitWidth
+                screen: root.screen
             }
 
             Item { Layout.fillWidth: true }

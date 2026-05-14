@@ -17,13 +17,24 @@ Island {
 
     property string timeText: ""
     property string dateText: ""
+    property string _hh: ""
+    property string _mm: ""
+    property string _ss: ""
+    property real _colonBlink: 1.0
+
+    // Colon blink — slow sine-wave fade
+    Timer {
+        interval: 800
+        running: true
+        repeat: true
+        onTriggered: root._colonBlink = (root._colonBlink > 0.5) ? 0.4 : 1.0
+    }
 
     function _tick() {
         const d = new Date()
-        const hh = String(d.getHours()).padStart(2, "0")
-        const mm = String(d.getMinutes()).padStart(2, "0")
-        const ss = String(d.getSeconds()).padStart(2, "0")
-        timeText = `${hh}:${mm}:${ss}`
+        _hh = String(d.getHours()).padStart(2, "0")
+        _mm = String(d.getMinutes()).padStart(2, "0")
+        _ss = String(d.getSeconds()).padStart(2, "0")
 
         const days   = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
         const months = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"]
@@ -35,10 +46,40 @@ Island {
         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
         anchors.leftMargin: Geometry.innerPad
         anchors.rightMargin: Geometry.innerPad
-        spacing: 10
+        spacing: 0
 
         Text {
-            text: root.timeText
+            text: root._hh
+            color: Colors.cyan
+            font.family: "DSEG7 Classic Bold"
+            font.pixelSize: 18
+        }
+        Text {
+            text: ":"
+            color: Colors.cyan
+            font.family: "DSEG7 Classic Bold"
+            font.pixelSize: 18
+            opacity: root._colonBlink
+
+            Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.InOutSine } }
+        }
+        Text {
+            text: root._mm
+            color: Colors.cyan
+            font.family: "DSEG7 Classic Bold"
+            font.pixelSize: 18
+        }
+        Text {
+            text: ":"
+            color: Colors.cyan
+            font.family: "DSEG7 Classic Bold"
+            font.pixelSize: 18
+            opacity: root._colonBlink
+
+            Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.InOutSine } }
+        }
+        Text {
+            text: root._ss
             color: Colors.cyan
             font.family: "DSEG7 Classic Bold"
             font.pixelSize: 18

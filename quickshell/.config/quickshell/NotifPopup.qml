@@ -28,11 +28,14 @@ PanelWindow {
         border.color: Colors.border
         border.width: Geometry.borderWidth
 
+        // Fade-out animation on close
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+
         // Miku teal top accent
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 2
-            color: Colors.cyan
+            color: "#b589d6"
             radius: 2
         }
 
