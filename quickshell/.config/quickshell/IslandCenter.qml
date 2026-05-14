@@ -48,7 +48,7 @@ Island {
             text: root.dateText
             color: Colors.textDim
             font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Geometry.fontSizeSm
+            font.pixelSize: 12
         }
     }
 
