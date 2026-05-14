@@ -1,44 +1,73 @@
 -- ============================================================================
 -- lua/plugins/colorscheme.lua
 -- ----------------------------------------------------------------------------
--- Tokyonight is the de-facto dark theme for Neovim in 2026 — it ships
--- treesitter + lsp-semantic-token highlights and integrates cleanly with
--- every plugin in this config.  Swap out for "catppuccin" / "kanagawa" /
--- "rose-pine" by changing the `name` in colorscheme() and the table below.
+-- Catppuccin Mocha with teal accent — Miku palette alignment.
+-- Formerly Tokyonight. Catppuccin is already in the lazy plugin list.
 -- ============================================================================
 return {
   {
-    "folke/tokyonight.nvim",
+    "catppuccin/nvim",
+    name = "catppuccin",
     lazy = false,       -- colorscheme must load on startup
     priority = 1000,    -- before any other plugin
     opts = {
-      style = "night",          -- "storm" | "night" | "moon" | "day"
-      transparent = false,
-      terminal_colors = true,
+      flavour = "mocha",       -- darkest variant — matches chassis
+      term_colors = true,
+      transparent_background = false,
       styles = {
-        comments   = { italic = true },
-        keywords   = { italic = true },
+        comments   = { "italic" },
+        keywords   = { "italic" },
         functions  = {},
         variables  = {},
-        sidebars   = "dark",
-        floats     = "dark",
       },
-      on_highlights = function(hl, c)
-        -- tighten up a couple of treesitter groups
-        hl.LineNr            = { fg = c.fg_gutter }
-        hl.CursorLineNr      = { fg = c.orange, bold = true }
-        hl.WinSeparator      = { fg = c.border, bg = "NONE" }
-        hl["@lsp.type.unresolvedReference.rust"] = {}   -- rust_analyzer false-positive on built-in macros
-      end,
+      integrations = {
+        treesitter = true,
+        native_lsp = {
+          enabled = true,
+          virtual_text = {
+            errors = { "italic" },
+            hints = { "italic" },
+            warnings = { "italic" },
+            information = { "italic" },
+          },
+          underlines = {
+            errors = { "underline" },
+            hints = { "underline" },
+            warnings = { "underline" },
+            information = { "underline" },
+          },
+        },
+        indent_blankline = { enabled = true },
+        mini = { enabled = true },
+        snacks = { enabled = true },
+        which_key = true,
+        mason = true,
+        notify = true,
+        noice = true,
+        markdown = true,
+        neotree = false,
+      },
+      highlight_overrides = {
+        mocha = function(colors)
+          return {
+            -- Tighten up: make cursor line number teal instead of peach
+            CursorLineNr = { fg = colors.teal, style = { "bold" } },
+            -- Win separator in surface colour
+            WinSeparator = { fg = colors.surface1 },
+            -- Rust unresolved references (false positive suppression)
+            ["@lsp.type.unresolvedReference.rust"] = {},
+          }
+        end,
+      },
     },
     config = function(_, opts)
-      require("tokyonight").setup(opts)
-      vim.cmd.colorscheme("tokyonight")
+      require("catppuccin").setup(opts)
+      vim.cmd.colorscheme("catppuccin-mocha")
     end,
   },
 
   -- Alternate themes (install but don't activate). Switch with :colorscheme X
-  { "catppuccin/nvim",       name = "catppuccin", lazy = true },
-  { "rebelot/kanagawa.nvim", lazy = true },
-  { "rose-pine/neovim",      name = "rose-pine",  lazy = true },
+  { "folke/tokyonight.nvim",   lazy = true },
+  { "rebelot/kanagawa.nvim",   lazy = true },
+  { "rose-pine/neovim",        name = "rose-pine",  lazy = true },
 }
