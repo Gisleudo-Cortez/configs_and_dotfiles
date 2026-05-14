@@ -37,21 +37,13 @@ Island {
         anchors.rightMargin: Geometry.innerPad
         spacing: 8
 
-        Text {
-            text: " "
-            color: Colors.cyan
-            font.family: "JetBrainsMono Nerd Font"
-            font.pixelSize: Geometry.iconFontSize
-        }
-
         Column {
             spacing: 0
             Text {
                 text: root.timeText
-                color: Colors.textActive
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSize
-                font.bold: true
+                color: Colors.cyan
+                font.family: "DSEG7 Classic Bold"
+                font.pixelSize: 18
             }
             Text {
                 text: root.dateText

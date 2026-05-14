@@ -424,9 +424,14 @@ Island {
                 id: mediaText
                 anchors.centerIn: parent
                 text: "󰝚"
-                color: root._activePlayer?.isPlaying ? Colors.green : Colors.textDim
+                color: Colors.cyan
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: Geometry.iconFontSize
+                opacity: root._activePlayer?.isPlaying ? 1.0 : 0.4
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 400; easing.type: Easing.InOutQuad }
+                }
             }
 
             HoverHandler {
@@ -460,7 +465,7 @@ Island {
                 id: bellText
                 anchors.centerIn: parent
                 text: NotifService.unreadCount > 0 ? "󱅫" : "󰂚"
-                color: NotifService.unreadCount > 0 ? Colors.purple : Colors.textDim
+                color: NotifService.unreadCount > 0 ? Colors.alert : Colors.textDim
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: Geometry.iconFontSize
             }

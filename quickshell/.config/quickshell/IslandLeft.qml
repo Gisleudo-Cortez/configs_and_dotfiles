@@ -22,7 +22,7 @@ Island {
                 implicitWidth: wsLabel.implicitWidth + 10
                 implicitHeight: 18
                 radius: 4
-                color: active ? Colors.purple : "transparent"
+                color: active ? Colors.cyan : "transparent"
                 border.color: active ? "transparent" : Colors.textDim
                 border.width: 1
                 Behavior on color { ColorAnimation { duration: 150 } }

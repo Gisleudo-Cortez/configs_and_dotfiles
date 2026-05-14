@@ -16,6 +16,20 @@ PanelWindow {
     Item {
         anchors.fill: parent
 
+        // Miku signal trace — teal line across bar top, dim edges, bright center
+        Rectangle {
+            anchors { top: parent.top; left: parent.left; right: parent.right }
+            height: 1
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0.0; color: "transparent" }
+                GradientStop { position: 0.2; color: Colors.hudGlow }
+                GradientStop { position: 0.5; color: Colors.cyan }
+                GradientStop { position: 0.8; color: Colors.hudGlow }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+        }
+
         RowLayout {
             anchors {
                 top: parent.top; left: parent.left; right: parent.right
