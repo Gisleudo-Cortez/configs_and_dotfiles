@@ -13,4 +13,6 @@ QtObject {
     readonly property int fontSizeSm:   10
     readonly property int popupWidth:   280
     readonly property int calWidth:     260
+    readonly property int popupSpacing: 8
+    readonly property int popupPadding: 10
 }

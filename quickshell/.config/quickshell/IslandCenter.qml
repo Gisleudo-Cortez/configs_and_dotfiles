@@ -86,10 +86,27 @@ Island {
         }
 
         Text {
+            id: dateText
             text: root.dateText
             color: Colors.text
             font.family: "JetBrainsMono Nerd Font"
             font.pixelSize: 14
+
+            transform: Scale {
+                id: dateScale
+                origin.x: dateText.width / 2
+                origin.y: dateText.height / 2
+            }
+
+            Behavior on text {
+                SequentialAnimation {
+                    NumberAnimation { target: dateScale; property: "xScale"; to: 0.85; duration: 80; easing.type: Easing.InOutQuad }
+                    NumberAnimation { target: dateScale; property: "yScale"; to: 0.85; duration: 80; easing.type: Easing.InOutQuad }
+                    PropertyAction {}
+                    NumberAnimation { target: dateScale; property: "xScale"; to: 1.0; duration: 120; easing.type: Easing.OutBack }
+                    NumberAnimation { target: dateScale; property: "yScale"; to: 1.0; duration: 120; easing.type: Easing.OutBack }
+                }
+            }
         }
     }
 

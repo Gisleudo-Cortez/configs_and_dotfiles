@@ -78,7 +78,7 @@ PanelWindow {
                     // ── Volume slider row ─────────────────────────────────
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: 8
+                        spacing: Geometry.popupSpacing
 
                         Text {
                             text: AudioService.volIcon()
@@ -173,7 +173,7 @@ PanelWindow {
                                     verticalCenter: parent.verticalCenter
                                     leftMargin: Geometry.innerPad; rightMargin: Geometry.innerPad
                                 }
-                                spacing: 8
+                                spacing: Geometry.popupSpacing
 
                                 // Active indicator
                                 Text {
