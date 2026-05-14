@@ -28,6 +28,9 @@ PanelWindow {
         border.color: Colors.border
         border.width: Geometry.borderWidth
 
+        // Fade-out animation on close
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+
         Flickable {
             id: flick
             anchors.fill: parent

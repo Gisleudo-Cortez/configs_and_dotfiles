@@ -29,6 +29,9 @@ PanelWindow {
         border.color: Colors.border
         border.width: Geometry.borderWidth
 
+        // Fade-out animation on close
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+
         // Miku teal top accent
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
@@ -167,7 +170,8 @@ PanelWindow {
                             anchors.centerIn: parent
                             width: 22; height: 22
                             radius: 11
-                            color: isToday ? Colors.purple : "transparent"
+                            color: isToday ? Colors.cyan : "transparent"
+                            opacity: isToday ? 0.15 : 1.0
                         }
 
                         Rectangle {

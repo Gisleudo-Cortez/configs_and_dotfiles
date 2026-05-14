@@ -6,6 +6,7 @@ import Quickshell.Hyprland
 Island {
     id: root
     implicitWidth: row.implicitWidth + Geometry.innerPad * 2
+    property var screen: null
 
     RowLayout {
         id: row
@@ -41,6 +42,16 @@ Island {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     onClicked: modelData.activate()
+                }
+
+                HoverHandler {
+                    id: wsHover
+                    onHoveredChanged: {
+                        if (hovered && modelData.name && modelData.name !== modelData.id.toString())
+                            TooltipService.show(modelData.name, root.screen)
+                        else if (!hovered)
+                            TooltipService.hide()
+                    }
                 }
             }
         }

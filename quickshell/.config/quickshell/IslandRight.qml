@@ -17,6 +17,17 @@ Island {
     signal btClicked
 
     // ── helpers ───────────────────────────────────────────────────────────
+    function _battColor(pct) {
+        // Smooth gradient: teal (100%) → amber (50%) → red (10%)
+        pct = Math.max(0, Math.min(100, pct))
+        if (pct >= 50) {
+            const t = (pct - 50) / 50  // 0→1 from 50%→100%
+            return Qt.rgba(0.0 * (1-t) + 0.0 * t, 0.784 * (1-t) + 0.706 * t, 0.667 * (1-t) + 0.533 * t, 1.0)
+        }
+        const t = pct / 50  // 0→1 from 0%→50%
+        return Qt.rgba(1.0 * (1-t) + 0.0 * t, 0.706 * (1-t) + 0.784 * t, 0.0 * (1-t) + 0.667 * t, 1.0)
+    }
+
     function _statColor(pct, warn, crit) {
         if (pct >= crit) return Colors.alert
         if (pct >= warn) return Colors.warning
@@ -406,7 +417,7 @@ Island {
             screen: root.screen
             icon: root._battIcon(Battery.percent, Battery.charging)
             value: Battery.percent + "%"
-            color: root._statColor(100 - Battery.percent, 30, 10)
+            color: root._battColor(Battery.percent)
             tooltip: "Battery  " + Battery.percent + "% · " +
                      (Battery.charging ? "Charging" : "Discharging")
             visible: Battery.percent > 0
