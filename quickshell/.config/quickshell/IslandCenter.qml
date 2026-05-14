@@ -35,22 +35,20 @@ Island {
         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
         anchors.leftMargin: Geometry.innerPad
         anchors.rightMargin: Geometry.innerPad
-        spacing: 8
+        spacing: 10
 
-        Column {
-            spacing: 0
-            Text {
-                text: root.timeText
-                color: Colors.cyan
-                font.family: "DSEG7 Classic Bold"
-                font.pixelSize: 18
-            }
-            Text {
-                text: root.dateText
-                color: Colors.textDim
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.fontSizeSm
-            }
+        Text {
+            text: root.timeText
+            color: Colors.cyan
+            font.family: "DSEG7 Classic Bold"
+            font.pixelSize: 18
+        }
+
+        Text {
+            text: root.dateText
+            color: Colors.textDim
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: Geometry.fontSizeSm
         }
     }
 
