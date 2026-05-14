@@ -54,7 +54,7 @@ PanelWindow {
             id: box
             anchors { left: parent.left; right: parent.right; top: parent.top }
             anchors.margins: Geometry.innerPad
-            spacing: 8
+            spacing: Geometry.popupSpacing
 
             // Header
             Text {

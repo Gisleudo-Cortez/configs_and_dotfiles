@@ -74,7 +74,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.margins: Geometry.innerPad
                     Layout.bottomMargin: 6
-                    spacing: 8
+                    spacing: Geometry.popupSpacing
 
                     Text {
                         text: "󰂯  Bluetooth"
@@ -170,7 +170,7 @@ PanelWindow {
                                     verticalCenter: parent.verticalCenter
                                     leftMargin: Geometry.innerPad; rightMargin: Geometry.innerPad
                                 }
-                                spacing: 8
+                                spacing: Geometry.popupSpacing
 
                                 Rectangle {
                                     width: 7; height: 7; radius: 4

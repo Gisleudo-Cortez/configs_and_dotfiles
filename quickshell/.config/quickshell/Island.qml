@@ -13,6 +13,9 @@ Rectangle {
     border.color: Colors.border
     border.width: Geometry.borderWidth
 
+    Behavior on color { ColorAnimation { duration: 200 } }
+    Behavior on border.color { ColorAnimation { duration: 200 } }
+
     // Miku teal top-edge highlight
     Rectangle {
         anchors { top: parent.top; left: parent.left; right: parent.right }
