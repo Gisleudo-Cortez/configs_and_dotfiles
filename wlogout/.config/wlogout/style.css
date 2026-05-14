@@ -1,86 +1,88 @@
-/* Cyberpunk Hybrid-Cybercore wlogout theme — matches quickshell/kitty palette */
+/* =============================================================================
+ * WLOGOUT — MIKU THEME
+ * -----------------------------------------------------------------------------
+ * Palette: teal-cyan core (#00c8aa), dark chassis (#091833),
+ * amber destructive (#ffb43c), purple gradient endpoint (#b589d6)
+ * ============================================================================= */
 
-* {
-	background-image: none;
-	font-size: 13px;
-	font-family: monospace;
-}
-
-/* Deep navy backdrop matching quickshell bgPopup */
+/* ------------- dialog backdrop ------------- */
 window {
-	background-color: rgba(9, 24, 51, 0.92);
+	background-color: rgba(9, 24, 51, 0.94);
+	/* Miku chassis — same as hyprlock/quickshell */
 }
 
-/* Frosted-glass island buttons */
+/* ------------- generic button style ------------- */
 button {
-	min-width:  150px;
-	min-height: 150px;
-	padding: 20px 24px;
-	margin: 10px;
-	border-radius: 16px;
+	/* geometry */
+	min-width: 140px;
+	min-height: 140px;
+	padding: 18px 22px;
+	border-radius: 14px;
+	border: 1px solid rgba(0, 200, 170, 0.25);
 
-	background-color: rgba(9, 24, 51, 0.88);
-	color: #d4b8f0;
+	/* colours */
+	background-color: rgba(0, 200, 170, 0.06);
+	color: #8cafa5;
+	font-family: "JetBrainsMono Nerd Font";
+	font-size: 12px;
 
-	/* 1px purple border — same as quickshell Islands */
-	border: 1px solid #b589d6;
-
-	/* Soft purple outer glow */
-	box-shadow:
-		0 0 14px rgba(181, 137, 214, 0.30),
-		inset 0 1px 0 rgba(181, 137, 214, 0.08);
-
+	/* icon placement */
 	background-repeat: no-repeat;
-	background-position: center 32%;
-	background-size: 30%;
-
-	transition: all 0.25s cubic-bezier(0.55, 0.0, 0.28, 1.682);
+	background-position: center;
+	background-size: 28%;
 }
 
-/* Cyan accent on hover — mirrors quickshell hudGlow */
 button:hover,
-button:focus {
-	background-color: rgba(3, 237, 249, 0.10);
-	border-color: #03edf9;
-	color: #ffffff;
-
-	box-shadow:
-		0 0 22px rgba(3, 237, 249, 0.40),
-		0 0 44px rgba(3, 237, 249, 0.14),
-		inset 0 1px 0 rgba(3, 237, 249, 0.18);
-
-	background-size: 36%;
-	outline: none;
-}
-
-/* Green flash on click */
+button:focus,
 button:active {
-	background-color: rgba(0, 255, 159, 0.14);
-	border-color: #00ff9f;
-	box-shadow: 0 0 18px rgba(0, 255, 159, 0.45);
+	background-color: rgba(0, 200, 170, 0.22);
+	/* teal glow on hover */
+	border: 1px solid rgba(0, 200, 170, 0.55);
+	color: #00c8aa;
+	outline: none;
+	box-shadow: 0 0 12px rgba(0, 200, 170, 0.25);
 }
 
-/* Per-button icons — white variants from local icons dir */
+/* ------------- destructive overrides ------------- */
+#shutdown,
+#reboot {
+	border-color: rgba(255, 180, 60, 0.20);
+	background-color: rgba(255, 180, 60, 0.04);
+}
+
+#shutdown:hover,
+#shutdown:focus,
+#shutdown:active,
+#reboot:hover,
+#reboot:focus,
+#reboot:active {
+	background-color: rgba(255, 180, 60, 0.22);
+	border-color: rgba(255, 180, 60, 0.55);
+	color: #ffb43c;
+	box-shadow: 0 0 12px rgba(255, 180, 60, 0.25);
+}
+
+/* ------------- per-button icons ------------- */
 #lock {
-	background-image: url("$HOME/.config/wlogout/icons/lock_white.png");
+	background-image: url("icons/lock_white.png");
 }
 
 #logout {
-	background-image: url("$HOME/.config/wlogout/icons/logout_white.png");
+	background-image: url("icons/logout_white.png");
 }
 
 #suspend {
-	background-image: url("$HOME/.config/wlogout/icons/suspend_white.png");
+	background-image: url("icons/suspend_white.png");
 }
 
 #hibernate {
-	background-image: url("$HOME/.config/wlogout/icons/hibernate_white.png");
+	background-image: url("icons/hibernate_white.png");
 }
 
 #shutdown {
-	background-image: url("$HOME/.config/wlogout/icons/shutdown_white.png");
+	background-image: url("icons/shutdown_white.png");
 }
 
 #reboot {
-	background-image: url("$HOME/.config/wlogout/icons/reboot_white.png");
+	background-image: url("icons/reboot_white.png");
 }
