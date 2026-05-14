@@ -37,3 +37,11 @@ NotifPopup 1.0 NotifPopup.qml
 NotifToast 1.0 NotifToast.qml
 StatChip 1.0 StatChip.qml
 TooltipWindow 1.0 TooltipWindow.qml
+WidgetAudio 1.0 WidgetAudio.qml
+WidgetBluetooth 1.0 WidgetBluetooth.qml
+WidgetClipboard 1.0 WidgetClipboard.qml
+WidgetDocker 1.0 WidgetDocker.qml
+WidgetKeyLed 1.0 WidgetKeyLed.qml
+WidgetMedia 1.0 WidgetMedia.qml
+WidgetNetwork 1.0 WidgetNetwork.qml
+WidgetNotifBell 1.0 WidgetNotifBell.qml

@@ -1,3 +1,4 @@
+import QtQuick
 // Widget notification bell — amber when unread, teal-grey when empty
 Item {
     id: root
