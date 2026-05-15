@@ -82,7 +82,7 @@ QtObject {
     }
 
     readonly property var _ticker: Timer {
-        interval: 3000
+        interval: 15000
         running: true
         repeat: true
         triggeredOnStart: true

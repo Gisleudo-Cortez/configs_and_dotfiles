@@ -100,7 +100,14 @@ QtObject {
             root._cpuProc.running  = true
             root._ramProc.running  = true
             root._diskProc.running = true
-            root._gpuProc.running  = true
         }
+    }
+
+    readonly property var _gpuTicker: Timer {
+        interval: 10000
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: { root._gpuProc.running = true }
     }
 }
