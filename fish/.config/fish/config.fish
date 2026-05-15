@@ -34,6 +34,13 @@ if test -d ~/.local/bin
     end
 end
 
+# Add npm global packages to PATH
+if test -d ~/.local/share/npm/bin
+    if not contains -- ~/.local/share/npm/bin $PATH
+        set -p PATH ~/.local/share/npm/bin
+    end
+end
+
 # Add depot_tools to PATH
 if test -d ~/Applications/depot_tools
     if not contains -- ~/Applications/depot_tools $PATH
