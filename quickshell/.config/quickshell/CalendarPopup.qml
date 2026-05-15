@@ -157,7 +157,6 @@ PanelWindow {
                     delegate: Item {
                         width: cal.cellW
                         height: 26
-                        visible: modelData > 0
 
                         readonly property string isoDate: modelData > 0
                             ? cal.year + "-" + String(cal.month + 1).padStart(2, "0") + "-" + String(modelData).padStart(2, "0")
