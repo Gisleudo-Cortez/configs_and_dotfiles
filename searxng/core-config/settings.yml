@@ -192,6 +192,7 @@ engines:
   enable_http: true
   shortcut: ah
   disabled: true
+  inactive: true
 - name: anaconda
   engine: xpath
   paging: true
@@ -229,7 +230,9 @@ engines:
 - name: arch linux wiki
   engine: archlinux
   shortcut: al
-  weight: 0.8
+  categories:
+  - it
+  weight: 1.2
 - name: nixos wiki
   engine: mediawiki
   shortcut: nixw
@@ -307,7 +310,11 @@ engines:
 - name: bing
   engine: bing
   shortcut: bi
-  disabled: true
+  categories:
+  - general
+  - web
+  - it
+  weight: 0.5
 - name: bing images
   engine: bing_images
   shortcut: bii
@@ -552,6 +559,7 @@ engines:
   categories:
   - general
   - web
+  - it
   weight: 0.8
 - name: duckduckgo images
   engine: duckduckgo_extra
@@ -758,6 +766,7 @@ engines:
   categories:
   - general
   - web
+  - it
   weight: 1.5
 - name: google images
   engine: google_images
@@ -1075,7 +1084,7 @@ engines:
     use_official_api: false
     require_api_key: false
     results: JSON
-  weight: 0.8
+  weight: 0.3
 - name: metacpan
   engine: metacpan
   shortcut: cpan
@@ -1556,6 +1565,7 @@ engines:
   - general
   - web
   weight: 0.8
+  inactive: true
 - name: startpage news
   engine: startpage
   startpage_categ: news
@@ -1618,6 +1628,7 @@ engines:
   enable_http: true
   shortcut: tch
   disabled: true
+  inactive: true
 - name: Torznab EZTV
   engine: torznab
   shortcut: eztv
