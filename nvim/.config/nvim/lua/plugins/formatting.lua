@@ -70,7 +70,6 @@ local formatters_by_ft = {
   zsh        = { "shfmt" },
   fish       = { "fish_indent" },             -- ships with fish itself
   toml       = { "taplo" },
-  dockerfile = { "hadolint" },                -- hadolint only lints; no fmt
   hyprlang   = { "hyprlang-fmt" },            -- optional; safe no-op if missing
   nginx      = { "nginxbeautifier" },
 
@@ -115,6 +114,14 @@ return {
         latexindent   = { prepend_args = { "-l", "-m" } },     -- local config, modify-line-breaks
         -- hyprlang-fmt is not packaged; mark as optional so conform doesn't error
         ["hyprlang-fmt"] = { condition = function() return vim.fn.executable("hyprlang-fmt") == 1 end },
+        -- hadolint is a linter only (no formatting) — dockerfile falls through to [_] fallback
+        ["nginxbeautifier"] = { condition = function() return vim.fn.executable("nginxbeautifier") == 1 end },
+        ["rubocop"]         = { condition = function() return vim.fn.executable("rubocop") == 1 end },
+        ["php-cs-fixer"]    = { condition = function() return vim.fn.executable("php-cs-fixer") == 1 end },
+        ["fourmolu"]        = { condition = function() return vim.fn.executable("fourmolu") == 1 end },
+        ["nixfmt"]          = { condition = function() return vim.fn.executable("nixfmt") == 1 end },
+        ["styler"]          = { condition = function() return vim.fn.executable("styler") == 1 end },
+        ["scalafmt"]        = { condition = function() return vim.fn.executable("scalafmt") == 1 end },
       },
     },
   },

@@ -54,6 +54,14 @@ return {
         "ktlint", -- Kotlin
         "black", -- fallback Python formatter
         "isort", -- fallback Python import sorter
+        "nginxbeautifier", -- nginx
+        "rubocop", -- Ruby
+        "php-cs-fixer", -- PHP
+        "fourmolu", -- Haskell
+        "nixfmt", -- Nix
+        "styler", -- R
+        "scalafmt", -- Scala
+        "bibtex-tidy", -- BibTeX
 
         -- ── Linters ─────────────────────────────────────────────────────
         "shellcheck", -- bash/sh/zsh
@@ -62,6 +70,7 @@ return {
         "yamllint", -- YAML
         "tflint", -- Terraform
         "chktex", -- LaTeX
+        "codespell", -- spelling in comments/strings
 
         -- ── Debug adapters (DAP) ───────────────────────────────────────
         "debugpy", -- Python
