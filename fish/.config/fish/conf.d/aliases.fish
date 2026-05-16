@@ -70,6 +70,12 @@ alias rs "rsync -avP"
 alias update='sudo pacman -Syu --noconfirm && paru -Syu --noconfirm'
 alias upd_force='sudo pacman -Syyu --noconfirm && paru -Syyu --noconfirm'
 
+# Mullvad VPN region switching
+alias vpn-br 'mullvad relay set location br for'
+alias vpn-us 'mullvad relay set location us mia'
+alias vpn-jp 'mullvad relay set location jp tyo'
+alias vpn-eu 'mullvad relay set location de fra'
+
 # tool calls
 alias nv="nvim ."
 alias mk="mkdir -p"
