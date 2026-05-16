@@ -3,7 +3,20 @@
 -- ----------------------------------------------------------------------------
 -- Syntax, indent, folding, and textobjects powered by tree-sitter.
 -- Parsers are installed to stdpath("data")/lazy/… on first use; update with :TSUpdate
+--
+-- Neovim 0.12.x injection engine bug: async injection processing crashes
+-- when it encounters injected languages (e.g. code blocks in markdown,
+-- chunks in quarto, R noweb).  The crash fires across the highlighter,
+-- scope analysis, and indent-guide layers.
+--
+-- Mitigation: disable ALL treesitter features on the known crash-trigger
+-- filetypes.  They fall back to Neovim's built-in regex syntax engine.
+-- Once Neovim upstream fixes the injection engine, remove from disable lists.
 -- ============================================================================
+
+-- Filetypes where Neovim 0.12.x injection crashes.  Disable TS there.
+local TS_CRASH_FTS = { "markdown", "quarto", "rmd", "rnoweb" }
+
 return {
   {
     "nvim-treesitter/nvim-treesitter",
@@ -118,8 +131,18 @@ return {
       },
       auto_install = true,
       sync_install = false,
-      highlight = { enable = true, additional_vim_regex_highlighting = false },
-      indent = { enable = true, disable = { "python", "yaml" } },
+      highlight = {
+        enable = true,
+        -- Neovim 0.12.x: disable TS highlight on injection-crash filetypes.
+        -- They fall back to built-in regex syntax engine.
+        disable = TS_CRASH_FTS,
+        additional_vim_regex_highlighting = false,
+      },
+      indent = {
+        enable = true,
+        -- Python/YAML have perma-indent issues; injection FTs crash 0.12.x.
+        disable = vim.list_extend({ "python", "yaml" }, TS_CRASH_FTS),
+      },
       -- Incremental selection (ported from old config).
       -- <C-space>  — start / expand to next node
       -- <BS>       — shrink to previous node
