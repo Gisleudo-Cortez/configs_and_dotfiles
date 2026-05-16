@@ -13,28 +13,30 @@ Item {
 
     Row {
         anchors.centerIn: parent
-        spacing: 4
+        spacing: 0
 
-        // Hour tens
+        // ── Hour digits ────────────────────────────────────────────────
         Text {
             text: clock.timeStr.charAt(0)
             color: clock.digitColor
             font.pixelSize: 220
             font.family: "DSEG7 Classic"
             font.weight: Font.Bold
-            width: 130
-            horizontalAlignment: Text.AlignHCenter
+            width: 140
+            horizontalAlignment: Text.AlignRight
         }
-        // Hour ones
         Text {
             text: clock.timeStr.charAt(1)
             color: clock.digitColor
             font.pixelSize: 220
             font.family: "DSEG7 Classic"
             font.weight: Font.Bold
-            width: 130
-            horizontalAlignment: Text.AlignHCenter
+            width: 140
+            horizontalAlignment: Text.AlignLeft
         }
+
+        // Gap between hour block and colon
+        Item { width: 28; height: 1 }
 
         // Separator colon — JetBrainsMono, NOT DSEG7 (DSEG7 mangles alphabet glyphs)
         Text {
@@ -42,31 +44,33 @@ Item {
             color: Qt.rgba(0, 0.784, 0.667, 0.5)
             font.pixelSize: 160
             font.family: "JetBrainsMono Nerd Font"
-            width: 60
+            width: 40
             horizontalAlignment: Text.AlignHCenter
             anchors.verticalCenter: parent.verticalCenter
             anchors.verticalCenterOffset: -10
         }
 
-        // Minute tens
+        // Gap between colon and minute block
+        Item { width: 28; height: 1 }
+
+        // ── Minute digits ───────────────────────────────────────────────
         Text {
             text: clock.timeStr.charAt(2)
             color: clock.digitColor
             font.pixelSize: 220
             font.family: "DSEG7 Classic"
             font.weight: Font.Bold
-            width: 130
-            horizontalAlignment: Text.AlignHCenter
+            width: 140
+            horizontalAlignment: Text.AlignRight
         }
-        // Minute ones
         Text {
             text: clock.timeStr.charAt(3)
             color: clock.digitColor
             font.pixelSize: 220
             font.family: "DSEG7 Classic"
             font.weight: Font.Bold
-            width: 130
-            horizontalAlignment: Text.AlignHCenter
+            width: 140
+            horizontalAlignment: Text.AlignLeft
         }
     }
 
