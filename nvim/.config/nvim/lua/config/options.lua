@@ -66,6 +66,13 @@ opt.foldlevel = 99
 opt.foldlevelstart = 99
 opt.foldenable = true
 
+-- Neovim 0.12 workaround: force synchronous TS injection processing.
+-- The async injection engine can GC injection-language nodes while
+-- callbacks still hold references to them, producing:
+--   languagetree.lua:215: attempt to call method 'range' (a nil value)
+-- This is a known Neovim 0.12.x bug; force-sync avoids the race.
+vim.g._ts_force_sync_parsing = true
+
 -- Session -------------------------------------------------------------------
 opt.sessionoptions =
   { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" }

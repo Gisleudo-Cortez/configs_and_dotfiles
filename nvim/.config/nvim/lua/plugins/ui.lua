@@ -17,7 +17,7 @@ return {
     opts = function()
       return {
         options = {
-          theme = "catppuccin",
+          theme = "auto", -- auto-detects from active colorscheme (catppuccin)
           globalstatus = true,
           component_separators = { left = "│", right = "│" },
           section_separators   = { left = "",  right = ""  },
