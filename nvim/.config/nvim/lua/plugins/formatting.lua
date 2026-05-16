@@ -110,12 +110,27 @@ return {
       formatters = {
         shfmt         = { prepend_args = { "-i", "2", "-ci" } },
         stylua        = { prepend_args = { "--column-width", "100", "--indent-width", "2", "--indent-type", "Spaces" } },
-        sqlfluff      = { prepend_args = { "--dialect", "ansi" } },
-        latexindent   = { prepend_args = { "-l", "-m" } },     -- local config, modify-line-breaks
-        -- hyprlang-fmt is not packaged; mark as optional so conform doesn't error
-        ["hyprlang-fmt"] = { condition = function() return vim.fn.executable("hyprlang-fmt") == 1 end },
+        latexindent   = {
+          prepend_args = { "-l", "-m" },
+          condition = function() return vim.fn.executable("latexindent") == 1 end,
+        },
+        -- sqlfluff: requires .sqlfluff/pyproject.toml/setup.cfg in project root.
+        -- If none found, silently skip — don't spam the log.
+        sqlfluff      = {
+          prepend_args = { "--dialect", "ansi" },
+          condition = function()
+            if vim.fn.executable("sqlfluff") == 0 then return false end
+            local cwd = vim.fn.getcwd()
+            return vim.fn.filereadable(cwd .. "/.sqlfluff") == 1
+              or vim.fn.filereadable(cwd .. "/pyproject.toml") == 1
+              or vim.fn.filereadable(cwd .. "/setup.cfg") == 1
+          end,
+        },
+        -- hyprlang-fmt & nginxbeautifier are not in Mason; provide explicit command
+        -- so Conform doesn't log "Missing built-in definition".
+        ["hyprlang-fmt"]    = { command = "hyprlang-fmt", condition = function() return vim.fn.executable("hyprlang-fmt") == 1 end },
+        ["nginxbeautifier"] = { command = "nginxbeautifier", condition = function() return vim.fn.executable("nginxbeautifier") == 1 end },
         -- hadolint is a linter only (no formatting) — dockerfile falls through to [_] fallback
-        ["nginxbeautifier"] = { condition = function() return vim.fn.executable("nginxbeautifier") == 1 end },
         ["rubocop"]         = { condition = function() return vim.fn.executable("rubocop") == 1 end },
         ["php-cs-fixer"]    = { condition = function() return vim.fn.executable("php-cs-fixer") == 1 end },
         ["fourmolu"]        = { condition = function() return vim.fn.executable("fourmolu") == 1 end },
