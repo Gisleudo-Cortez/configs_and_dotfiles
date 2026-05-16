@@ -50,12 +50,17 @@ return {
     explorer    = { enabled = true, hidden = true },
     indent      = {
       enabled = true,
-      -- Double-guard: reject bigfile buffers even if buffer var isn't set yet
+      -- Block injection-heavy filetypes that trigger Neovim 0.12's
+      -- async injection crash (languagetree.lua:215: range nil).
+      -- Also guard against bigfile buffers and explicit disables.
       filter = function(buf)
+        local ft = vim.bo[buf].filetype
+        local ts_crash_fts = { markdown = true, quarto = true, rmd = true, rnoweb = true }
+        if ts_crash_fts[ft] then return false end
         return vim.g.snacks_indent ~= false
           and vim.b[buf].snacks_indent ~= false
           and vim.bo[buf].buftype == ""
-          and vim.bo[buf].filetype ~= "bigfile"
+          and ft ~= "bigfile"
       end,
     },
     input       = { enabled = true },
