@@ -1,0 +1,11 @@
+[SddmGreeterTheme]
+Name=Miku
+Description=Miku-themed SDDM greeter — teal cyberspace, dark chassis, DSEG7 clock. Part of the Miku desktop theming project.
+Author=Hermes + nero
+Copyright=(c) 2026
+License=MIT
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+QtVersion=6
+X-SDDM-Theme-InterfaceVersion=2
