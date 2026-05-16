@@ -14,6 +14,7 @@ QtObject {
     property int    activeCount: 0     // apps using cameras (0 if no video group)
     property int    deviceCount: 0     // how many /dev/video* nodes exist
     property string tooltipText: ""
+    property var    devices:     []    // array of {dev, cmds} objects
     readonly property bool inUse: activeCount > 0
     readonly property bool hasDevices: deviceCount > 0
 
@@ -31,8 +32,8 @@ QtObject {
                for p in $out; do
                  c=$(readlink /proc/$p/exe 2>/dev/null | xargs basename 2>/dev/null)
                  [ -z "$c" ] && continue
-                 if [ $first -eq 1 ]; then first=0; else cmds="${cmds},"; fi
-                 cmds="${cmds}${c}"
+                if [ $first -eq 1 ]; then first=0; else cmds="\${cmds},"; fi
+                cmds="\${cmds}\${c}"
                done
                echo "{\"dev\":\"$d\",\"cmds\":\"$cmds\"}"
              done`

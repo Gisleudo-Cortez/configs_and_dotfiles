@@ -15,13 +15,13 @@ QtObject {
     readonly property var _capsProc: Process {
         command: ["sh", "-c", "for f in /sys/class/leds/*::capslock/brightness; do [ -r \"$f\" ] && [ \"$(cat \"$f\")\" = \"1\" ] && exit 0; done; exit 1"]
         running: false
-        onExited: { root.capsLock = (exitCode === 0) }
+        onExited: exitCode => { root.capsLock = (exitCode === 0) }
     }
 
     readonly property var _numProc: Process {
         command: ["sh", "-c", "for f in /sys/class/leds/*::numlock/brightness; do [ -r \"$f\" ] && [ \"$(cat \"$f\")\" = \"1\" ] && exit 0; done; exit 1"]
         running: false
-        onExited: { root.numLock = (exitCode === 0) }
+        onExited: exitCode => { root.numLock = (exitCode === 0) }
     }
 
     readonly property var _ticker: Timer {
