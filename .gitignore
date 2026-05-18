@@ -1,3 +1,7 @@
 nvim/nvim.txt
 .env
 nvim_config_dump.txt
+# hermes & codex: storage disk backup handles full copies.
+# Git tracks stow structure only; not the actual config payloads.
+hermes/.hermes/
+codex/.codex/

@@ -1,53 +1,115 @@
 /* =============================================================================
- * WLOGOUT — MIKU THEME
+ * WLOGOUT — BRIGHT SCAR THEME
  * -----------------------------------------------------------------------------
- * Palette: teal-cyan core (#00c8aa), dark chassis (#091833),
- * amber destructive (#ffb43c), purple gradient endpoint (#b589d6)
+ * Palette: Bright Scar v3 — theme.json semantic tokens.
+ *   primary:     #00c8aa   Miku voice, teal
+ *   primary_scar:#00e676   Electric variant, scar edge
+ *   primary_dim: #00695c   Quiet teal, grounded
+ *   surface:     #091833   Dark chassis, Lain's silence
+ *   exposed_wire:#ff8c00   Volatile orange, destructive
+ *   ghost:       #b0bec5   Signal static, faded
+ *   phosphor:    #e8f5e9   CRT glow, active
+ *   accent_glow: #1de9b6   Bright teal, hover
+ *   warning:     #ffd54f   Amber, caution
+ *   success:     #69f0ae   Green, safe
  * ============================================================================= */
 
 /* ------------- dialog backdrop ------------- */
 window {
 	background-color: rgba(9, 24, 51, 0.94);
-	/* Miku chassis — same as hyprlock/quickshell */
+	/* surface — the grid at rest */
 }
 
 /* ------------- generic button style ------------- */
 button {
-	/* geometry */
 	min-width: 140px;
 	min-height: 140px;
 	padding: 18px 22px;
 	border-radius: 14px;
 	border: 1px solid rgba(0, 200, 170, 0.25);
 
-	/* colours */
 	background-color: rgba(0, 200, 170, 0.06);
-	color: #8cafa5;
+	color: #b0bec5;
+	/* ghost — signal static, the echo */
 	font-family: "JetBrainsMono Nerd Font";
 	font-size: 12px;
 
-	/* icon placement */
 	background-repeat: no-repeat;
 	background-position: center;
 	background-size: 28%;
+
+	transition: all 0.2s ease;
 }
 
 button:hover,
 button:focus,
 button:active {
-	background-color: rgba(0, 200, 170, 0.22);
-	/* teal glow on hover */
-	border: 1px solid rgba(0, 200, 170, 0.55);
-	color: #00c8aa;
+	background-color: rgba(0, 200, 170, 0.18);
+	border: 1px solid rgba(0, 230, 118, 0.60);
+	/* primary_scar — the sharper edge */
+	color: #e8f5e9;
+	/* phosphor — CRT glow, active presence */
 	outline: none;
-	box-shadow: 0 0 12px rgba(0, 200, 170, 0.25);
+	box-shadow: 0 0 14px rgba(0, 230, 118, 0.30);
 }
 
-/* ------------- destructive overrides ------------- */
+/* ------------- lock & logout — safe / warm ------------- */
+#lock,
+#logout {
+	border-color: rgba(0, 200, 170, 0.30);
+	background-color: rgba(0, 200, 170, 0.08);
+}
+
+#lock:hover,
+#lock:focus,
+#lock:active,
+#logout:hover,
+#logout:focus,
+#logout:active {
+	background-color: rgba(0, 200, 170, 0.24);
+	border-color: rgba(0, 200, 170, 0.65);
+	color: #e8f5e9;
+	box-shadow: 0 0 14px rgba(0, 200, 170, 0.35);
+}
+
+/* ------------- suspend — caution amber ------------- */
+#suspend {
+	border-color: rgba(255, 213, 79, 0.20);
+	background-color: rgba(255, 213, 79, 0.05);
+	color: rgba(255, 213, 79, 0.50);
+}
+
+#suspend:hover,
+#suspend:focus,
+#suspend:active {
+	background-color: rgba(255, 213, 79, 0.18);
+	border-color: rgba(255, 213, 79, 0.55);
+	color: #ffd54f;
+	box-shadow: 0 0 12px rgba(255, 213, 79, 0.25);
+}
+
+/* ------------- hibernate — quiet deep teal ------------- */
+#hibernate {
+	border-color: rgba(0, 105, 92, 0.30);
+	background-color: rgba(0, 105, 92, 0.05);
+	color: rgba(0, 105, 92, 0.55);
+}
+
+#hibernate:hover,
+#hibernate:focus,
+#hibernate:active {
+	background-color: rgba(0, 105, 92, 0.20);
+	border-color: rgba(0, 105, 92, 0.55);
+	color: #00695c;
+	box-shadow: 0 0 10px rgba(0, 105, 92, 0.20);
+}
+
+/* ------------- destructive — exposed wire ------------- */
 #shutdown,
 #reboot {
-	border-color: rgba(255, 180, 60, 0.20);
-	background-color: rgba(255, 180, 60, 0.04);
+	border-color: rgba(255, 140, 0, 0.18);
+	background-color: rgba(255, 140, 0, 0.05);
+	color: rgba(255, 140, 0, 0.45);
 }
 
 #shutdown:hover,
@@ -56,10 +118,10 @@ button:active {
 #reboot:hover,
 #reboot:focus,
 #reboot:active {
-	background-color: rgba(255, 180, 60, 0.22);
-	border-color: rgba(255, 180, 60, 0.55);
-	color: #ffb43c;
-	box-shadow: 0 0 12px rgba(255, 180, 60, 0.25);
+	background-color: rgba(255, 140, 0, 0.22);
+	border-color: rgba(255, 140, 0, 0.55);
+	color: #ff8c00;
+	box-shadow: 0 0 16px rgba(255, 140, 0, 0.30);
 }
 
 /* ------------- per-button icons ------------- */

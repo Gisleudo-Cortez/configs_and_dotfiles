@@ -1,0 +1,12 @@
+# Codex stow package — deploy only, never runtime
+log
+memories
+sessions
+shell_snapshots
+tmp
+.tmp
+history.jsonl
+logs_*.sqlite*
+state_*.sqlite*
+installation_id
+.personality_migration

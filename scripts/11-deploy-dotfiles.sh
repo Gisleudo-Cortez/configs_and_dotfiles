@@ -27,6 +27,8 @@ STOW_PACKAGES_TO_DEPLOY=(
     "wlogout"
     "fastfetch"
     "tmux"
+    "hermes"
+    "codex"
 )
 
 # --- Main Logic ---
