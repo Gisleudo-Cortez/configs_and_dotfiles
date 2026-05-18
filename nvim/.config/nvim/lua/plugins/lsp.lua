@@ -213,6 +213,12 @@ return {
         },
         on_attach = function(client)
           client.server_capabilities.hoverProvider = false
+          -- Prevent ruff from providing completion items — basedpyright
+          -- handles completions. Without this, blink.cmp shows duplicate
+          -- entries because both LSP servers return completion results
+          -- and blink.cmp's cross-provider deduplication is not yet
+          -- implemented (marked TODO upstream).
+          client.server_capabilities.completionProvider = false
         end,
       })
 
@@ -423,20 +429,12 @@ return {
             vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
           end
 
-          if client:supports_method("textDocument/documentHighlight") then
-            local hi_group =
-              vim.api.nvim_create_augroup("user_lsp_highlight_" .. bufnr, { clear = true })
-            vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-              buffer = bufnr,
-              group = hi_group,
-              callback = vim.lsp.buf.document_highlight,
-            })
-            vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-              buffer = bufnr,
-              group = hi_group,
-              callback = vim.lsp.buf.clear_references,
-            })
-          end
+          -- Document highlight via LspAttach disabled — snacks.words
+          -- (enabled in plugins/snacks.lua) handles reference highlighting
+          -- and adds jump navigation (]]/[[). Leaving both enabled causes
+          -- competing highlight clears on CursorHold at 200ms updatetime,
+          -- producing the flickering popup effect around the cursor.
+          -- if client:supports_method("textDocument/documentHighlight") then ...
         end,
       })
     end,
