@@ -9,7 +9,7 @@ Item {
     readonly property int sz: 8   // arm length
     readonly property int th: 1   // arm thickness
     readonly property color cTop: Colors.hudGlow
-    readonly property color cBot: Qt.rgba(0.71, 0.0, 1.0, 0.25)
+    readonly property color cBot: Colors.ghost
 
     // Each corner: two perpendicular lines + blurred glow clone
     Repeater {
