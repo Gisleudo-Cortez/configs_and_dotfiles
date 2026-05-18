@@ -85,7 +85,9 @@ map("v", ">", ">gv")
 map("x", "p", [["_dP]], { desc = "Paste without yank" })
 
 -- Delete without yank
-map({ "n", "v" }, "<leader>d", [["_d]], { desc = "Delete (no yank)" })
+-- <leader>d* is the DAP/debug prefix (dap.lua). Use "<leader>D" for
+-- delete-no-yank to avoid the timeout clash with debug key combos.
+map({ "n", "v" }, "<leader>D", [["_d]], { desc = "Delete (no yank)" })
 
 -- Clear search highlight
 map({ "i", "n" }, "<Esc>", "<cmd>noh<CR><Esc>", { desc = "Clear search highlight" })

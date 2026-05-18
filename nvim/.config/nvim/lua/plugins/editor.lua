@@ -35,14 +35,14 @@ return {
   -- ── TODO / FIXME / HACK highlighting ────────────────────────────────────
   {
     "folke/todo-comments.nvim",
-    cmd = { "TodoTrouble", "TodoTelescope", "TodoLocList", "TodoQuickFix" },
+    cmd = { "TodoTrouble", "TodoQuickFix", "TodoLocList" },
     event = { "BufReadPost", "BufNewFile" },
     dependencies = { "nvim-lua/plenary.nvim" },
     opts = { signs = true },
     keys = {
       { "]t", function() require("todo-comments").jump_next() end, desc = "Next todo" },
       { "[t", function() require("todo-comments").jump_prev() end, desc = "Prev todo" },
-      { "<leader>st", "<cmd>TodoTelescope<CR>", desc = "Search todos" },
+      { "<leader>st", "<cmd>TodoQuickFix<CR>",   desc = "Search todos (quickfix)" },
       { "<leader>xt", "<cmd>TodoTrouble<CR>",   desc = "Todos (Trouble)" },
     },
   },
