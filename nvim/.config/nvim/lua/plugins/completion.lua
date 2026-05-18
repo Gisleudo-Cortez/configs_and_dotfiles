@@ -94,5 +94,33 @@ return {
       },
     },
     opts_extend = { "sources.default" },
+
+    -- Deduplication: blink.cmp does not yet deduplicate items across
+    -- providers (https://github.com/Saghen/blink.cmp/issues/1222).
+    -- When both basedpyright and ruff return the same LSP completion
+    -- item, both appear in the menu. The community-standard fix is
+    -- monkey-patching blink.cmp.completion.list.show to filter
+    -- duplicates by label at the final display step. This keeps the
+    -- first occurrence (respecting priority order of sources.default).
+    -- 10+ community approvals on this approach (May 2025).
+    config = function(_, opts)
+      local original_show = require("blink.cmp.completion.list").show
+      ---@diagnostic disable-next-line: duplicate-set-field
+      require("blink.cmp.completion.list").show = function(ctx, items_by_source)
+        local seen = {}
+        local function filter(item)
+          if seen[item.label] then return false end
+          seen[item.label] = true
+          return true
+        end
+        for id in vim.iter(opts.sources.default) do
+          if items_by_source[id] then
+            items_by_source[id] = vim.iter(items_by_source[id]):filter(filter):totable()
+          end
+        end
+        return original_show(ctx, items_by_source)
+      end
+      require("blink.cmp").setup(opts)
+    end,
   },
 }

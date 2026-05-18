@@ -213,12 +213,6 @@ return {
         },
         on_attach = function(client)
           client.server_capabilities.hoverProvider = false
-          -- Prevent ruff from providing completion items — basedpyright
-          -- handles completions. Without this, blink.cmp shows duplicate
-          -- entries because both LSP servers return completion results
-          -- and blink.cmp's cross-provider deduplication is not yet
-          -- implemented (marked TODO upstream).
-          client.server_capabilities.completionProvider = false
         end,
       })
 
