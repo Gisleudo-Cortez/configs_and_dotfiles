@@ -1,0 +1,180 @@
+// Bright Scar — Rofi Theme
+// Palette: Miku Palette v3  |  Chassis: #091833  Voice: #00c8aa  Scar: #00e676  Ghost: #b0bec5
+
+* {
+    background:                #091833;
+    background-color:          #091833;
+    foreground:                #e0f7fa;
+    foreground-color:          #e0f7fa;
+
+    selected-normal-background:    #00c8aa;
+    selected-normal-foreground:    #091833;
+    selected-active-background:    #00e676;
+    selected-active-foreground:    #091833;
+    selected-urgent-background:    #ff5252;
+    selected-urgent-foreground:    #091833;
+
+    active-background:         var(selected-normal-background);
+    active-foreground:         var(selected-normal-foreground);
+    urgent-background:         #ff5252;
+    urgent-foreground:         #091833;
+
+    border-color:              #00c8aa;
+    separatorcolor:            var(border-color);
+
+    spacing:                   2;
+    padding:                   6;
+
+    font:                      "JetBrainsMono Nerd Font 12";
+    text-color:                var(foreground);
+
+    normal-background:         var(background);
+    normal-foreground:         var(foreground);
+    alternate-normal-background:  #0d2247;
+    alternate-normal-foreground:  #e0f7fa;
+    alternate-active-background:  var(selected-normal-background);
+    alternate-active-foreground:  var(selected-normal-foreground);
+    alternate-urgent-background:  var(urgent-background);
+    alternate-urgent-foreground:  var(urgent-foreground);
+}
+
+window {
+    background-color:   #091833e6;
+    border:             1px;
+    border-color:       #00c8aa;
+    border-radius:      8px;
+    padding:            4px;
+    location:           center;
+    anchor:             center;
+    width:              480px;
+    children:           [ inputbar, listview, mode-switcher ];
+}
+
+inputbar {
+    background-color:   #0d2247;
+    border:             0px;
+    border-radius:      6px;
+    padding:            6px 10px;
+    margin:             4px;
+    spacing:            4px;
+    children:           [ prompt, entry ];
+}
+
+prompt {
+    text-color:         #00c8aa;
+    font:               "JetBrainsMono Nerd Font Bold 12";
+    padding:            0px 6px 0px 0px;
+}
+
+entry {
+    text-color:         #e0f7fa;
+    font:               "JetBrainsMono Nerd Font 12";
+    padding:            2px;
+    background-color:   transparent;
+    cursor:             text;
+    placeholder-color:  #80cbc4;
+    placeholder:        "  signal...";
+}
+
+listview {
+    background-color:   transparent;
+    border:             0px;
+    margin:             2px 4px 4px 4px;
+    padding:            2px 0px;
+    spacing:            1px;
+    columns:            1;
+    cycle:              true;
+    dynamic:            true;
+    scrollbar:          true;
+}
+
+element {
+    background-color:   transparent;
+    text-color:         #e0f7fa;
+    border:             0px;
+    border-radius:      4px;
+    padding:            4px 8px;
+    orientation:        horizontal;
+    spacing:            6px;
+}
+
+element selected {
+    background-color:   #0d2247;
+    text-color:         #00e676;
+    border:             1px;
+    border-color:       #00c8aa;
+    border-radius:      4px;
+}
+
+element normal {
+    background-color:   transparent;
+    text-color:         #e0f7fa;
+}
+
+element alternate {
+    background-color:   #0d2247;
+    text-color:         #e0f7fa;
+}
+
+element-icon {
+    size:               20px;
+    border:             0px;
+    padding:            0px 4px 0px 0px;
+    background-color:   transparent;
+}
+
+element-text {
+    text-color:         inherit;
+    font:               "JetBrainsMono Nerd Font 12";
+    vertical-align:     0.5;
+    horizontal-align:   0.0;
+}
+
+mode-switcher {
+    background-color:   transparent;
+    border:             0px;
+    border-radius:      4px;
+    margin:             0px 4px 4px 4px;
+    padding:            4px 8px;
+    spacing:            8px;
+    orientation:        horizontal;
+}
+
+button {
+    background-color:   transparent;
+    text-color:         #80cbc4;
+    font:               "JetBrainsMono Nerd Font 10";
+    border:             0px;
+    border-radius:      3px;
+    padding:            2px 8px;
+}
+
+button selected {
+    background-color:   #0d2247;
+    text-color:         #00c8aa;
+    border:             1px;
+    border-color:       #00c8aa;
+    border-radius:      3px;
+}
+
+textbox {
+    text-color:         #80cbc4;
+    font:               "JetBrainsMono Nerd Font 11";
+    background-color:   transparent;
+    padding:            8px;
+}
+
+message {
+    background-color:   transparent;
+    border:             0px;
+    padding:            4px;
+}
+
+scrollbar {
+    handle-color:       #00c8aa;
+    handle-width:       3px;
+    background-color:   #0d2247;
+    border:             0px;
+    border-radius:      2px;
+    margin:             0px 1px 0px 0px;
+}
