@@ -1,3 +1,7 @@
+// Bright Scar — fastfetch config
+// Palette: theme.json v3
+// Chassis: #091833  Voice: #00c8aa  Scar: #00e676  Ghost: #b0bec5
+
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "display": {
@@ -9,11 +13,20 @@
         "freq": {
             "ndigits": 3,
             "spaceBeforeUnit": "never"
+        },
+        "color": {
+            "keys": "#00c8aa",
+            "title": "#00e676",
+            "output": "#e0f7fa",
+            "separator": "#00695c"
         }
     },
     "modules": [
         "title",
-        "separator",
+        {
+            "type": "separator",
+            "string": "⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁ ⌁"
+        },
         "os",
         "host",
         {

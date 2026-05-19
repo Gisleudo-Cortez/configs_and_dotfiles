@@ -1,10 +1,10 @@
 ########################################
-#  Global style – Cyber-Lavender theme #
+#  Bright Scar — Mako Notifications   #
 ########################################
 font=CaskaydiaCove Nerd Font Mono 14
 background-color=#091833
-text-color=#b589d6
-border-color=#03edf9
+text-color=#e0f7fa
+border-color=#00c8aa
 border-size=2
 border-radius=8
 padding=10
@@ -20,28 +20,28 @@ markup=1
 format=[%a]\n<b>%s</b>\n%b
 
 ########################################
-#  Pointer bindings                    #
+#  Pointer bindings                   #
 ########################################
 on-button-left=dismiss
 on-button-right=dismiss-all
 on-button-middle=exec makoctl invoke
 
 ########################################
-#  Urgency overrides                   #
+#  Urgency overrides                  #
 ########################################
 [urgency=low]
-border-color=#b589d6
-text-color=#b589d6
+border-color=#00695c
+text-color=#80cbc4
 background-color=#091833
 default-timeout=5000
 
 [urgency=normal]
-border-color=#03edf9
-text-color=#b589d6
+border-color=#00c8aa
+text-color=#e0f7fa
 background-color=#091833
 
 [urgency=critical]
-background-color=#f92672
+background-color=#ff5252
 text-color=#091833
-border-color=#f92672
+border-color=#ff8c00
 default-timeout=0
