@@ -66,7 +66,6 @@ return {
                 snacks_picker_list= "Picker",
                 lazy              = "Lazy",
                 mason             = "Mason",
-                TelescopePrompt   = "Telescope",
                 dbui              = "DBUI",
                 dbout             = "DB output",
               },

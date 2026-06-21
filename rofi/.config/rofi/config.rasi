@@ -1,2 +1,10 @@
+configuration {
+    modi: "drun,window,run";
+    show-icons: true;
+    terminal: "kitty";
+    display-drun: "Apps";
+    display-run: "Run";
+    display-window: "Windows";
+}
 
 @theme "bright-scar"

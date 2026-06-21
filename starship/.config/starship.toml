@@ -4,6 +4,7 @@
 # Accent:  #ff6ec7  Blue: #40c4ff  Warning: #ffd54f  Wire: #ff8c00
 
 add_newline = false
+scan_timeout = 30
 format = """\
   󰣇 \
   $directory\
@@ -12,69 +13,17 @@ format = """\
   $cmd_duration\n
 """
 right_format = """
-$singularity\
-$kubernetes\
-$vcsh\
-$hg_branch\
-$pijul_channel\
-$c\
-$cmake\
-$cobol\
-$daml\
-$dart\
-$deno\
-$dotnet\
-$elixir\
-$elm\
-$erlang\
-$fennel\
-$golang\
-$guix_shell\
-$haskell\
-$haxe\
-$helm\
-$java\
-$julia\
-$kotlin\
-$gradle\
-$lua\
-$nim\
-$nodejs\
-$ocaml\
-$opa\
-$perl\
-$pulumi\
-$purescript\
 $python\
-$raku\
-$rlang\
-$red\
-$ruby\
 $rust\
-$scala\
-$solidity\
-$swift\
-$terraform\
-$vlang\
-$vagrant\
-$zig\
-$buf\
-$conda\
-$meson\
-$spack\
-$memory_usage\
-$aws\
-$gcloud\
-$openstack\
-$azure\
+$nodejs\
+$golang\
+$lua\
+$java\
 $cpp\
-$kotlin\
-$ocaml\
 $pixi\
-$rlang\
-$php\
-$crystal\
-$custom\
+$conda\
+$nix_shell\
+$memory_usage\
 $status\
 $os\
 $time"""

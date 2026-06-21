@@ -31,6 +31,14 @@ PanelWindow {
         // Fade-out animation on close
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
+        // Teal top accent — consistent across all popups
+        Rectangle {
+            anchors { top: parent.top; left: parent.left; right: parent.right }
+            height: 2
+            color: Colors.cyan
+            radius: 2
+        }
+
         Flickable {
             id: flick
             anchors.fill: parent
@@ -45,7 +53,7 @@ PanelWindow {
                 // Header
                 Text {
                     text: "󰅎  Clipboard"
-                    color: Colors.purple
+                    color: Colors.cyan
                     font.family: "JetBrainsMono Nerd Font"
                     font.pixelSize: Geometry.fontSize
                     Layout.margins: Geometry.innerPad

@@ -33,10 +33,10 @@ set -g fish_color_escape $flamingo
 set -g fish_color_autosuggestion $gray
 set -g fish_color_cancel $red
 
-# Prompt
-set -g fish_color_cwd $yellow
-set -g fish_color_user $teal
-set -g fish_color_host $blue
+# Prompt — Bright Scar identity
+set -g fish_color_cwd "#00e676"     # scar green — earned brightness, where you stand
+set -g fish_color_user "#00c8aa"    # cyan — Miku voice, the one speaking
+set -g fish_color_host "#80cbc4"    # ghost — Rei Toei's echo, system identity
 
 # Completion Pager
 set -g fish_pager_color_progress $gray

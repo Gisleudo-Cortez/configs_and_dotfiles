@@ -126,7 +126,7 @@ PanelWindow {
 
                 Text {
                     text: root.player?.isPlaying ? "󰏤" : "󰐊"
-                    color: Colors.purple
+                    color: Colors.cyan
                     font.family: "JetBrainsMono Nerd Font"
                     font.pixelSize: 24
                     MouseArea {

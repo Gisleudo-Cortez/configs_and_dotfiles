@@ -32,11 +32,11 @@ PanelWindow {
         // Fade-out animation on close
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
-        // Miku teal top accent
+        // Miku cyan signature accent
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 2
-            color: "#00b4d8"
+            color: Colors.cyan
             radius: 2
         }
 

@@ -32,6 +32,14 @@ PanelWindow {
         border.color: Colors.border
         border.width: Geometry.borderWidth
 
+        // Miku cyan top accent — consistent across all popups
+        Rectangle {
+            anchors { top: parent.top; left: parent.left; right: parent.right }
+            height: 2
+            color: Colors.cyan
+            radius: 2
+        }
+
         Text {
             id: tipText
             anchors.centerIn: parent

@@ -8,6 +8,7 @@ Item {
     implicitHeight: Geometry.barHeight
 
     property var screen: null
+    signal clicked
     property bool _netHovered: false
     property bool _vpnHovered: false
 
@@ -80,5 +81,11 @@ Item {
                 }
             }
         }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.clicked()
     }
 }

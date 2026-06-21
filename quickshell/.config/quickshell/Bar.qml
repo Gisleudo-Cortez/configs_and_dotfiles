@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Io
 
 PanelWindow {
     id: root
@@ -16,10 +17,22 @@ PanelWindow {
     Item {
         anchors.fill: parent
 
-        // Miku signal trace — teal line across bar top, dim edges, bright center
+        // Miku signal trace — breathing teal line, dim edges, bright center
+        // Slow 6-second pulse. Carries current, not just painted on.
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 1
+
+            property real _pulse: 0.75
+            opacity: _pulse
+
+            NumberAnimation on _pulse {
+                from: 0.6; to: 0.85
+                duration: 6000
+                loops: Animation.Infinite
+                easing.type: Easing.InOutSine
+            }
+
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0.0; color: "transparent" }
@@ -66,6 +79,12 @@ PanelWindow {
                 onAudioClicked:  PopupState.toggle("audio",     root.screen)
                 onDockerClicked: PopupState.toggle("docker",    root.screen)
                 onBtClicked:     PopupState.toggle("bluetooth", root.screen)
+                // ── ronema launcher — one-shot on network click ──
+            onNetClicked: {
+                const p = new Process()
+                p.command = ["ronema"]
+                p.start()
+            }
             }
         }
     }

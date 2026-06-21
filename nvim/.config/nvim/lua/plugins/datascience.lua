@@ -45,7 +45,7 @@ return {
   -- ── image.nvim ─────────────────────────────────────────────────────────
   {
     "3rd/image.nvim",
-    enabled = false,
+    enabled = true,
     build = false, -- no post-install step
     event = "VeryLazy",
     cond = is_kitty, -- only load under Kitty
@@ -230,14 +230,14 @@ return {
     "GCBallesteros/NotebookNavigator.nvim",
     keys = {
       {
-        "]c",
+        "]j",
         function()
           require("notebook-navigator").move_cell("d")
         end,
         desc = "Next cell",
       },
       {
-        "[c",
+        "[j",
         function()
           require("notebook-navigator").move_cell("u")
         end,

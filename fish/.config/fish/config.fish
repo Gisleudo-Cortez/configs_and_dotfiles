@@ -11,10 +11,10 @@ set -xU MANROFFOPT "-c"
 # Hint to exit PKGBUILD review in Paru
 set -x PARU_PAGER "less -P \"Press 'q' to exit the PKGBUILD review.\""
 
-## Export variable need for qt-theme
-if type "qtile" >> /dev/null 2>&1
-   set -x QT_QPA_PLATFORMTHEME "qt5ct"
-end
+## Export variable need for qt-theme (Hyprland chassis — qtile block disabled)
+#if type "qtile" >> /dev/null 2>&1
+#   set -x QT_QPA_PLATFORMTHEME "qt5ct"
+#end
 
 # Set settings for https://github.com/franciscolourenco/done
 set -U __done_min_cmd_duration 10000
@@ -142,8 +142,8 @@ set -gx pessoal  $HOME/Documents/Pessoal
 set -gx boot_dev $HOME/Documents/Estudos/boot_dev/
 set -gx conf $HOME/Documents/configs_and_dotfiles/
 
-# go env setup
-export PATH="$PATH:$(go env GOBIN):$(go env GOPATH)/bin"
+# go env setup (slow on cold start — uncomment if needed)
+# export PATH="$PATH:$(go env GOBIN):$(go env GOPATH)/bin"
 
 # protontricks env variables
 set -gx WINE "/usr/bin/wine"
@@ -152,14 +152,19 @@ set -gx WINETRICKS "/usr/bin/winetricks"
 # Add cargo to PATH
 set -gx PATH $HOME/.cargo/bin $PATH
 
+## fnm (Fast Node Manager) — replaces nvm.fish
+if type -q fnm
+    fnm env --use-on-cd --shell fish | source
+end
+
 # change editor to nvim 
 set -gx EDITOR /usr/bin/nvim
 
 # Generated for envman. Do not edit.
 test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
 
-# Added by LM Studio CLI (lms)
-set -gx PATH $PATH /home/nero/.lmstudio/bin
+# LM Studio CLI PATH (disabled — provider offline)
+# set -gx PATH $PATH /home/nero/.lmstudio/bin
 # End of LM Studio CLI section
 
 # Ollama performance settings
