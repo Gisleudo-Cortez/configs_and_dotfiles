@@ -28,13 +28,6 @@ alias fgrep 'ugrep -F --color=auto'
 
 ## abbreviations — interactive shortcuts (expand on Space/Enter)
 
-# Aliases not in either list — converted to abbr (interactive shortcuts)
-abbr grubup 'sudo update-grub'
-abbr create_dc_folder 'bash /home/nero/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/create_dc_folder.sh'
-abbr estudos_env 'source $estudos/estudos/bin/activate.fish'
-abbr ds 'dust -d 2'
-abbr dua 'dua interactive'
-
 # System / package management
 abbr big 'expac -H M "%m\t%n" | sort -h | nl'
 abbr cls 'clear'
@@ -59,7 +52,6 @@ abbr mirrors 'sudo reflector --latest 50 --number 20 --sort score --save /etc/pa
 # Help people new to Arch
 abbr tb 'nc termbin.com 9999'
 abbr helpme 'echo "To print basic information about a command use tldr <command>"'
-abbr pacdiff 'sudo -H DIFFPROG=meld pacdiff'
 
 # Get the error messages from journalctl
 abbr jctl 'journalctl -p 3 -xb'
@@ -70,7 +62,7 @@ abbr rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
 # Custom aliases
 abbr backup_all 'sudo bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/backup_all.sh'
 abbr source_fish 'source $HOME/Documents/configs_and_dotfiles/fish/.config/fish/config.fish'
-abbr save_fish_config 'cp ~/.config/fish/config.fish $conf/fish/.config/fish/config.fish'
+abbr save_fish_config 'cp ~/.config/fish/config.fish $conf/fish/.config/fish/config.fish && cp ~/.config/fish/conf.d/aliases.fish $conf/fish/.config/fish/conf.d/aliases.fish'
 abbr print_file 'lp -d EPSON_L3210_Series'
 abbr rs 'rsync -avP'
 abbr update 'sudo pacman -Syu && paru -Syu && flatpak update'
@@ -89,20 +81,13 @@ abbr mkdir 'mkdir -p' # just in case i type the full command :)
 # Custom launch parameters
 abbr anki_launch 'LIBGL_ALWAYS_SOFTWARE=1 anki'
 
-# audio control
-abbr audio_select '~/.config/waybar/scripts/wireplumber-audio.sh select'
-
 # Quickshell reload
-abbr qs-reload 'pkill -x dunst 2>/dev/null; pkill quickshell 2>/dev/null; quickshell &'
+abbr qs-reload 'pkill quickshell 2>/dev/null; quickshell &'
 
-## abbreviations — navigation / yazi / sftp
+## abbreviations — navigation / yazi
 abbr yal "yazi ~/Documents/Lonam/"
 abbr yag "yazi ~/Documents/GEG/"
-abbr sfl "sftp -r lonam:Documents/LONAM/"
-abbr sfg "sftp -r lonam:Documents/GEG/"
-abbr gtal "./gather_data.sh .config/nvim .zshrc .config/fish .config/hypr .config/kitty .config/waybar .config/starship .config/starship.toml .config/starship_cat.toml"
 abbr cff 'nvim ~/.config/fish/'
-abbr cfw "nvim ~/.config/waybar/"
 abbr cfq "nvim ~/.config/quickshell/"
 abbr cfh "nvim ~/.config/hypr/"
 abbr cfk "nvim ~/.config/kitty/"
