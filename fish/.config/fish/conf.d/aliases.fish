@@ -9,7 +9,7 @@ alias lt 'eza -aT --color=always --group-directories-first --icons' # tree listi
 alias l. 'eza -ald --color=always --group-directories-first --icons .*' # show only dotfiles
 
 # Replace some more things with better alternatives
-alias cat 'bat --style header --style snip --style changes --style header'
+alias cat 'bat --style header,snip,changes'
 if not test -x /usr/bin/yay && test -x /usr/bin/paru
     alias yay paru
 end
@@ -27,7 +27,6 @@ alias gitpkg 'pacman -Q | grep -i "\-git" | wc -l' # List amount of -git package
 alias grep 'ugrep --color=auto'
 alias egrep 'ugrep -E --color=auto'
 alias fgrep 'ugrep -F --color=auto'
-alias grubup 'sudo update-grub'
 alias hw 'hwinfo --short' # Hardware Info
 alias ip 'ip -color'
 alias psmem 'ps auxf | sort -nr -k 4'
@@ -35,9 +34,7 @@ alias psmem10 'ps auxf | sort -nr -k 4 | head -10'
 alias rmpkg 'sudo pacman -Rdd'
 alias tarnow 'tar -acf '
 alias untar 'tar -zxvf '
-alias upd /usr/bin/garuda-update
-alias vdir 'vdir --color=auto'
-alias wget 'wget -c '
+alias upd_force='sudo pacman -Syyu && paru -Syyu'
 
 # Get fastest mirrors
 alias mirror 'sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist'
@@ -48,7 +45,6 @@ alias mirrors 'sudo reflector --latest 50 --number 20 --sort score --save /etc/p
 # Help people new to Arch
 alias tb 'nc termbin.com 9999'
 alias helpme 'echo "To print basic information about a command use tldr <command>"'
-alias pacdiff 'sudo -H DIFFPROG=meld pacdiff'
 
 # Get the error messages from journalctl
 alias jctl 'journalctl -p 3 -xb'
@@ -60,15 +56,10 @@ alias rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
 alias cls='clear'
 alias backup_all='sudo bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/backup_all.sh'
 alias source_fish='source $HOME/Documents/configs_and_dotfiles/fish/.config/fish/config.fish'
-alias create_dc_folder='bash /home/nero/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/create_dc_folder.sh'
 alias print_file='lp -d EPSON_L3210_Series'
-alias save_fish_config='cp ~/.config/fish/config.fish $pessoal/dotfiles/config.fish'
-alias estudos_env='source $estudos/estudos/bin/activate.fish'
-alias ds "dust -d 2"
-alias dua "dua interactive"
-alias rs "rsync -avP"
-alias update='sudo pacman -Syu --noconfirm && paru -Syu --noconfirm'
-alias upd_force='sudo pacman -Syyu --noconfirm && paru -Syyu --noconfirm'
+alias save_fish_config='cp ~/.config/fish/config.fish $conf/fish/.config/fish/config.fish && cp ~/.config/fish/conf.d/aliases.fish $conf/fish/.config/fish/conf.d/aliases.fish'
+alias rs 'rsync -avP'
+alias update='sudo pacman -Syu && paru -Syu && flatpak update'
 
 # Mullvad VPN region switching
 alias vpn-br 'mullvad relay set location br for'
@@ -84,21 +75,15 @@ abbr mkdir "mkdir -p" # just in case i type the full command :)
 # Custom launch parameters
 alias anki_launch="LIBGL_ALWAYS_SOFTWARE=1 anki"
 
-# audio control
-alias audio_select="~/.config/waybar/scripts/wireplumber-audio.sh select"
-
 ## abbreviations
 abbr yal "yazi ~/Documents/Lonam/"
 abbr yag "yazi ~/Documents/GEG/"
-abbr sfl "sftp -r lonam:Documents/LONAM/"
-abbr sfg "sftp -r lonam:Documents/GEG/"
-abbr gtal "./gather_data.sh .config/nvim .zshrc .config/fish .config/hypr .config/kitty .config/waybar .config/starship .config/starship.toml .config/starship_cat.toml"
 abbr cff 'nvim ~/.config/fish/'
 abbr cfw "nvim ~/.config/waybar/"
 abbr cfq "nvim ~/.config/quickshell/"
-alias qs-reload "pkill -x dunst 2>/dev/null; pkill quickshell 2>/dev/null; quickshell &"
 abbr cfh "nvim ~/.config/hypr/"
 abbr cfk "nvim ~/.config/kitty/"
+alias qs-reload "pkill quickshell 2>/dev/null; quickshell &"
 
 ## git
 # --- Status & Diffing ---
@@ -145,7 +130,7 @@ alias gm "git merge"
 alias gma "git merge --abort" # Abort a merge in progress
 alias gmc "git merge --continue" # Continue a merge in progress
 alias gr "git rebase"
-alias gra "git rebase --abort" # Abort a rebase in progress
+alias grba "git rebase --abort" # Abort a rebase in progress
 alias grc "git rebase --continue" # Continue a rebase in progress
 alias gri "git rebase -i" # Interactive rebase
 

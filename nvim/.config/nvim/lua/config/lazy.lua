@@ -23,12 +23,12 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   end
 end
 vim.opt.rtp:prepend(lazypath)
-rocks = { enabled = false }
 require("lazy").setup({
   spec = {
     -- Import every Lua file in lua/plugins/ as a plugin spec source.
     { import = "plugins" },
   },
+  rocks = { enabled = false },
   defaults = {
     lazy = false, -- default: plugins load eagerly; opt-in lazy via `event=`, `keys=`, etc.
     version = false, -- always use latest git — set to "*" to follow latest stable tags

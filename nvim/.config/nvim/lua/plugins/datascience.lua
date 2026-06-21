@@ -230,14 +230,14 @@ return {
     "GCBallesteros/NotebookNavigator.nvim",
     keys = {
       {
-        "]c",
+        "]j",
         function()
           require("notebook-navigator").move_cell("d")
         end,
         desc = "Next cell",
       },
       {
-        "[c",
+        "[j",
         function()
           require("notebook-navigator").move_cell("u")
         end,
