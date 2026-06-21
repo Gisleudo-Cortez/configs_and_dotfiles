@@ -142,8 +142,8 @@ set -gx pessoal  $HOME/Documents/Pessoal
 set -gx boot_dev $HOME/Documents/Estudos/boot_dev/
 set -gx conf $HOME/Documents/configs_and_dotfiles/
 
-# go env setup
-export PATH="$PATH:$(go env GOBIN):$(go env GOPATH)/bin"
+# go env setup (uncomment if needed — slow on cold start)
+# fish_add_path (go env GOBIN) (go env GOPATH)/bin
 
 # protontricks env variables
 set -gx WINE "/usr/bin/wine"
@@ -167,5 +167,5 @@ set -gx OLLAMA_FLASH_ATTENTION 1
 set -gx OLLAMA_MAX_LOADED_MODELS 1
 set -gx OLLAMA_KV_CACHE_TYPE q8_0
 set -gx OLLAMA_NUM_PARALLEL 1
-set -gx OLLAMA_NUM_CTX 35000
+set -gx OLLAMA_CONTEXT_LENGTH 35000
 

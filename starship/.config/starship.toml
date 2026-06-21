@@ -68,10 +68,7 @@ $gcloud\
 $openstack\
 $azure\
 $cpp\
-$kotlin\
-$ocaml\
 $pixi\
-$rlang\
 $php\
 $crystal\
 $custom\
