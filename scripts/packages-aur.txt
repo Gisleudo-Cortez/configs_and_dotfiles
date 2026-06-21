@@ -1,5 +1,4 @@
 # Utilities
-find-the-command
 anydesk-bin
 grimblast-git
 zen-browser-bin
@@ -9,3 +8,4 @@ google-chrome
 catppuccin-gtk-theme-macchiato
 catppuccin-gtk-theme-latte
 catppuccin-gtk-theme-frappe
+matugen

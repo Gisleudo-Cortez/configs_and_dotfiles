@@ -33,6 +33,8 @@ main() {
     
     local pkgs_to_install=()
     pkgs_to_install+=("steam") # Steam is always needed
+    # Gaming tools useful across all GPU vendors
+    pkgs_to_install+=("gamemode" "lib32-gamemode" "mangohud" "lib32-mangohud" "gamescope")
 
     echo "[08-gaming-setup] Detected GPU Vendor: $vendor"
 
