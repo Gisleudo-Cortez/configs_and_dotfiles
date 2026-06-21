@@ -4,6 +4,7 @@
 # Accent:  #ff6ec7  Blue: #40c4ff  Warning: #ffd54f  Wire: #ff8c00
 
 add_newline = false
+scan_timeout = 30
 format = """\
   󰣇 \
   $directory\

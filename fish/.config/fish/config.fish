@@ -5,16 +5,16 @@ set VIRTUAL_ENV_DISABLE_PROMPT "1"
 set -x SHELL /usr/bin/fish
 
 # Use bat for man pages
-set -gx MANPAGER "sh -c 'col -bx | bat -l man -p'"
-set -gx MANROFFOPT "-c"
+set -xU MANPAGER "sh -c 'col -bx | bat -l man -p'"
+set -xU MANROFFOPT "-c"
 
 # Hint to exit PKGBUILD review in Paru
 set -x PARU_PAGER "less -P \"Press 'q' to exit the PKGBUILD review.\""
 
-## Export variable need for qt-theme
-if type -q qtile
-   set -x QT_QPA_PLATFORMTHEME "qt5ct"
-end
+## Export variable need for qt-theme (Hyprland chassis — qtile block disabled)
+#if type "qtile" >> /dev/null 2>&1
+#   set -x QT_QPA_PLATFORMTHEME "qt5ct"
+#end
 
 # Set settings for https://github.com/franciscolourenco/done
 set -U __done_min_cmd_duration 10000
@@ -27,8 +27,26 @@ if test -f ~/.fish_profile
   source ~/.fish_profile
 end
 
-# Use fish_add_path for PATH management (deduplicates automatically)
-fish_add_path ~/.local/bin ~/.local/share/npm/bin ~/Applications/depot_tools ~/.cargo/bin
+# Add ~/.local/bin to PATH
+if test -d ~/.local/bin
+    if not contains -- ~/.local/bin $PATH
+        set -p PATH ~/.local/bin
+    end
+end
+
+# Add npm global packages to PATH
+if test -d ~/.local/share/npm/bin
+    if not contains -- ~/.local/share/npm/bin $PATH
+        set -p PATH ~/.local/share/npm/bin
+    end
+end
+
+# Add depot_tools to PATH
+if test -d ~/Applications/depot_tools
+    if not contains -- ~/Applications/depot_tools $PATH
+        set -p PATH ~/Applications/depot_tools
+    end
+end
 
 ## Starship prompt
 if status --is-interactive
@@ -59,7 +77,7 @@ function __history_previous_command_arguments
   end
 end
 
-if test "$fish_key_bindings" = fish_vi_key_bindings
+if [ "$fish_key_bindings" = fish_vi_key_bindings ];
   bind -Minsert ! __history_previous_command
   bind -Minsert '$' __history_previous_command_arguments
 else
@@ -99,8 +117,8 @@ function cleanup
 end
 
 
-## Run fastfetch only on login shells (avoids 500-1500ms startup on every new terminal)
-if status --is-login && type -q fastfetch
+## Run fastfetch if session is interactive
+if status --is-interactive && type -q fastfetch
    fastfetch --file ~/.config/fastfetch/lain.txt --logo-color-1 "#00c8aa" --config neofetch.jsonc
 end
 
@@ -124,12 +142,15 @@ set -gx pessoal  $HOME/Documents/Pessoal
 set -gx boot_dev $HOME/Documents/Estudos/boot_dev/
 set -gx conf $HOME/Documents/configs_and_dotfiles/
 
-# go env setup (uncomment if needed — slow on cold start)
-# fish_add_path (go env GOBIN) (go env GOPATH)/bin
+# go env setup (slow on cold start — uncomment if needed)
+# export PATH="$PATH:$(go env GOBIN):$(go env GOPATH)/bin"
 
 # protontricks env variables
 set -gx WINE "/usr/bin/wine"
 set -gx WINETRICKS "/usr/bin/winetricks"
+
+# Add cargo to PATH
+set -gx PATH $HOME/.cargo/bin $PATH
 
 # change editor to nvim 
 set -gx EDITOR /usr/bin/nvim
@@ -137,8 +158,8 @@ set -gx EDITOR /usr/bin/nvim
 # Generated for envman. Do not edit.
 test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
 
-# Added by LM Studio CLI (lms)
-set -gx PATH $PATH /home/nero/.lmstudio/bin
+# LM Studio CLI PATH (disabled — provider offline)
+# set -gx PATH $PATH /home/nero/.lmstudio/bin
 # End of LM Studio CLI section
 
 # Ollama performance settings
@@ -146,5 +167,5 @@ set -gx OLLAMA_FLASH_ATTENTION 1
 set -gx OLLAMA_MAX_LOADED_MODELS 1
 set -gx OLLAMA_KV_CACHE_TYPE q8_0
 set -gx OLLAMA_NUM_PARALLEL 1
-set -gx OLLAMA_CONTEXT_LENGTH 35000
+set -gx OLLAMA_NUM_CTX 35000
 

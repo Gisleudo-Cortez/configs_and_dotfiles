@@ -109,7 +109,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             height: cContent.implicitHeight + 14
                             color: cHover.containsMouse
-                                   ? Qt.rgba(0.012, 0.929, 0.976, 0.07) : "transparent"
+                                   ? Qt.rgba(0.0, 0.784, 0.667, 0.07) : "transparent"
 
                             ColumnLayout {
                                 id: cContent

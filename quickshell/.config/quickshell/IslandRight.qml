@@ -15,6 +15,7 @@ Island {
     signal audioClicked
     signal dockerClicked
     signal btClicked
+    signal netClicked
 
     // ── helpers ───────────────────────────────────────────────────────────
     function _battColor(pct) {
@@ -90,7 +91,7 @@ Island {
         BarSep {}
 
         // ── Extracted widgets ────────────────────────────────────────────
-        WidgetNetwork { screen: root.screen }
+        WidgetNetwork { screen: root.screen; onClicked: root.netClicked() }
 
         BarSep {}
 

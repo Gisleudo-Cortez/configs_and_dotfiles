@@ -126,25 +126,25 @@ button:active {
 
 /* ------------- per-button icons ------------- */
 #lock {
-	background-image: url("icons/lock_white.png");
+	background-image: url("/home/nero/.config/wlogout/icons/lock_white.png");
 }
 
 #logout {
-	background-image: url("icons/logout_white.png");
+	background-image: url("/home/nero/.config/wlogout/icons/logout_white.png");
 }
 
 #suspend {
-	background-image: url("icons/suspend_white.png");
+	background-image: url("/home/nero/.config/wlogout/icons/suspend_white.png");
 }
 
 #hibernate {
-	background-image: url("icons/hibernate_white.png");
+	background-image: url("/home/nero/.config/wlogout/icons/hibernate_white.png");
 }
 
 #shutdown {
-	background-image: url("icons/shutdown_white.png");
+	background-image: url("/home/nero/.config/wlogout/icons/shutdown_white.png");
 }
 
 #reboot {
-	background-image: url("icons/reboot_white.png");
+	background-image: url("/home/nero/.config/wlogout/icons/reboot_white.png");
 }

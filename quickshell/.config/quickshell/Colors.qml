@@ -28,6 +28,7 @@ QtObject {
     readonly property color bareMetal:   "#8e8e93"                    // Motoko's steel. Diagnostics, raw truth.
     readonly property color ghost:       "#b0bec5"                    // Rei Toei's echo. Memory, past signals.
     readonly property color copper:      "#b87333"                    // Warm metal. Grounded encouragement.
+    readonly property color purple:      "#b589d6"                    // Ghost frequency. Lain's watch — notifications, memory.
 
     // ── Text hierarchy ────────────────────────────────────────────
     readonly property color text:        "#e0f7fa"                    // Bright readable. Signal clear.

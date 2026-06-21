@@ -61,7 +61,7 @@ PanelWindow {
 
                     Text {
                         text: "󰕾  Audio Output"
-                        color: Colors.purple
+                        color: Colors.cyan
                         font.family: "JetBrainsMono Nerd Font"
                         font.pixelSize: Geometry.fontSize
                     }

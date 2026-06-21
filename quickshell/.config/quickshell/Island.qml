@@ -16,13 +16,13 @@ Rectangle {
     Behavior on color { ColorAnimation { duration: 200 } }
     Behavior on border.color { ColorAnimation { duration: 200 } }
 
-    // Miku teal top-edge highlight
+    // Miku teal top-edge highlight — brighter, more present
     Rectangle {
         anchors { top: parent.top; left: parent.left; right: parent.right }
         height: 2
         color: Colors.cyan
         radius: 1
-        opacity: 0.7
+        opacity: 0.85
     }
 
     // Faint outer glow — blurred duplicate behind

@@ -66,7 +66,7 @@ PanelWindow {
         // Fade-out animation on close
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
-        // Miku teal top accent
+        // Warm warning accent — ghost signals arriving
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 2
