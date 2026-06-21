@@ -45,7 +45,7 @@ return {
   -- ── image.nvim ─────────────────────────────────────────────────────────
   {
     "3rd/image.nvim",
-    enabled = false,
+    enabled = true,
     build = false, -- no post-install step
     event = "VeryLazy",
     cond = is_kitty, -- only load under Kitty

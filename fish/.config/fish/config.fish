@@ -152,6 +152,11 @@ set -gx WINETRICKS "/usr/bin/winetricks"
 # Add cargo to PATH
 set -gx PATH $HOME/.cargo/bin $PATH
 
+## fnm (Fast Node Manager) — replaces nvm.fish
+if type -q fnm
+    fnm env --use-on-cd --shell fish | source
+end
+
 # change editor to nvim 
 set -gx EDITOR /usr/bin/nvim
 

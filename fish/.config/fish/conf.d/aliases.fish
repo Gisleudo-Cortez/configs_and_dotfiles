@@ -14,78 +14,88 @@ if not test -x /usr/bin/yay && test -x /usr/bin/paru
     alias yay paru
 end
 
-# Common use
+# Common use — navigation aliases stay as aliases (not worth abbreviating)
 alias .. 'cd ..'
 alias ... 'cd ../..'
 alias .... 'cd ../../..'
 alias ..... 'cd ../../../..'
 alias ...... 'cd ../../../../..'
-alias big 'expac -H M "%m\t%n" | sort -h | nl' # Sort installed packages according to size in MB (expac must be installed)
-alias dir 'dir --color=auto'
-alias fixpacman 'sudo rm /var/lib/pacman/db.lck'
-alias gitpkg 'pacman -Q | grep -i "\-git" | wc -l' # List amount of -git packages
+
+# Replace grep family (shadow system commands)
 alias grep 'ugrep --color=auto'
 alias egrep 'ugrep -E --color=auto'
 alias fgrep 'ugrep -F --color=auto'
-alias grubup 'sudo update-grub'
-alias hw 'hwinfo --short' # Hardware Info
-alias ip 'ip -color'
-alias psmem 'ps auxf | sort -nr -k 4'
-alias psmem10 'ps auxf | sort -nr -k 4 | head -10'
-alias rmpkg 'sudo pacman -Rdd'
-alias tarnow 'tar -acf '
-alias untar 'tar -zxvf '
-alias upd_force='sudo pacman -Syyu && paru -Syyu'
+
+## abbreviations — interactive shortcuts (expand on Space/Enter)
+
+# Aliases not in either list — converted to abbr (interactive shortcuts)
+abbr grubup 'sudo update-grub'
+abbr create_dc_folder 'bash /home/nero/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/create_dc_folder.sh'
+abbr estudos_env 'source $estudos/estudos/bin/activate.fish'
+abbr ds 'dust -d 2'
+abbr dua 'dua interactive'
+
+# System / package management
+abbr big 'expac -H M "%m\t%n" | sort -h | nl'
+abbr cls 'clear'
+abbr dir 'dir --color=auto'
+abbr fixpacman 'sudo rm /var/lib/pacman/db.lck'
+abbr gitpkg 'pacman -Q | grep -i "\-git" | wc -l'
+abbr hw 'hwinfo --short'
+abbr ip 'ip -color'
+abbr psmem 'ps auxf | sort -nr -k 4'
+abbr psmem10 'ps auxf | sort -nr -k 4 | head -10'
+abbr rmpkg 'sudo pacman -Rdd'
+abbr tarnow 'tar -acf '
+abbr untar 'tar -zxvf '
+abbr upd_force 'sudo pacman -Syyu && paru -Syyu'
 
 # Get fastest mirrors
-alias mirror 'sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist'
-alias mirrora 'sudo reflector --latest 50 --number 20 --sort age --save /etc/pacman.d/mirrorlist'
-alias mirrord 'sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist'
-alias mirrors 'sudo reflector --latest 50 --number 20 --sort score --save /etc/pacman.d/mirrorlist'
+abbr mirror 'sudo reflector -f 30 -l 30 --number 10 --verbose --save /etc/pacman.d/mirrorlist'
+abbr mirrora 'sudo reflector --latest 50 --number 20 --sort age --save /etc/pacman.d/mirrorlist'
+abbr mirrord 'sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist'
+abbr mirrors 'sudo reflector --latest 50 --number 20 --sort score --save /etc/pacman.d/mirrorlist'
 
 # Help people new to Arch
-alias tb 'nc termbin.com 9999'
-alias helpme 'echo "To print basic information about a command use tldr <command>"'
-alias pacdiff 'sudo -H DIFFPROG=meld pacdiff'
+abbr tb 'nc termbin.com 9999'
+abbr helpme 'echo "To print basic information about a command use tldr <command>"'
+abbr pacdiff 'sudo -H DIFFPROG=meld pacdiff'
 
 # Get the error messages from journalctl
-alias jctl 'journalctl -p 3 -xb'
+abbr jctl 'journalctl -p 3 -xb'
 
 # Recent installed packages
-alias rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
+abbr rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
 
 # Custom aliases
-alias cls='clear'
-alias backup_all='sudo bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/backup_all.sh'
-alias source_fish='source $HOME/Documents/configs_and_dotfiles/fish/.config/fish/config.fish'
-alias create_dc_folder='bash /home/nero/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/create_dc_folder.sh'
-alias print_file='lp -d EPSON_L3210_Series'
-alias save_fish_config='cp ~/.config/fish/config.fish $conf/fish/.config/fish/config.fish'
-alias estudos_env='source $estudos/estudos/bin/activate.fish'
-alias ds "dust -d 2"
-alias dua "dua interactive"
-alias rs "rsync -avP"
-alias update='sudo pacman -Syu && paru -Syu && flatpak update'
-alias upd_force='sudo pacman -Syyu && paru -Syyu'
+abbr backup_all 'sudo bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/backup_all.sh'
+abbr source_fish 'source $HOME/Documents/configs_and_dotfiles/fish/.config/fish/config.fish'
+abbr save_fish_config 'cp ~/.config/fish/config.fish $conf/fish/.config/fish/config.fish'
+abbr print_file 'lp -d EPSON_L3210_Series'
+abbr rs 'rsync -avP'
+abbr update 'sudo pacman -Syu && paru -Syu && flatpak update'
 
 # Mullvad VPN region switching
-alias vpn-br 'mullvad relay set location br for'
-alias vpn-us 'mullvad relay set location us mia'
-alias vpn-jp 'mullvad relay set location jp tyo'
-alias vpn-eu 'mullvad relay set location de fra'
+abbr vpn-br 'mullvad relay set location br for'
+abbr vpn-us 'mullvad relay set location us mia'
+abbr vpn-jp 'mullvad relay set location jp tyo'
+abbr vpn-eu 'mullvad relay set location de fra'
 
 # tool calls
-alias nv="nvim ."
-alias mk="mkdir -p"
-abbr mkdir "mkdir -p" # just in case i type the full command :)
+abbr nv 'nvim .'
+abbr mk 'mkdir -p'
+abbr mkdir 'mkdir -p' # just in case i type the full command :)
 
 # Custom launch parameters
-alias anki_launch="LIBGL_ALWAYS_SOFTWARE=1 anki"
+abbr anki_launch 'LIBGL_ALWAYS_SOFTWARE=1 anki'
 
 # audio control
-alias audio_select="~/.config/waybar/scripts/wireplumber-audio.sh select"
+abbr audio_select '~/.config/waybar/scripts/wireplumber-audio.sh select'
 
-## abbreviations
+# Quickshell reload
+abbr qs-reload 'pkill -x dunst 2>/dev/null; pkill quickshell 2>/dev/null; quickshell &'
+
+## abbreviations — navigation / yazi / sftp
 abbr yal "yazi ~/Documents/Lonam/"
 abbr yag "yazi ~/Documents/GEG/"
 abbr sfl "sftp -r lonam:Documents/LONAM/"
@@ -94,81 +104,80 @@ abbr gtal "./gather_data.sh .config/nvim .zshrc .config/fish .config/hypr .confi
 abbr cff 'nvim ~/.config/fish/'
 abbr cfw "nvim ~/.config/waybar/"
 abbr cfq "nvim ~/.config/quickshell/"
-alias qs-reload "pkill -x dunst 2>/dev/null; pkill quickshell 2>/dev/null; quickshell &"
 abbr cfh "nvim ~/.config/hypr/"
 abbr cfk "nvim ~/.config/kitty/"
 
 ## git
 # --- Status & Diffing ---
-alias gs "git status"
-alias gd "git diff" # Show unstaged changes
-alias gds "git diff --staged" # Show staged changes (same as gdc)
-alias gdc "git diff --cached" # Show staged changes (alternative to gds)
+abbr gs "git status"
+abbr gd "git diff"
+abbr gds "git diff --staged"
+abbr gdc "git diff --cached"
 
 # --- Staging & Committing ---
-alias ga "git add"
-alias gaa "git add ." # Add all changes in current directory
-alias gau "git add -u" # Add all tracked files (update)
-alias gc "git commit -m"
-alias gca "git commit -a -m" # Add all tracked files and commit
-alias gcam "git commit --amend -m" # Amend last commit with a new message
-alias gcnm "git commit --amend --no-edit" # Amend last commit, keep existing message
-alias gfix "git commit -a --amend -C HEAD" # Add to last commit without changing message (stages all tracked files)
-alias greset "git reset HEAD --" # Unstage a file
+abbr ga "git add"
+abbr gaa "git add ."
+abbr gau "git add -u"
+abbr gc "git commit -m"
+abbr gca "git commit -a -m"
+abbr gcam "git commit --amend -m"
+abbr gcnm "git commit --amend --no-edit"
+abbr gfix "git commit -a --amend -C HEAD"
+abbr greset "git reset HEAD --"
 
 # --- Branching ---
-alias gb "git branch"
-alias gba "git branch -a" # Show all branches (local and remote)
-alias gco "git checkout"
-alias gcb "git checkout -b" # Create and switch to a new branch
-alias gbd "git branch -d" # Delete a local branch (safer: only if merged)
-alias gbD "git branch -D" # Force delete a local branch
-alias gbm "git branch -m" # Rename current local branch
-alias gbM "git branch -M" # Force rename current local branch (even if new name exists)
+abbr gb "git branch"
+abbr gba "git branch -a"
+abbr gco "git checkout"
+abbr gcb "git checkout -b"
+abbr gbd "git branch -d"
+abbr gbD "git branch -D"
+abbr gbm "git branch -m"
+abbr gbM "git branch -M"
 
 # --- Remotes, Pushing & Pulling ---
-alias gph "git push"
-alias gpl "git pull"
-alias gpr "git pull --rebase" # Pull and rebase
-alias gpo "git push -u origin (git rev-parse --abbrev-ref HEAD)" # Push current branch to origin and set upstream
-alias gf "git fetch"
-alias gfa "git fetch --all --prune" # Fetch all remotes and remove stale remote-tracking branches
-alias grv "git remote -v" # List remotes
-alias gra "git remote add"
-alias grr "git remote remove"
-alias grset "git remote set-url"
+abbr gph "git push"
+abbr gpl "git pull"
+abbr gpr "git pull --rebase"
+abbr gpo "git push -u origin (git rev-parse --abbrev-ref HEAD)"
+abbr gf "git fetch"
+abbr gfa "git fetch --all --prune"
+abbr grv "git remote -v"
+abbr gra "git remote add"
+abbr grr "git remote remove"
+abbr grset "git remote set-url"
 
 # --- Merging & Rebasing ---
-alias gm "git merge"
-alias gma "git merge --abort" # Abort a merge in progress
-alias gmc "git merge --continue" # Continue a merge in progress
-alias gr "git rebase"
-alias gra "git rebase --abort" # Abort a rebase in progress
-alias grc "git rebase --continue" # Continue a rebase in progress
-alias gri "git rebase -i" # Interactive rebase
+abbr gm "git merge"
+abbr gma "git merge --abort"
+abbr gmc "git merge --continue"
+abbr gr "git rebase"
+abbr grba "git rebase --abort"
+abbr grc "git rebase --continue"
+abbr gri "git rebase -i"
 
 # --- Logging & History ---
-alias gl "git log --oneline --graph --decorate --all" # Concise log of all branches
-alias gll "git log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short --graph" # Detailed, pretty log
-alias gls "git log --stat" # Log with stats (files changed)
-alias gsh "git show" # Show various types of objects (last commit by default)
+abbr gl "git log --oneline --graph --decorate --all"
+abbr gll "git log --pretty=format:'%C(yellow)%h %Cred%ad %Cblue%an%Cgreen%d %Creset%s' --date=short --graph"
+abbr gls "git log --stat"
+abbr gsh "git show"
 
 # --- Stashing ---
-alias gst "git stash"
-alias gstp "git stash pop"
-alias gsta "git stash apply"
-alias gstd "git stash drop"
-alias gstl "git stash list"
-alias gsts "git stash show -p" # Show changes in latest stash as a patch
+abbr gst "git stash"
+abbr gstp "git stash pop"
+abbr gsta "git stash apply"
+abbr gstd "git stash drop"
+abbr gstl "git stash list"
+abbr gsts "git stash show -p"
 
 # --- Ignoring & Cleaning ---
-alias gcl "git clone"
-alias gignore "git update-index --assume-unchanged" # Ignore tracking changes to a file (locally)
-alias gunignore "git update-index --no-assume-unchanged" # Resume tracking changes to a file (locally)
-alias gclean "git clean -fd" # Remove untracked files and directories (USE WITH CAUTION!)
-alias gcleani "git clean -fd -i" # Remove untracked files and directories interactively (safer)
+abbr gcl "git clone"
+abbr gignore "git update-index --assume-unchanged"
+abbr gunignore "git update-index --no-assume-unchanged"
+abbr gclean "git clean -fd"
+abbr gcleani "git clean -fd -i"
 
 # --- Configuration ---
-alias gcfgl "git config --local --list" # List local git config
-alias gcfgg "git config --global --list" # List global git config
-alias gcfgse "git config --global --edit" # Edit global git config
+abbr gcfgl "git config --local --list"
+abbr gcfgg "git config --global --list"
+abbr gcfgse "git config --global --edit"

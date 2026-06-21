@@ -26,6 +26,10 @@ go
 rust
 delve
 gopls
+fnm
+gdb
+shellcheck
+just
 
 # Utilities & Tools
 qalculate-gtk
@@ -36,17 +40,16 @@ rsync
 fzf
 fd
 bat
+bat-extras
 eza
 ripgrep
 ripgrep-all
-ugrep
 htop
 yazi
 hyperfine
 jq
 grim
 slurp
-swappy
 satty
 hypridle
 rofi
@@ -62,11 +65,26 @@ duf
 fastfetch
 cliphist
 yad
-python-pywal
+trash-cli
+powertop
 reflector
 nvtop
 lazygit
 wl-clipboard
+
+# Gaming
+gamemode
+lib32-gamemode
+mangohud
+lib32-mangohud
+gamescope
+
+# Intel GPU (iGPU drivers)
+intel-media-driver
+vulkan-intel
+lib32-vulkan-intel
+libva-utils
+intel-gpu-tools
 
 # Fonts
 ttf-jetbrains-mono
