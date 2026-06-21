@@ -35,7 +35,7 @@ return {
     event = "VeryLazy",
     opts = {
       auto_update = false,
-      run_on_start = true,
+      run_on_start = false,
       ensure_installed = {
         -- ── Formatters ──────────────────────────────────────────────────
         "stylua", -- Lua

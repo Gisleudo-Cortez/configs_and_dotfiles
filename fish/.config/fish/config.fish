@@ -5,14 +5,14 @@ set VIRTUAL_ENV_DISABLE_PROMPT "1"
 set -x SHELL /usr/bin/fish
 
 # Use bat for man pages
-set -xU MANPAGER "sh -c 'col -bx | bat -l man -p'"
-set -xU MANROFFOPT "-c"
+set -gx MANPAGER "sh -c 'col -bx | bat -l man -p'"
+set -gx MANROFFOPT "-c"
 
 # Hint to exit PKGBUILD review in Paru
 set -x PARU_PAGER "less -P \"Press 'q' to exit the PKGBUILD review.\""
 
 ## Export variable need for qt-theme
-if type "qtile" >> /dev/null 2>&1
+if type -q qtile
    set -x QT_QPA_PLATFORMTHEME "qt5ct"
 end
 
@@ -27,26 +27,8 @@ if test -f ~/.fish_profile
   source ~/.fish_profile
 end
 
-# Add ~/.local/bin to PATH
-if test -d ~/.local/bin
-    if not contains -- ~/.local/bin $PATH
-        set -p PATH ~/.local/bin
-    end
-end
-
-# Add npm global packages to PATH
-if test -d ~/.local/share/npm/bin
-    if not contains -- ~/.local/share/npm/bin $PATH
-        set -p PATH ~/.local/share/npm/bin
-    end
-end
-
-# Add depot_tools to PATH
-if test -d ~/Applications/depot_tools
-    if not contains -- ~/Applications/depot_tools $PATH
-        set -p PATH ~/Applications/depot_tools
-    end
-end
+# Use fish_add_path for PATH management (deduplicates automatically)
+fish_add_path ~/.local/bin ~/.local/share/npm/bin ~/Applications/depot_tools ~/.cargo/bin
 
 ## Starship prompt
 if status --is-interactive
@@ -77,7 +59,7 @@ function __history_previous_command_arguments
   end
 end
 
-if [ "$fish_key_bindings" = fish_vi_key_bindings ];
+if test "$fish_key_bindings" = fish_vi_key_bindings
   bind -Minsert ! __history_previous_command
   bind -Minsert '$' __history_previous_command_arguments
 else
@@ -117,8 +99,8 @@ function cleanup
 end
 
 
-## Run fastfetch if session is interactive
-if status --is-interactive && type -q fastfetch
+## Run fastfetch only on login shells (avoids 500-1500ms startup on every new terminal)
+if status --is-login && type -q fastfetch
    fastfetch --file ~/.config/fastfetch/lain.txt --logo-color-1 "#00c8aa" --config neofetch.jsonc
 end
 
@@ -148,9 +130,6 @@ set -gx conf $HOME/Documents/configs_and_dotfiles/
 # protontricks env variables
 set -gx WINE "/usr/bin/wine"
 set -gx WINETRICKS "/usr/bin/winetricks"
-
-# Add cargo to PATH
-set -gx PATH $HOME/.cargo/bin $PATH
 
 # change editor to nvim 
 set -gx EDITOR /usr/bin/nvim

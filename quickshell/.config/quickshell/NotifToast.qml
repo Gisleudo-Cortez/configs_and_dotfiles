@@ -70,7 +70,7 @@ PanelWindow {
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 2
-            color: "#ffb43c"
+            color: Colors.warning
             radius: 2
         }
 

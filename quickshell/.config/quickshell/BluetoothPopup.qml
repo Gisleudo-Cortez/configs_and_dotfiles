@@ -54,7 +54,7 @@ PanelWindow {
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 2
-            color: "#00b4d8"
+            color: Colors.cyan
             radius: 2
         }
 
