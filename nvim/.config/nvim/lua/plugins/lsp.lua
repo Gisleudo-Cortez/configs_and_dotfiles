@@ -255,12 +255,20 @@ return {
       })
 
       -- Rust
+      -- NOTE: rustaceanvim (rust.lua) manages its own LSP attachment for Rust
+      -- buffers and merges these settings as `default_settings`. Keep the
+      -- config here as the canonical source — rustaceanvim picks it up.
+      -- `checkOnSave` is DEPRECATED in recent rust-analyzer — it triggers a
+      -- second check-on-save pass alongside `check.enable`, producing double
+      -- diagnostics. Use `check.enable` (defaults to true) instead.
       vim.lsp.config("rust_analyzer", {
         settings = {
           ["rust-analyzer"] = {
             cargo = { allFeatures = true, loadOutDirsFromCheck = true },
-            checkOnSave = true,
-            check = { command = "clippy", extraArgs = { "--no-deps" } },
+            check = {
+              command = "clippy",
+              extraArgs = { "--no-deps" },
+            },
             procMacro = { enable = true },
             inlayHints = {
               bindingModeHints        = { enable = true },

@@ -22,6 +22,10 @@ return {
           cmd = { "rust-analyzer" },
           default_settings = {
             ["rust-analyzer"] = {
+              -- Use a separate target dir for the check pass so it doesn't
+              -- fight the build artifacts.  rustaceanvim merges these with
+              -- lsp.lua's vim.lsp.config("rust_analyzer") settings, so the
+              -- check.command = "clippy" from lsp.lua applies here too.
               check = {
                 extraArgs = { "--target-dir", "/tmp/rust-analyzer-check" },
               },
