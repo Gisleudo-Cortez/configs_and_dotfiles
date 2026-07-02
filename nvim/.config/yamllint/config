@@ -1,0 +1,22 @@
+---
+# yamllint configuration — relaxed defaults for personal projects.
+# The default rules (80-char line length, strict document-start, etc.)
+# cause constant false-positive errors in Neovim (via nvim-lint).
+# Override per-project by placing a .yamllint in the project root.
+
+extends: default
+
+rules:
+  line-length: disable
+  document-start: disable
+  indentation:
+    indent-sequences: consistent
+  comments:
+    require-starting-space: false
+  comments-indentation: disable
+  truthy:
+    level: warning
+  braces:
+    max-spaces-inside: 1
+  brackets:
+    max-spaces-inside: 1
