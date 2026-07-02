@@ -114,17 +114,15 @@ return {
           prepend_args = { "-l", "-m" },
           condition = function() return vim.fn.executable("latexindent") == 1 end,
         },
-        -- sqlfluff: requires .sqlfluff/pyproject.toml/setup.cfg in project root.
-        -- If none found, silently skip — don't spam the log.
+        -- sqlfluff: format-on-save for any .sql file, no project config required.
+        -- Override the built-in definition which sets require_cwd = true (won't
+        -- run without .sqlfluff/pyproject.toml in the tree).  We pass --dialect
+        -- ansi as the default; override per-project by adding a .sqlfluff file.
         sqlfluff      = {
-          prepend_args = { "--dialect", "ansi" },
-          condition = function()
-            if vim.fn.executable("sqlfluff") == 0 then return false end
-            local cwd = vim.fn.getcwd()
-            return vim.fn.filereadable(cwd .. "/.sqlfluff") == 1
-              or vim.fn.filereadable(cwd .. "/pyproject.toml") == 1
-              or vim.fn.filereadable(cwd .. "/setup.cfg") == 1
-          end,
+          args = { "fix", "--dialect", "ansi", "-" },
+          stdin = true,
+          require_cwd = false,
+          condition = function() return vim.fn.executable("sqlfluff") == 1 end,
         },
         -- hyprlang-fmt & nginxbeautifier are not in Mason; provide explicit command
         -- so Conform doesn't log "Missing built-in definition".
