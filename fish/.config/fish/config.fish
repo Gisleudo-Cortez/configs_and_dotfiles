@@ -1,12 +1,12 @@
 # Set values
 # Hide welcome message & ensure we are reporting fish as shell
 set fish_greeting
-set VIRTUAL_ENV_DISABLE_PROMPT "1"
+set VIRTUAL_ENV_DISABLE_PROMPT 1
 set -x SHELL /usr/bin/fish
 
 # Use bat for man pages
 set -xU MANPAGER "sh -c 'col -bx | bat -l man -p'"
-set -xU MANROFFOPT "-c"
+set -xU MANROFFOPT -c
 
 # Hint to exit PKGBUILD review in Paru
 set -x PARU_PAGER "less -P \"Press 'q' to exit the PKGBUILD review.\""
@@ -24,7 +24,7 @@ set -U __done_notification_urgency_level low
 
 # Apply .profile: use this to put fish compatible .profile stuff in
 if test -f ~/.fish_profile
-  source ~/.fish_profile
+    source ~/.fish_profile
 end
 
 # Add ~/.local/bin to PATH
@@ -50,7 +50,7 @@ end
 
 ## Starship prompt
 if status --is-interactive
-   source ("/usr/bin/starship" init fish --print-full-init | psub)
+    source ("/usr/bin/starship" init fish --print-full-init | psub)
 end
 
 ## Advanced command-not-found hook
@@ -59,30 +59,32 @@ source /usr/share/doc/find-the-command/ftc.fish
 ## Functions
 # Functions needed for !! and !$ https://github.com/oh-my-fish/plugin-bang-bang
 function __history_previous_command
-  switch (commandline -t)
-  case "!"
-    commandline -t $history[1]; commandline -f repaint
-  case "*"
-    commandline -i !
-  end
+    switch (commandline -t)
+        case "!"
+            commandline -t $history[1]
+            commandline -f repaint
+        case "*"
+            commandline -i !
+    end
 end
 
 function __history_previous_command_arguments
-  switch (commandline -t)
-  case "!"
-    commandline -t ""
-    commandline -f history-token-search-backward
-  case "*"
-    commandline -i '$'
-  end
+    switch (commandline -t)
+        case "!"
+            commandline -t ""
+            commandline -f history-token-search-backward
+        case "*"
+            commandline -i '$'
+    end
 end
 
-if [ "$fish_key_bindings" = fish_vi_key_bindings ];
-  bind -Minsert ! __history_previous_command
-  bind -Minsert '$' __history_previous_command_arguments
+if [ "$fish_key_bindings" = fish_vi_key_bindings ]
+
+    bind -Minsert ! __history_previous_command
+    bind -Minsert '$' __history_previous_command_arguments
 else
-  bind ! __history_previous_command
-  bind '$' __history_previous_command_arguments
+    bind ! __history_previous_command
+    bind '$' __history_previous_command_arguments
 end
 
 # Fish command history
@@ -98,8 +100,8 @@ end
 function copy
     set count (count $argv | tr -d \n)
     if test "$count" = 2; and test -d "$argv[1]"
-	set from (echo $argv[1] | string trim --right --chars=/)
-	set to (echo $argv[2])
+        set from (echo $argv[1] | string trim --right --chars=/)
+        set to (echo $argv[2])
         command cp -r $from $to
     else
         command cp $argv
@@ -111,20 +113,17 @@ function cleanup
     while pacman -Qdtq
         sudo pacman -R (pacman -Qdtq)
         if test "$status" -eq 1
-           break
+            break
         end
     end
 end
 
-
 ## Run fastfetch if session is interactive
 if status --is-interactive && type -q fastfetch
-   fastfetch --file ~/.config/fastfetch/lain.txt --logo-color-1 "#00c8aa" --config neofetch.jsonc
+    fastfetch --file ~/.config/fastfetch/lain.txt --logo-color-1 "#00c8aa" --config neofetch.jsonc
 end
 
-
-
-# Custom functions 
+# Custom functions
 function unzip_all
     for file in *.zip
         set dir_name (basename "$file" .zip)
@@ -133,12 +132,12 @@ function unzip_all
 end
 
 # Custom env vars
-set -gx loja  $HOME/Documents/Lonam
-set -gx estudos  $HOME/Documents/Estudos
-set -gx ourodata  $HOME/Documents/ourodata
-set -gx geg  $HOME/Documents/GEG
-set -gx portfolio  $HOME/Documents/Portfolio
-set -gx pessoal  $HOME/Documents/Pessoal
+set -gx loja $HOME/Documents/Lonam
+set -gx estudos $HOME/Documents/Estudos
+set -gx ourodata $HOME/Documents/ourodata
+set -gx geg $HOME/Documents/GEG
+set -gx portfolio $HOME/Documents/Portfolio
+set -gx pessoal $HOME/Documents/Pessoal
 set -gx boot_dev $HOME/Documents/Estudos/boot_dev/
 set -gx conf $HOME/Documents/configs_and_dotfiles/
 
@@ -146,8 +145,8 @@ set -gx conf $HOME/Documents/configs_and_dotfiles/
 # export PATH="$PATH:$(go env GOBIN):$(go env GOPATH)/bin"
 
 # protontricks env variables
-set -gx WINE "/usr/bin/wine"
-set -gx WINETRICKS "/usr/bin/winetricks"
+set -gx WINE /usr/bin/wine
+set -gx WINETRICKS /usr/bin/winetricks
 
 # Add cargo to PATH
 set -gx PATH $HOME/.cargo/bin $PATH
@@ -157,7 +156,7 @@ if type -q fnm
     fnm env --use-on-cd --shell fish | source
 end
 
-# change editor to nvim 
+# change editor to nvim
 set -gx EDITOR /usr/bin/nvim
 
 # Generated for envman. Do not edit.
@@ -173,4 +172,3 @@ set -gx OLLAMA_MAX_LOADED_MODELS 1
 set -gx OLLAMA_KV_CACHE_TYPE q8_0
 set -gx OLLAMA_NUM_PARALLEL 1
 set -gx OLLAMA_NUM_CTX 35000
-
