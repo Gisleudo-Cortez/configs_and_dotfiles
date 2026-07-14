@@ -5,3 +5,7 @@ nvim_config_dump.txt
 # Git tracks stow structure only; not the actual config payloads.
 hermes/.hermes/
 codex/.codex/
+
+# skidl REPL artifacts
+skidl_REPL.erc
+skidl_REPL.log
