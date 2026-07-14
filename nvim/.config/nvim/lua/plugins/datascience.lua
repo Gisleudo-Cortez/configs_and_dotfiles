@@ -49,6 +49,25 @@ return {
     build = false, -- no post-install step
     event = "VeryLazy",
     cond = is_kitty, -- only load under Kitty
+    config = function(_, opts)
+      require("image").setup(opts)
+      -- Guard against Neovim 0.12 treesitter injection crash on large files.
+      -- Same class of bug as treesitter-context and snacks indent/scope —
+      -- the render scheduler fires before treesitter finishes parsing,
+      -- and get_matches receives nodes with nil ranges.
+      -- pcall wrapper returns {} on crash → no images rendered, no crash.
+      local ok, document = pcall(require, "image.utils.document")
+      if ok then
+        local original_get_matches = document.get_matches
+        document.get_matches = function(...)
+          local ok, result = pcall(original_get_matches, ...)
+          if ok then
+            return result
+          end
+          return {}
+        end
+      end
+    end,
     opts = {
       backend = "kitty", -- best backend for the Kitty terminal
       processor = "magick_cli", -- requires imagemagick on PATH
