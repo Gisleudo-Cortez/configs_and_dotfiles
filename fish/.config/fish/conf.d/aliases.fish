@@ -1,15 +1,15 @@
 ## Useful aliases
 
 # Replace ls with eza
-alias ls 'eza -al --color=always --group-directories-first --icons' # preferred listing
-alias lsz 'eza -al --color=always --total-size --group-directories-first --icons' # include file size
-alias la 'eza -a --color=always --group-directories-first --icons' # all files and dirs
-alias ll 'eza -l --color=always --group-directories-first --icons' # long format
-alias lt 'eza -aT --color=always --group-directories-first --icons' # tree listing
-alias l. 'eza -ald --color=always --group-directories-first --icons .*' # show only dotfiles
+alias ls 'eza -al --color=always --group-directories-first --icons=always' # preferred listing
+alias lsz 'eza -al --color=always --total-size --group-directories-first --icons=always' # include file size
+alias la 'eza -a --color=always --group-directories-first --icons=always' # all files and dirs
+alias ll 'eza -l --color=always --group-directories-first --icons=always' # long format
+alias lt 'eza -aT --color=always --group-directories-first --icons=always' # tree listing
+alias l. 'eza -ald --color=always --group-directories-first --icons=always .*' # show only dotfiles
 
 # Replace some more things with better alternatives
-alias cat 'bat --style header --style snip --style changes --style header'
+alias cat 'bat --style header --style snip --style changes'
 if not test -x /usr/bin/yay && test -x /usr/bin/paru
     alias yay paru
 end
@@ -68,11 +68,10 @@ abbr rs 'rsync -avP'
 abbr update 'sudo pacman -Syu && paru -Syu && flatpak update'
 
 # Mullvad VPN region switching
-abbr vpn-br 'mullvad relay set location br for && mullvad reconnect -w'
-abbr vpn-us 'mullvad relay set location us mia && mullvad reconnect -w'
-abbr vpn-jp 'mullvad relay set location jp tyo && mullvad reconnect -w'
-abbr vpn-eu 'mullvad relay set location ch zrh && mullvad reconnect -w'
-abbr vpn-ca 'mullvad relay set location ca mtr && mullvad reconnect -w'
+abbr vpn-br 'mullvad relay set location br for'
+abbr vpn-us 'mullvad relay set location us mia'
+abbr vpn-jp 'mullvad relay set location jp tyo'
+abbr vpn-eu 'mullvad relay set location de fra'
 
 # tool calls
 abbr nv 'nvim .'
