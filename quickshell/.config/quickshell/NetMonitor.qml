@@ -8,8 +8,8 @@ QtObject {
     property real txKbps: 0
 
     function _fmtSpeed(kbps) {
-        if (kbps >= 1024) return (kbps / 1024).toFixed(1) + " MB/s"
-        return Math.round(kbps) + " KB/s"
+        if (kbps >= 1024) return (kbps / 1024).toFixed(1) + "M"
+        return Math.round(kbps) + "K"
     }
     readonly property string rxText: _fmtSpeed(rxKbps)
     readonly property string txText: _fmtSpeed(txKbps)

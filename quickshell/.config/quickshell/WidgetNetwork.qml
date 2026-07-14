@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 
-// Network icon + name + VPN indicator, shared hover → NetworkPopup
+// Network icon + name + speeds + VPN indicator with location, shared hover → NetworkPopup
 Item {
     id: root
     implicitWidth: netRow.implicitWidth + vpnWidget.implicitWidth + 10
@@ -45,25 +45,59 @@ Item {
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: Geometry.fontSizeSm
             }
+
+            // ── Speed indicators ──────────────────────────────────
+            Text {
+                visible: NetworkService.connected
+                text: "↓" + NetMonitor.rxText + " ↑" + NetMonitor.txText
+                color: Colors.textDim
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: Geometry.fontSizeSm
+            }
         }
 
         HoverHandler {
-            onHoveredChanged: { root._netHovered = hovered; root._checkNetHover() }
+            onHoveredChanged: {
+                root._netHovered = hovered
+                root._checkNetHover()
+                if (hovered)
+                    TooltipService.show(
+                        NetworkService.connected
+                        ? NetworkService.connectionType + " · " + NetworkService.connectionName
+                          + (NetworkService.ipAddress ? " · " + NetworkService.ipAddress : "")
+                        : "disconnected",
+                        root.screen)
+                else
+                    TooltipService.hide()
+            }
         }
 
         // ── VPN ────────────────────────────────────────────────────────
         Item {
             id: vpnWidget
-            implicitWidth: vpnText.implicitWidth + 6
+            implicitWidth: vpnRow.implicitWidth + 6
             implicitHeight: Geometry.barHeight
 
-            Text {
-                id: vpnText
+            RowLayout {
+                id: vpnRow
                 anchors.centerIn: parent
-                text: "󰒄"
-                color: VpnService.connected ? Colors.green : Colors.textDim
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: Geometry.iconFontSize
+                spacing: 3
+
+                Text {
+                    id: vpnText
+                    text: "󰒄"
+                    color: VpnService.connected ? Colors.green : Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.iconFontSize
+                }
+
+                Text {
+                    visible: VpnService.connected
+                    text: VpnService.locationLabel
+                    color: Colors.textDim
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSizeSm
+                }
             }
 
             HoverHandler {
