@@ -48,6 +48,12 @@ if test -d ~/Applications/depot_tools
     end
 end
 
+## SSH agent — auto-start and load key once per session
+if not pgrep -u "$USER" ssh-agent > /dev/null
+    eval (ssh-agent -c)
+end
+ssh-add -l > /dev/null 2>&1; or ssh-add
+
 ## Starship prompt
 if status --is-interactive
     source ("/usr/bin/starship" init fish --print-full-init | psub)

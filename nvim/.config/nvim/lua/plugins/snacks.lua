@@ -130,11 +130,20 @@ return {
     { "[[",              function() Snacks.words.jump(-vim.v.count1) end, desc = "Prev reference", mode = { "n", "t" } },
   },
   init = function()
-    -- Guard: prevent indent/scope treesitter crash on large files.
-    -- BufReadPost fires before FileType 'bigfile' in many cases, so
-    -- scope.attach() tries to parse treesitter before bigfile.setup
-    -- can set the buffer vars. This BufReadPre handler runs first
-    -- (init > config in lazy.nvim) and blocks the parse before it starts.
+    -- Guard: prevent treesitter crashes on large files (>1.5 MB).
+    -- Neovim 0.12's async injection processing crashes with
+    -- "attempt to call method 'range' (a nil value)" on large
+    -- injection-heavy files. Three crash paths exist:
+    --   1. image.nvim render scheduler (vim.schedule callback)
+    --   2. Async injection parsing (languagetree.lua:215 tcall)
+    --   3. Treesitter highlighter (decoration provider)
+    -- Setting snacks_indent/scope=false isn't enough — treesitter
+    -- itself must be stopped before any plugin tries to parse.
+    --
+    -- BufReadPre: detect large files early, set flags.
+    -- BufReadPost (high priority): stop treesitter before
+    --   vim.schedule callbacks fire. pcall guards against
+    --   stopping an already-crashed parser.
     vim.api.nvim_create_autocmd("BufReadPre", {
       pattern = "*",
       callback = function(ev)
@@ -142,6 +151,16 @@ return {
         if ok and size > 1.5 * 1024 * 1024 then
           vim.b.snacks_indent = false
           vim.b.snacks_scope = false
+          vim.b._large_file = true
+        end
+      end,
+    })
+    vim.api.nvim_create_autocmd("BufReadPost", {
+      pattern = "*",
+      callback = function(ev)
+        if vim.b[ev.buf]._large_file then
+          pcall(vim.treesitter.stop, ev.buf)
+          vim.bo[ev.buf].syntax = "on" -- regex fallback
         end
       end,
     })

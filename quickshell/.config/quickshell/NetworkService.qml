@@ -53,6 +53,10 @@ QtObject {
 
                 if (state !== "connected" || !name || name === "--") return
                 if (type === "loopback" || type === "dummy" || dev.startsWith("lo")) return
+                // Skip tunnel/VPN interfaces — VpnService tracks those separately.
+                // Prevents WireGuard (wg-*) from stealing connectionType when it
+                // appears before the physical device in nmcli output.
+                if (type.includes("tun") || type === "wireguard" || dev.startsWith("wg")) return
 
                 root.device         = dev
                 root.connectionName = name
