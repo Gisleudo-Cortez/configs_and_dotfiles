@@ -11,6 +11,16 @@ Item {
     property var screen: null
     signal clicked
 
+    function _globalX(): real {
+        var p = root
+        var x = 0
+        while (p) {
+            x += p.x
+            p = p.parent
+        }
+        return x
+    }
+
     Text {
         id: btText
         anchors.centerIn: parent
@@ -39,7 +49,7 @@ Item {
                 const text = (Bluetooth.defaultAdapter?.enabled ?? false)
                     ? "Bluetooth · " + connected + " connected"
                     : "Bluetooth off"
-                TooltipService.show(text, root.screen)
+                TooltipService.show(text, root.screen, root._globalX() + root.width / 2)
             } else {
                 btHoverTimer.stop()
                 PopupState.clearHover("bluetooth")
@@ -51,7 +61,7 @@ Item {
     Timer {
         id: btHoverTimer
         interval: 500
-        onTriggered: PopupState.showHover("bluetooth", root.screen)
+        onTriggered: PopupState.showHoverAt("bluetooth", root.screen, root._globalX() + root.width / 2)
     }
 
     MouseArea {
@@ -60,7 +70,7 @@ Item {
         onClicked: {
             btHoverTimer.stop()
             PopupState.clearHover("bluetooth")
-            root.clicked()
+            PopupState.toggleAt("bluetooth", root.screen, root._globalX() + root.width / 2)
         }
     }
 }

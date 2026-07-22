@@ -10,18 +10,36 @@ QtObject {
     property string text:   ""
     property bool   visible: false
     property var    screen:  null
+    property real   anchorX: -1   // screen-global X for positioning
 
     property string _pending: ""
     property var    _pScreen: null
+    property real   _pAnchorX: -1
 
     function show(t, scrn) {
         _pending = t
         _pScreen = scrn
+        _pAnchorX = -1
         _hideTimer.stop()
         if (visible) {
-            // Already visible — update text immediately, no re-delay
-            text   = t
-            screen = scrn
+            text    = t
+            screen  = scrn
+            anchorX = -1
+        } else {
+            _showTimer.restart()
+        }
+    }
+
+    // Overload: show with screen-global X for positioning under the widget
+    function showAt(t, scrn, globalX) {
+        _pending = t
+        _pScreen = scrn
+        _pAnchorX = globalX
+        _hideTimer.stop()
+        if (visible) {
+            text    = t
+            screen  = scrn
+            anchorX = globalX
         } else {
             _showTimer.restart()
         }
@@ -37,6 +55,7 @@ QtObject {
         onTriggered: {
             root.text    = root._pending
             root.screen  = root._pScreen
+            root.anchorX = root._pAnchorX
             root.visible = true
         }
     }
@@ -44,6 +63,6 @@ QtObject {
     // Small hide delay prevents flicker when moving between chips
     readonly property var _hideTimer: Timer {
         interval: 150
-        onTriggered: { root.visible = false; root.screen = null }
+        onTriggered: { root.visible = false; root.screen = null; root.anchorX = -1 }
     }
 }

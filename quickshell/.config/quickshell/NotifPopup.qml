@@ -13,7 +13,11 @@ PanelWindow {
     anchors { top: true; right: true }
     exclusiveZone: -1
     margins.top: Geometry.barHeight + Geometry.outerGap * 2 + 4
-    margins.right: Geometry.outerGap
+    margins.right: PopupState.popupAnchorX >= 0
+        ? Math.max(Geometry.outerGap,
+              Math.min(_screen.width - Geometry.outerGap - implicitWidth,
+                  _screen.width - PopupState.popupAnchorX - implicitWidth / 2))
+        : Geometry.outerGap
 
     implicitWidth: Geometry.popupWidth
     implicitHeight: Math.min(box.implicitHeight, 420)

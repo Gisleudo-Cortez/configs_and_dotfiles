@@ -10,6 +10,16 @@ Item {
     property var screen: null
     signal clicked
 
+    function _globalX(): real {
+        var p = root
+        var x = 0
+        while (p) {
+            x += p.x
+            p = p.parent
+        }
+        return x
+    }
+
     StatChip {
         id: dockerChip
         anchors.centerIn: parent
@@ -23,6 +33,6 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
+        onClicked: PopupState.toggleAt("docker", root.screen, root._globalX() + root.width / 2)
     }
 }

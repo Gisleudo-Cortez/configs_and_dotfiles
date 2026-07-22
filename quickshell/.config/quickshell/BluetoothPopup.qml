@@ -14,7 +14,16 @@ PanelWindow {
     anchors { top: true; right: true }
     exclusiveZone: -1
     margins.top: Geometry.barHeight + Geometry.outerGap * 2 + 4
-    margins.right: Geometry.outerGap
+    // Use click anchor if set, otherwise hover anchor, otherwise edge
+    margins.right: {
+        var ax = PopupState.popupAnchorX >= 0 ? PopupState.popupAnchorX
+                : PopupState.hoverAnchorX >= 0 ? PopupState.hoverAnchorX
+                : -1
+        if (ax < 0) return Geometry.outerGap
+        return Math.max(Geometry.outerGap,
+            Math.min(_screen.width - Geometry.outerGap - implicitWidth,
+                _screen.width - ax - implicitWidth / 2))
+    }
 
     implicitWidth: Geometry.popupWidth
     implicitHeight: Math.min(box.implicitHeight, 440)

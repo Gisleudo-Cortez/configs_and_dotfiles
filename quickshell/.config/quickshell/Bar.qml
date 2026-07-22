@@ -60,9 +60,10 @@ PanelWindow {
             Item { Layout.fillWidth: true }
 
             IslandCenter {
+                id: centerIsland
                 Layout.fillHeight: true
                 Layout.preferredWidth: implicitWidth
-                onClockClicked: PopupState.toggle("calendar", root.screen)
+                onClockClicked: PopupState.toggleAt("calendar", root.screen, centerIsland._globalX() + centerIsland.width / 2)
             }
 
             Item { Layout.fillWidth: true }
