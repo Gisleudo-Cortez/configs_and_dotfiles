@@ -11,6 +11,16 @@ Item {
     property var screen: null
     signal clicked
 
+    function _globalX(): real {
+        var p = root
+        var x = 0
+        while (p) {
+            x += p.x
+            p = p.parent
+        }
+        return x
+    }
+
     readonly property var _activePlayer: {
         if (!Mpris.players || Mpris.players.count === 0) return null
         const players = Mpris.players.values
@@ -42,7 +52,8 @@ Item {
                 const title  = p.trackTitle  || "Unknown"
                 TooltipService.show(
                     (artist ? artist + " — " : "") + title,
-                    root.screen)
+                    root.screen,
+                    root._globalX() + root.width / 2)
             } else {
                 TooltipService.hide()
             }
@@ -52,6 +63,6 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
+        onClicked: PopupState.toggleAt("media", root.screen, root._globalX() + root.width / 2)
     }
 }

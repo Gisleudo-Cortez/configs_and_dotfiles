@@ -12,10 +12,20 @@ Item {
     property bool _netHovered: false
     property bool _vpnHovered: false
 
+    function _globalX(): real {
+        var p = root
+        var x = 0
+        while (p) {
+            x += p.x
+            p = p.parent
+        }
+        return x
+    }
+
     Timer {
         id: netHoverTimer
         interval: 400
-        onTriggered: PopupState.showHover("network", root.screen)
+        onTriggered: PopupState.showHoverAt("network", root.screen, root._globalX() + root.width / 2)
     }
 
     function _checkNetHover() {
@@ -66,7 +76,8 @@ Item {
                         ? NetworkService.connectionType + " · " + NetworkService.connectionName
                           + (NetworkService.ipAddress ? " · " + NetworkService.ipAddress : "")
                         : "disconnected",
-                        root.screen)
+                        root.screen,
+                        root._globalX() + root.width / 2)
                 else
                     TooltipService.hide()
             }
@@ -109,7 +120,8 @@ Item {
                             VpnService.connected
                             ? "Mullvad · " + VpnService.locationLabel
                             : "Mullvad · disconnected · " + VpnService.locationLabel,
-                            root.screen)
+                            root.screen,
+                            root._globalX() + root.width / 2)
                     else
                         TooltipService.hide()
                 }

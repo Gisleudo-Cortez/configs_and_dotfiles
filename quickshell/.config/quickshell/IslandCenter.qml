@@ -7,6 +7,16 @@ Island {
 
     signal clockClicked
 
+    function _globalX(): real {
+        var p = root
+        var x = 0
+        while (p) {
+            x += p.x
+            p = p.parent
+        }
+        return x
+    }
+
     readonly property var _now: Timer {
         interval: 1000
         running: true

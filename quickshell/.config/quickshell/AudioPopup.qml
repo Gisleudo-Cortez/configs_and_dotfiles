@@ -15,10 +15,16 @@ PanelWindow {
     anchors { top: true; right: true }
     exclusiveZone: -1
     margins.top: Geometry.barHeight + Geometry.outerGap * 2 + 4
-    margins.right: Geometry.outerGap
+    // Right margin anchors popup under the clicked widget.
+    // Falls back to outerGap when no anchor X is set.
+    margins.right: PopupState.popupAnchorX >= 0
+        ? Math.max(Geometry.outerGap,
+              Math.min(_screen.width - Geometry.outerGap - implicitWidth,
+                  _screen.width - PopupState.popupAnchorX - implicitWidth / 2))
+        : Geometry.outerGap
 
     implicitWidth: Geometry.popupWidth
-    implicitHeight: Math.min(box.implicitHeight, 440)
+    implicitHeight: Math.min(box.implicitHeight, 560)
     color: "transparent"
 
     visible: PopupState.active === "audio" && PopupState.screen === _screen
@@ -153,7 +159,7 @@ PanelWindow {
                     model: Pipewire.nodes
 
                     delegate: ColumnLayout {
-                        visible: modelData.isSink && modelData.audio !== null
+                        visible: modelData.isSink && !modelData.isStream && modelData.audio !== null
                         width: box.width
                         spacing: 0
 
@@ -209,6 +215,136 @@ PanelWindow {
 
                         Rectangle {
                             visible: parent.visible && index < sinkRepeater.count - 1
+                            Layout.fillWidth: true
+                            height: 1
+                            color: Colors.textDim
+                            opacity: 0.1
+                        }
+                    }
+                }
+
+                // ── Per-app volume ────────────────────────────────────────
+                // Bind all nodes so stream audio.volume / audio.muted are valid
+                PwObjectTracker {
+                    objects: Pipewire.nodes.values
+                }
+
+                // Count audio-out streams (reactive on nodes list change)
+                property int streamCount: {
+                    var c = 0
+                    var vals = Pipewire.nodes.values
+                    for (var i = 0; i < vals.length; i++) {
+                        var n = vals[i]
+                        if (n.isStream && n.audio !== null && !n.isSink) c++
+                    }
+                    return c
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: Colors.textDim
+                    opacity: 0.25
+                    visible: box.streamCount > 0
+                }
+
+                Text {
+                    visible: box.streamCount > 0
+                    text: "󰎆  Applications"
+                    color: Colors.purple
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSize
+                    Layout.margins: Geometry.innerPad
+                    Layout.bottomMargin: 4
+                }
+
+                Repeater {
+                    model: Pipewire.nodes
+
+                    delegate: ColumnLayout {
+                        visible: modelData.isStream && modelData.audio !== null && !modelData.isSink
+                        width: box.width
+                        spacing: 0
+
+                        // Guard: null audio on non-audio stream nodes
+                        property var au: modelData.audio
+                        property bool auMuted: au ? au.muted : false
+                        property real auVol: au ? au.volume : 0
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.leftMargin: Geometry.innerPad
+                            Layout.rightMargin: Geometry.innerPad
+                            Layout.topMargin: 4
+                            Layout.bottomMargin: 4
+                            spacing: Geometry.popupSpacing
+
+                            // Mute toggle
+                            Text {
+                                text: auMuted ? "󰝟" : "󰕾"
+                                color: auMuted ? Colors.textDim : Colors.cyan
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: Geometry.fontSize
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: if (au) au.muted = !au.muted
+                                }
+                            }
+
+                            // App name
+                            Text {
+                                text: (modelData.properties && modelData.properties["application.name"]) || modelData.description || modelData.name
+                                color: Colors.text
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: Geometry.fontSizeSm
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                            }
+
+                            // Per-app volume slider
+                            Item {
+                                Layout.preferredWidth: 80
+                                height: 20
+
+                                Rectangle {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width
+                                    height: 4
+                                    radius: 2
+                                    color: Colors.textDim
+                                    opacity: 0.25
+                                }
+                                Rectangle {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width * Math.min(auVol / 1.5, 1)
+                                    height: 4
+                                    radius: 2
+                                    color: auMuted ? Colors.textDim : Colors.cyan
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.SizeHorCursor
+                                    onClicked: function(m) {
+                                        if (au) au.volume = (m.x / width) * 1.5
+                                    }
+                                    onPositionChanged: function(m) {
+                                        if (pressed && au) au.volume = (m.x / width) * 1.5
+                                    }
+                                }
+                            }
+
+                            // Volume percentage
+                            Text {
+                                text: Math.round(auVol * 100) + "%"
+                                color: auMuted ? Colors.textDim : Colors.text
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: Geometry.fontSizeSm
+                            }
+                        }
+
+                        Rectangle {
+                            visible: parent.visible
                             Layout.fillWidth: true
                             height: 1
                             color: Colors.textDim

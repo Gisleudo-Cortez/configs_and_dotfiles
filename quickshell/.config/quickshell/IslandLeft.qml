@@ -8,6 +8,16 @@ Island {
     implicitWidth: row.implicitWidth + Geometry.innerPad * 2
     property var screen: null
 
+    function _globalX(): real {
+        var p = root
+        var x = 0
+        while (p) {
+            x += p.x
+            p = p.parent
+        }
+        return x
+    }
+
     RowLayout {
         id: row
         anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter }
@@ -19,6 +29,7 @@ Island {
         Repeater {
             model: Hyprland.workspaces
             delegate: Rectangle {
+                id: wsChip
                 readonly property bool active: modelData.focused
                 implicitWidth: wsLabel.implicitWidth + 10
                 implicitHeight: 18
@@ -48,7 +59,8 @@ Island {
                     id: wsHover
                     onHoveredChanged: {
                         if (hovered && modelData.name && modelData.name !== modelData.id.toString())
-                            TooltipService.show(modelData.name, root.screen)
+                            TooltipService.showAt(modelData.name, root.screen,
+                                root._globalX() + wsChip.x + wsChip.width / 2)
                         else if (!hovered)
                             TooltipService.hide()
                     }

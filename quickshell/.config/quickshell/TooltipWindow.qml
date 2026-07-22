@@ -15,7 +15,11 @@ PanelWindow {
     anchors { top: true; right: true }
     exclusiveZone: -1
     margins.top: Geometry.barHeight + Geometry.outerGap * 2 + 4
-    margins.right: Geometry.outerGap
+    margins.right: TooltipService.anchorX >= 0
+        ? Math.max(Geometry.outerGap,
+              Math.min(_screen.width - Geometry.outerGap - implicitWidth,
+                  _screen.width - TooltipService.anchorX - implicitWidth / 2))
+        : Geometry.outerGap
 
     implicitWidth:  tipText.implicitWidth  + Geometry.innerPad * 2
     implicitHeight: tipText.implicitHeight + 8

@@ -9,6 +9,16 @@ Item {
 
     property var screen: null
 
+    function _globalX(): real {
+        var p = root
+        var x = 0
+        while (p) {
+            x += p.x
+            p = p.parent
+        }
+        return x
+    }
+
     RowLayout {
         id: keyLedRow
         anchors.centerIn: parent
@@ -35,7 +45,8 @@ Item {
                 TooltipService.show(
                     "Caps Lock " + (KeyLedService.capsLock ? "ON" : "off") +
                     "  ·  Num Lock " + (KeyLedService.numLock ? "ON" : "off"),
-                    root.screen)
+                    root.screen,
+                    root._globalX() + root.width / 2)
             else
                 TooltipService.hide()
         }

@@ -10,6 +10,16 @@ Item {
     property var screen: null
     signal clicked
 
+    function _globalX(): real {
+        var p = root
+        var x = 0
+        while (p) {
+            x += p.x
+            p = p.parent
+        }
+        return x
+    }
+
     RowLayout {
         id: audioRow
         anchors.centerIn: parent
@@ -45,7 +55,8 @@ Item {
                     AudioService.sinkName + "  " + AudioService.volPct() + "%" +
                     (AudioService.muted ? " · muted" : "") +
                     "\nscroll ±5%  ·  click to open",
-                    root.screen)
+                    root.screen,
+                    root._globalX() + root.width / 2)
             else
                 TooltipService.hide()
         }
@@ -54,7 +65,10 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
+        onClicked: {
+            // Position popup below this widget — pass widget center as screen-global X
+            PopupState.toggleAt("audio", root.screen, root._globalX() + root.width / 2)
+        }
         onWheel: function(wheel) {
             AudioService.adjustVolume(wheel.angleDelta.y > 0 ? 0.05 : -0.05)
         }
