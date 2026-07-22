@@ -22,11 +22,6 @@ set -U __done_notification_urgency_level low
 
 ## Environment setup
 
-# Apply .profile: use this to put fish compatible .profile stuff in
-if test -f ~/.fish_profile
-    source ~/.fish_profile
-end
-
 # Add ~/.local/bin to PATH
 if test -d ~/.local/bin
     if not contains -- ~/.local/bin $PATH
@@ -47,12 +42,6 @@ if test -d ~/Applications/depot_tools
         set -p PATH ~/Applications/depot_tools
     end
 end
-
-## SSH agent — auto-start and load key once per session
-if not pgrep -u "$USER" ssh-agent > /dev/null
-    eval (ssh-agent -c)
-end
-ssh-add -l > /dev/null 2>&1; or ssh-add
 
 ## Starship prompt
 if status --is-interactive
