@@ -65,7 +65,7 @@ abbr source_fish 'source $HOME/Documents/configs_and_dotfiles/fish/.config/fish/
 abbr save_fish_config 'cp ~/.config/fish/config.fish $conf/fish/.config/fish/config.fish && cp ~/.config/fish/conf.d/aliases.fish $conf/fish/.config/fish/conf.d/aliases.fish'
 abbr print_file 'lp -d EPSON_L3210_Series'
 abbr rs 'rsync -avP'
-abbr update 'sudo pacman -Syu && paru -Syu && flatpak update'
+abbr update 'sudo pacman -Syu; paru -Syu; flatpak update'
 
 # Mullvad VPN region switching
 abbr vpn-br 'mullvad relay set location br for'
