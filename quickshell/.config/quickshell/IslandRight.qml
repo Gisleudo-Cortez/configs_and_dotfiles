@@ -140,7 +140,8 @@ Island {
             }
         }
 
-        WidgetUsb { screen: root.screen }
+        WidgetUsbStorage { screen: root.screen }
+        WidgetUsb        { screen: root.screen }
 
         // ── Battery ───────────────────────────────────────────────────────
         StatChip {

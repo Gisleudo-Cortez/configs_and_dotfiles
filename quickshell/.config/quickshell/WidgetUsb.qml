@@ -1,6 +1,7 @@
 import QtQuick
 
-// USB device count indicator — click opens popup, hover shows tooltip
+// USB bus indicator — shows non-storage USB device count (input, audio,
+// video, network, etc). Click opens device popup. Hover shows tooltip.
 Item {
     id: root
     visible: true
@@ -26,9 +27,9 @@ Item {
         screen: root.screen
         // nf-fa-usb = U+F287 (Font Awesome USB trident)
         icon: "\uF287"
-        value: UsbService.deviceCount > 0 ? UsbService.deviceCount + "" : ""
-        color: UsbService.hasDevices ? Colors.cyan : Colors.textDim
-        tooltip: UsbService.tooltipText
+        value: UsbService.otherDeviceCount > 0 ? UsbService.otherDeviceCount + "" : ""
+        color: UsbService.hasOtherDevices ? Colors.cyan : Colors.textDim
+        tooltip: UsbService.otherTooltipText
     }
 
     MouseArea {

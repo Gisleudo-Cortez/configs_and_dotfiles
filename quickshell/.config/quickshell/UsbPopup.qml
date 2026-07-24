@@ -3,6 +3,8 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 
+// USB bus popup — non-storage devices (input, audio, video, network, etc).
+// Shows type icon, name, manufacturer, speed, power, VID:PID per device.
 PanelWindow {
     id: root
     readonly property var _screen: screen
@@ -29,7 +31,6 @@ PanelWindow {
     // ── Helpers ─────────────────────────────────────────────────────
     function _typeIcon(t) {
         switch (t) {
-            case "storage":  return "\uF0A5B"  // nf-md-usb_flash_drive
             case "audio":    return "\uF0957"  // nf-md-volume_high
             case "input":    return "\uF0B6D"  // nf-md-keyboard
             case "video":    return "\uF0AA0"  // nf-md-webcam
@@ -43,7 +44,6 @@ PanelWindow {
 
     function _typeLabel(t) {
         switch (t) {
-            case "storage":  return "storage"
             case "audio":    return "audio"
             case "input":    return "input"
             case "video":    return "video"
@@ -71,7 +71,7 @@ PanelWindow {
 
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
-        // Miku cyan signature accent
+        // Miku cyan accent — bus devices
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 2
@@ -98,7 +98,6 @@ PanelWindow {
                     spacing: Geometry.popupSpacing
 
                     Text {
-                        // nf-fa-usb + label
                         text: "\uF287  USB"
                         color: Colors.cyan
                         font.family: "JetBrainsMono Nerd Font"
@@ -107,7 +106,7 @@ PanelWindow {
                     }
 
                     Text {
-                        text: UsbService.deviceCount + " devices"
+                        text: UsbService.otherDeviceCount + " devices"
                         color: Colors.textDim
                         font.family: "JetBrainsMono Nerd Font"
                         font.pixelSize: Geometry.fontSizeSm
@@ -118,8 +117,8 @@ PanelWindow {
 
                 // ── Empty state ───────────────────────────────────────
                 Text {
-                    visible: UsbService.devices.length === 0
-                    text: "No USB devices connected"
+                    visible: UsbService.otherDevices.length === 0
+                    text: "No USB devices"
                     color: Colors.textDim
                     font.family: "JetBrainsMono Nerd Font"
                     font.pixelSize: Geometry.fontSizeSm
@@ -130,7 +129,7 @@ PanelWindow {
                 // ── Device list ───────────────────────────────────────
                 Repeater {
                     id: devRepeater
-                    model: UsbService.devices
+                    model: UsbService.otherDevices
 
                     delegate: ColumnLayout {
                         width: box.width
@@ -158,23 +157,16 @@ PanelWindow {
 
                                     Text {
                                         text: root._typeIcon(modelData.type)
-                                        color: modelData.isStorage ? Colors.cyan : Colors.textDim
+                                        color: Colors.textDim
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: Geometry.fontSizeSm
                                     }
 
                                     Text {
-                                        // Storage: prefer filesystem label, then product, then manufacturer
-                                        // Non-storage: product, then manufacturer
-                                        text: {
-                                            if (modelData.isStorage && modelData.label)
-                                                return modelData.label
-                                            return modelData.product || modelData.manufacturer || "Unknown"
-                                        }
+                                        text: modelData.product || modelData.manufacturer || "Unknown"
                                         color: Colors.text
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: Geometry.fontSizeSm
-                                        font.bold: modelData.isStorage
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
                                     }
@@ -187,7 +179,7 @@ PanelWindow {
                                     }
                                 }
 
-                                // ── Row 2: manufacturer + VID:PID ────────
+                                // ── Row 2: manufacturer + speed/power/VID:PID
                                 RowLayout {
                                     Layout.fillWidth: true
                                     spacing: 6
@@ -203,122 +195,12 @@ PanelWindow {
                                     }
 
                                     Text {
-                                        // Speed + power + VID:PID
                                         text: root._fmtSpeed(modelData.speed) + "  .  "
                                               + modelData.power + "  .  "
                                               + modelData.vid + ":" + modelData.pid
                                         color: Colors.textDim
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: Geometry.fontSizeSm - 1
-                                    }
-                                }
-
-                                // ── Row 3: storage info (mounted) ────────
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    visible: modelData.isStorage && modelData.mounted
-                                    spacing: 6
-
-                                    Text {
-                                        // nf-md-folder + mountpoint
-                                        text: "\uF02AB " + modelData.mountpoint
-                                        color: Colors.green
-                                        font.family: "JetBrainsMono Nerd Font"
-                                        font.pixelSize: Geometry.fontSizeSm - 1
-                                        Layout.fillWidth: true
-                                        elide: Text.ElideRight
-                                    }
-
-                                    Text {
-                                        text: modelData.used + "/" + modelData.total
-                                        color: Colors.textDim
-                                        font.family: "JetBrainsMono Nerd Font"
-                                        font.pixelSize: Geometry.fontSizeSm - 1
-                                    }
-
-                                    Text {
-                                        text: modelData.pct
-                                        color: {
-                                            var p = parseInt(modelData.pct)
-                                            if (isNaN(p)) return Colors.textDim
-                                            if (p >= 90) return Colors.alert
-                                            if (p >= 75) return Colors.warning
-                                            return Colors.green
-                                        }
-                                        font.family: "JetBrainsMono Nerd Font"
-                                        font.pixelSize: Geometry.fontSizeSm - 1
-                                    }
-                                }
-
-                                // ── Row 3b: storage unmounted ────────────
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    visible: modelData.isStorage && !modelData.mounted
-                                    spacing: 6
-
-                                    Text {
-                                        text: "unmounted . " + modelData.size
-                                        color: Colors.textDim
-                                        font.family: "JetBrainsMono Nerd Font"
-                                        font.pixelSize: Geometry.fontSizeSm - 1
-                                        Layout.fillWidth: true
-                                    }
-                                }
-
-                                // ── Row 4: disk usage bar ────────────────
-                                Rectangle {
-                                    Layout.fillWidth: true
-                                    Layout.leftMargin: Geometry.innerPad + 2
-                                    Layout.rightMargin: Geometry.innerPad + 2
-                                    visible: modelData.isStorage && modelData.mounted
-                                    height: 3
-                                    radius: 1
-                                    color: Qt.rgba(0.5, 0.5, 0.5, 0.2)
-
-                                    Rectangle {
-                                        anchors.left: parent.left
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        height: parent.height
-                                        radius: parent.radius
-                                        width: {
-                                            var p = parseInt(modelData.pct)
-                                            if (isNaN(p)) return 0
-                                            return parent.width * Math.min(p, 100) / 100
-                                        }
-                                        color: {
-                                            var p = parseInt(modelData.pct)
-                                            if (isNaN(p)) return Colors.textDim
-                                            if (p >= 90) return Colors.alert
-                                            if (p >= 75) return Colors.warning
-                                            return Colors.green
-                                        }
-                                    }
-                                }
-
-                                // ── Row 5: mount/unmount button ──────────
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    visible: modelData.isStorage
-                                    spacing: 6
-
-                                    Item { Layout.fillWidth: true }
-
-                                    Text {
-                                        text: modelData.mounted ? "\uF0A60 unmount" : "\uF02AB mount"
-                                        color: modelData.mounted ? Colors.alert : Colors.cyan
-                                        font.family: "JetBrainsMono Nerd Font"
-                                        font.pixelSize: Geometry.fontSizeSm - 1
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                if (modelData.mounted)
-                                                    UsbService.unmountDevice(modelData.blockDev)
-                                                else
-                                                    UsbService.mountDevice(modelData.blockDev)
-                                            }
-                                        }
                                     }
                                 }
                             }

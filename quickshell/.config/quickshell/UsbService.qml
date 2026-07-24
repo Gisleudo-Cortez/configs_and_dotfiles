@@ -4,18 +4,23 @@ import Quickshell.Io
 
 // USB device monitor — full bus enumeration via sysfs + storage via lsblk.
 // Polls every 5s. Immediate refresh after mount/unmount actions.
-// Bar chip: device count with USB icon. Popup: full device list with
-// type, speed, power, VID:PID, and mount/unmount for storage.
+// Exposes two filtered arrays: storageDevices (USB block devices with
+// mount/unmount support) and otherDevices (everything else on the bus).
 QtObject {
     id: root
 
-    // ── Public properties (consumed by widget + popup) ──────────────
-    property int deviceCount: 0          // non-hub, non-controller USB devices
-    property var devices: []             // [{sysfsName, manufacturer, product, vid, pid, speed, power, type, isStorage, blockDev, size, label, mountpoint, used, total, pct, mounted}]
-    property string tooltipText: ""
-    readonly property bool hasDevices: deviceCount > 0
-    property int storageCount: 0
+    // ── Storage-specific properties ─────────────────────────────────
+    property var storageDevices: []      // [{sysfsName, manufacturer, product, vid, pid, speed, power, type, isStorage, blockDev, size, label, mountpoint, used, total, pct, mounted}]
+    property int storageDeviceCount: 0
     property int mountedCount: 0
+    property string storageTooltipText: ""
+    readonly property bool hasStorage: storageDeviceCount > 0
+
+    // ── Other (non-storage) device properties ───────────────────────
+    property var otherDevices: []
+    property int otherDeviceCount: 0
+    property string otherTooltipText: ""
+    readonly property bool hasOtherDevices: otherDeviceCount > 0
 
     // ── Internal ────────────────────────────────────────────────────
 
@@ -74,17 +79,34 @@ for dev in /sys/bus/usb/devices/*/; do
 done
 
 # ── USB storage from lsblk ──────────────────────────────────────────
+# Partitions don't carry TRAN="usb" (only parent disks do), so we also
+# include partitions and check their parent disk's TRAN via PKNAME.
 while IFS= read -r line; do
-  [[ "$line" != *'TRAN="usb"'* ]] && continue
-  [[ "$line" =~ NAME="([^"]*)" ]] && name="\${BASH_REMATCH[1]}"
-  [[ "$line" =~ SIZE="([^"]*)" ]] && size="\${BASH_REMATCH[1]}"
-  [[ "$line" =~ LABEL="([^"]*)" ]] && label="\${BASH_REMATCH[1]}"
-  [[ "$line" =~ MOUNTPOINT="([^"]*)" ]] && mount="\${BASH_REMATCH[1]}"
-  [[ "$line" =~ TYPE="([^"]*)" ]] && type="\${BASH_REMATCH[1]}"
-  # Find USB parent by walking sysfs tree
+  is_usb=false
+  if echo "$line" | grep -q 'TRAN="usb"'; then
+    is_usb=true
+  elif echo "$line" | grep -q 'TYPE="part"'; then
+    pk=$(echo "$line" | grep -oP 'PKNAME="\K[^"]*')
+    if [ -n "$pk" ] && lsblk -ln -o TRAN "/dev/$pk" 2>/dev/null | grep -q "usb"; then
+      is_usb=true
+    fi
+  fi
+  [ "$is_usb" = false ] && continue
+  name=$(echo "$line" | grep -oP 'NAME="\K[^"]*' | head -1)
+  size=$(echo "$line" | grep -oP 'SIZE="\K[^"]*' | head -1)
+  label=$(echo "$line" | grep -oP 'LABEL="\K[^"]*' | head -1)
+  mount=$(echo "$line" | grep -oP 'MOUNTPOINT="\K[^"]*' | head -1)
+  type=$(echo "$line" | grep -oP 'TYPE="\K[^"]*' | head -1)
+  # Find USB parent by walking sysfs tree (4 levels up from block device)
+  # /sys/block/sdX/device -> ../../../N:M:O:P (SCSI)
+  # walk: device/.. = host, /../.. = interface (N-M:1.0), /../../.. = USB device (N-M)
+  # For partitions (sdXN), use the parent disk (sdX) instead.
   usbparent=""
-  if [ -d "/sys/block/$name" ]; then
-    usbparent=$(basename "$(readlink -f "/sys/block/$name/device/../.." 2>/dev/null)" 2>/dev/null)
+  blkbase="$name"
+  # Strip partition suffix: sdc1 -> sdc, mmcblk0p1 -> mmcblk0
+  blkbase=$(echo "$name" | sed 's/[0-9]*$//; s/p$//')
+  if [ -d "/sys/block/$blkbase" ]; then
+    usbparent=$(basename "$(readlink -f "/sys/block/$blkbase/device/../../../.." 2>/dev/null)" 2>/dev/null)
   fi
   # Disk usage if mounted
   used=""; total=""; pct=""
@@ -93,7 +115,7 @@ while IFS= read -r line; do
     read -r used total pct _ <<< "$dfsys"
   fi
   echo "STG|$name|$usbparent|$size|$label|$mount|$type|$used|$total|$pct"
-done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN 2>/dev/null)
+done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
         `]
 
         stdout: SplitParser {
@@ -135,7 +157,6 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN 2>/dev/null)
             }
 
             // ── Parse STG lines and merge into devices ───────────────
-            var stgCount = 0
             var mntCount = 0
             for (var s = 0; s < usbProc._stgBuf.length; s++) {
                 var sp = usbProc._stgBuf[s].split("|")
@@ -152,7 +173,6 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN 2>/dev/null)
                 var blkPct   = sp[9]
                 var isMounted = blkMount !== ""
                 if (isMounted) mntCount++
-                stgCount++
 
                 // Match to device by USB parent sysfs name
                 for (var d = 0; d < devList.length; d++) {
@@ -183,38 +203,71 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN 2>/dev/null)
                 }
             }
 
-            // ── Sort: storage first, then by type, then by name ──────
-            devList.sort(function(a, b) {
-                if (a.isStorage && !b.isStorage) return -1
-                if (!a.isStorage && b.isStorage) return 1
+            // ── Split into storage + other arrays ────────────────────
+            var stgList = []
+            var othList = []
+            for (var j = 0; j < devList.length; j++) {
+                if (devList[j].isStorage)
+                    stgList.push(devList[j])
+                else
+                    othList.push(devList[j])
+            }
+
+            // ── Sort storage: mounted first, then by label/name ──────
+            stgList.sort(function(a, b) {
+                if (a.mounted && !b.mounted) return -1
+                if (!a.mounted && b.mounted) return 1
+                var an = (a.label || a.product || "")
+                var bn = (b.label || b.product || "")
+                return an.localeCompare(bn)
+            })
+
+            // ── Sort other: by type, then by name ────────────────────
+            othList.sort(function(a, b) {
                 if (a.type < b.type) return -1
                 if (a.type > b.type) return 1
                 return (a.product || "").localeCompare(b.product || "")
             })
 
-            root.devices      = devList
-            root.deviceCount  = devList.length
-            root.storageCount = stgCount
-            root.mountedCount = mntCount
+            root.storageDevices    = stgList
+            root.storageDeviceCount = stgList.length
+            root.mountedCount      = mntCount
+            root.otherDevices      = othList
+            root.otherDeviceCount  = othList.length
 
-            // ── Tooltip ──────────────────────────────────────────────
-            if (devList.length === 0) {
-                root.tooltipText = "No USB devices"
+            // ── Storage tooltip ──────────────────────────────────────
+            if (stgList.length === 0) {
+                root.storageTooltipText = "No USB storage"
             } else {
-                var lines = []
-                for (var t = 0; t < Math.min(devList.length, 6); t++) {
-                    var dd = devList[t]
-                    var lbl = (dd.isStorage && dd.label) ? dd.label
-                             : (dd.product || dd.manufacturer || "Unknown")
-                    if (dd.isStorage && dd.mounted) {
-                        lbl += " -> " + dd.mountpoint
-                        if (dd.pct) lbl += " (" + dd.pct + ")"
+                var slines = []
+                for (var st = 0; st < Math.min(stgList.length, 6); st++) {
+                    var sd = stgList[st]
+                    var slabel = sd.label || sd.product || "Unknown"
+                    if (sd.mounted) {
+                        slabel += " -> " + sd.mountpoint
+                        if (sd.pct) slabel += " (" + sd.pct + ")"
+                    } else {
+                        slabel += " . unmounted"
                     }
-                    lines.push(lbl)
+                    slines.push(slabel)
                 }
-                if (devList.length > 6)
-                    lines.push("+" + (devList.length - 6) + " more")
-                root.tooltipText = "USB . " + devList.length + " devices: " + lines.join(" . ")
+                if (stgList.length > 6)
+                    slines.push("+" + (stgList.length - 6) + " more")
+                root.storageTooltipText = "USB Storage . " + stgList.length + " devices: " + slines.join(" . ")
+            }
+
+            // ── Other devices tooltip ────────────────────────────────
+            if (othList.length === 0) {
+                root.otherTooltipText = "No USB devices"
+            } else {
+                var olines = []
+                for (var ot = 0; ot < Math.min(othList.length, 6); ot++) {
+                    var od = othList[ot]
+                    olines.push(od.product || od.manufacturer || "Unknown")
+                }
+                if (othList.length > 6)
+                    olines.push("+" + (othList.length - 6) + " more")
+                root.otherTooltipText = "USB . " + othList.length + " devices: " + olines.join(" . ")
             }
 
             // Reset buffers

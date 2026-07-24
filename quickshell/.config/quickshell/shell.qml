@@ -49,6 +49,10 @@ ShellRoot {
     }
     Variants {
         model: Quickshell.screens
+        UsbStoragePopup { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens
         TooltipWindow { required property var modelData; screen: modelData }
     }
 }
