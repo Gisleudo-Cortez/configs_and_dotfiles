@@ -63,8 +63,8 @@ PanelWindow {
                     spacing: Geometry.popupSpacing
 
                     Text {
-                        // nf-md-usb_flash_drive + label
-                        text: "\uF0A5B  USB Storage"
+                        // nf-md-usb_flash_drive (U+F129E, supplementary plane) + label
+                        text: String.fromCodePoint(0xF129E) + "  USB Storage"
                         color: Colors.green
                         font.family: "JetBrainsMono Nerd Font"
                         font.pixelSize: Geometry.fontSize
@@ -129,10 +129,12 @@ PanelWindow {
                                     }
 
                                     Text {
-                                        // Prefer filesystem label, then product
+                                        // Label priority: filesystem LABEL > MODEL > product > manufacturer
                                         text: {
                                             if (modelData.label)
                                                 return modelData.label
+                                            if (modelData.model)
+                                                return modelData.model
                                             return modelData.product || modelData.manufacturer || "Unknown"
                                         }
                                         color: Colors.text
@@ -151,19 +153,27 @@ PanelWindow {
                                     }
                                 }
 
-                                // ── Row 2: manufacturer + size ───────────
+                                // ── Row 2: manufacturer + model + size ───
                                 RowLayout {
                                     Layout.fillWidth: true
                                     spacing: 6
 
                                     Text {
-                                        text: modelData.manufacturer || ""
+                                        // Show manufacturer + model (hardware identity)
+                                        text: {
+                                            var parts = []
+                                            if (modelData.manufacturer && modelData.manufacturer !== "Unknown")
+                                                parts.push(modelData.manufacturer)
+                                            if (modelData.model && modelData.label)
+                                                parts.push(modelData.model)
+                                            return parts.join(" . ")
+                                        }
                                         color: Colors.textDim
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: Geometry.fontSizeSm - 1
                                         Layout.fillWidth: true
                                         elide: Text.ElideRight
-                                        visible: modelData.manufacturer !== ""
+                                        visible: text !== ""
                                     }
 
                                     Text {

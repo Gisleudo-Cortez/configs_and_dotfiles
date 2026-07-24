@@ -12,6 +12,9 @@ Item {
     property var screen: null
     signal clicked
 
+    // nf-md-usb_flash_drive = U+F129E (supplementary plane, needs fromCodePoint)
+    readonly property string flashDriveIcon: String.fromCodePoint(0xF129E)
+
     function _globalX(): real {
         var p = root
         var x = 0
@@ -26,8 +29,7 @@ Item {
         id: stgChip
         anchors.centerIn: parent
         screen: root.screen
-        // nf-md-usb_flash_drive = U+F0A5B
-        icon: "\uF0A5B"
+        icon: root.flashDriveIcon
         value: UsbService.storageDeviceCount > 0 ? UsbService.storageDeviceCount + "" : ""
         color: UsbService.mountedCount > 0 ? Colors.green
               : UsbService.hasStorage ? Colors.cyan

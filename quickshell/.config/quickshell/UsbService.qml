@@ -4,36 +4,37 @@ import Quickshell.Io
 
 // USB device monitor — full bus enumeration via sysfs + storage via lsblk.
 // Polls every 5s. Immediate refresh after mount/unmount actions.
-// Exposes two filtered arrays: storageDevices (USB block devices with
-// mount/unmount support) and otherDevices (everything else on the bus).
+// Exposes two filtered arrays: storageDevices and otherDevices.
+//
+// Data pipeline (all in one bash script):
+//   DEV|name|manuf|prod|vid|pid|speed|power|dtype
+//   STG|blkname|usbparent|size|label|model|mount|type|used|total|pct
+//
+// Label priority: filesystem LABEL (partition) > MODEL (disk) > product (sysfs)
 QtObject {
     id: root
 
-    // ── Storage-specific properties ─────────────────────────────────
-    property var storageDevices: []      // [{sysfsName, manufacturer, product, vid, pid, speed, power, type, isStorage, blockDev, size, label, mountpoint, used, total, pct, mounted}]
+    property var storageDevices: []
     property int storageDeviceCount: 0
     property int mountedCount: 0
     property string storageTooltipText: ""
     readonly property bool hasStorage: storageDeviceCount > 0
 
-    // ── Other (non-storage) device properties ───────────────────────
     property var otherDevices: []
     property int otherDeviceCount: 0
     property string otherTooltipText: ""
     readonly property bool hasOtherDevices: otherDeviceCount > 0
-
-    // ── Internal ────────────────────────────────────────────────────
 
     readonly property var _proc: Process {
         id: usbProc
         running: false
         property var _devBuf: []
         property var _stgBuf: []
-        // Single bash script: enumerate sysfs devices, then lsblk storage.
-        // DEV|name|manuf|prod|vid|pid|speed|power|dtype
-        // STG|blkname|usbparent|size|label|mount|type|used|total|pct
+
+        // The bash script avoids ${...} syntax (QML template interpolation)
+        // and uses $var and $(...) which are safe in QML backtick templates.
         command: ["bash", "-c", `
-# ── USB devices from sysfs ──────────────────────────────────────────
+# Phase 1: USB devices from sysfs
 for dev in /sys/bus/usb/devices/*/; do
   name=$(basename "$dev")
   [[ "$name" == *:* ]] && continue
@@ -45,12 +46,9 @@ for dev in /sys/bus/usb/devices/*/; do
   pid=$(cat "$dev/idProduct" 2>/dev/null || echo "????")
   speed=$(cat "$dev/speed" 2>/dev/null || echo "0")
   power=$(cat "$dev/bMaxPower" 2>/dev/null || echo "0mA")
-  # Type from device class or first interface class
   dtype="other"
-  if [[ "$cls" == "08" ]]; then
-    dtype="storage"
-  elif [[ "$cls" == "e0" ]]; then
-    dtype="wireless"
+  if [[ "$cls" == "08" ]]; then dtype="storage"
+  elif [[ "$cls" == "e0" ]]; then dtype="wireless"
   elif [[ "$cls" == "00" || -z "$cls" ]]; then
     ifacedir=$(ls -d "$dev"*/ 2>/dev/null | head -1)
     if [[ -n "$ifacedir" ]]; then
@@ -78,44 +76,41 @@ for dev in /sys/bus/usb/devices/*/; do
   echo "DEV|$name|$manuf|$prod|$vid|$pid|$speed|$power|$dtype"
 done
 
-# ── USB storage from lsblk ──────────────────────────────────────────
-# Partitions don't carry TRAN="usb" (only parent disks do), so we also
-# include partitions and check their parent disk's TRAN via PKNAME.
-while IFS= read -r line; do
-  is_usb=false
-  if echo "$line" | grep -q 'TRAN="usb"'; then
-    is_usb=true
-  elif echo "$line" | grep -q 'TYPE="part"'; then
-    pk=$(echo "$line" | grep -oP 'PKNAME="\K[^"]*')
-    if [ -n "$pk" ] && lsblk -ln -o TRAN "/dev/$pk" 2>/dev/null | grep -q "usb"; then
-      is_usb=true
+# Phase 2: USB storage from lsblk
+# Use a simple approach: lsblk -ln for USB disks, then for each disk
+# get partitions. Output one STG line per disk and per partition.
+# Avoid grep -oP and BASH_REMATCH which break in QML templates.
+
+# Get USB disk names
+usb_disks=$(lsblk -ln -o NAME,TRAN 2>/dev/null | awk '$2=="usb"{print $1}')
+
+for disk in $usb_disks; do
+  # Get disk info (lsblk needs /dev/ prefix with -ln)
+  d_size=$(lsblk -ln -o SIZE "/dev/$disk" 2>/dev/null | head -1)
+  d_model=$(lsblk -ln -o MODEL "/dev/$disk" 2>/dev/null | head -1)
+  # Find USB parent via sysfs (4 levels up)
+  d_parent=""
+  if [ -d "/sys/block/$disk" ]; then
+    d_parent=$(basename "$(readlink -f "/sys/block/$disk/device/../../../.." 2>/dev/null)" 2>/dev/null)
+  fi
+  # Emit disk-level STG (no label, no mount — those come from partitions)
+  echo "STG|$disk|$d_parent|$d_size||$d_model||disk|||"
+
+  # Get partitions of this disk
+  parts=$(lsblk -ln -o NAME,TYPE "/dev/$disk" 2>/dev/null | awk '$2=="part"{print $1}')
+  for part in $parts; do
+    p_size=$(lsblk -ln -o SIZE "/dev/$part" 2>/dev/null | head -1)
+    p_label=$(lsblk -ln -o LABEL "/dev/$part" 2>/dev/null | head -1)
+    p_mount=$(lsblk -ln -o MOUNTPOINT "/dev/$part" 2>/dev/null | head -1)
+    # Disk usage if mounted
+    p_used=""; p_total=""; p_pct=""
+    if [ -n "$p_mount" ]; then
+      dfsys=$(df -h --output=used,size,pcent "$p_mount" 2>/dev/null | tail -1)
+      read -r p_used p_total p_pct _ <<< "$dfsys"
     fi
-  fi
-  [ "$is_usb" = false ] && continue
-  name=$(echo "$line" | grep -oP 'NAME="\K[^"]*' | head -1)
-  size=$(echo "$line" | grep -oP 'SIZE="\K[^"]*' | head -1)
-  label=$(echo "$line" | grep -oP 'LABEL="\K[^"]*' | head -1)
-  mount=$(echo "$line" | grep -oP 'MOUNTPOINT="\K[^"]*' | head -1)
-  type=$(echo "$line" | grep -oP 'TYPE="\K[^"]*' | head -1)
-  # Find USB parent by walking sysfs tree (4 levels up from block device)
-  # /sys/block/sdX/device -> ../../../N:M:O:P (SCSI)
-  # walk: device/.. = host, /../.. = interface (N-M:1.0), /../../.. = USB device (N-M)
-  # For partitions (sdXN), use the parent disk (sdX) instead.
-  usbparent=""
-  blkbase="$name"
-  # Strip partition suffix: sdc1 -> sdc, mmcblk0p1 -> mmcblk0
-  blkbase=$(echo "$name" | sed 's/[0-9]*$//; s/p$//')
-  if [ -d "/sys/block/$blkbase" ]; then
-    usbparent=$(basename "$(readlink -f "/sys/block/$blkbase/device/../../../.." 2>/dev/null)" 2>/dev/null)
-  fi
-  # Disk usage if mounted
-  used=""; total=""; pct=""
-  if [ -n "$mount" ]; then
-    dfsys=$(df -h --output=used,size,pcent "$mount" 2>/dev/null | tail -1)
-    read -r used total pct _ <<< "$dfsys"
-  fi
-  echo "STG|$name|$usbparent|$size|$label|$mount|$type|$used|$total|$pct"
-done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
+    echo "STG|$part|$d_parent|$p_size|$p_label|$d_model|$p_mount|part|$p_used|$p_total|$p_pct"
+  done
+done
         `]
 
         stdout: SplitParser {
@@ -129,11 +124,9 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
         }
 
         onExited: {
-            // ── Parse DEV lines ──────────────────────────────────────
             var devList = []
             for (var i = 0; i < usbProc._devBuf.length; i++) {
                 var parts = usbProc._devBuf[i].split("|")
-                // DEV|name|manuf|prod|vid|pid|speed|power|dtype
                 if (parts.length < 9) continue
                 devList.push({
                     sysfsName:    parts[1],
@@ -148,6 +141,7 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
                     blockDev:     "",
                     size:         "",
                     label:        "",
+                    model:        "",
                     mountpoint:   "",
                     used:         "",
                     total:        "",
@@ -156,54 +150,52 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
                 })
             }
 
-            // ── Parse STG lines and merge into devices ───────────────
             var mntCount = 0
             for (var s = 0; s < usbProc._stgBuf.length; s++) {
                 var sp = usbProc._stgBuf[s].split("|")
-                // STG|blkname|usbparent|size|label|mount|type|used|total|pct
-                if (sp.length < 10) continue
+                if (sp.length < 11) continue
                 var blkName  = sp[1]
                 var usbPar   = sp[2]
                 var blkSize  = sp[3]
                 var blkLabel = sp[4]
-                var blkMount = sp[5]
-                var blkType  = sp[6]
-                var blkUsed  = sp[7]
-                var blkTotal = sp[8]
-                var blkPct   = sp[9]
+                var blkModel = sp[5]
+                var blkMount = sp[6]
+                var blkType  = sp[7]
+                var blkUsed  = sp[8]
+                var blkTotal = sp[9]
+                var blkPct   = sp[10]
                 var isMounted = blkMount !== ""
-                if (isMounted) mntCount++
 
-                // Match to device by USB parent sysfs name
+                if (!usbPar) continue
+
                 for (var d = 0; d < devList.length; d++) {
                     var dev = devList[d]
-                    if (dev.sysfsName === usbPar) {
-                        if (blkType === "part") {
-                            // Partition — takes priority over disk
-                            dev.isStorage  = true
-                            dev.blockDev   = blkName
-                            dev.size       = blkSize
-                            dev.label      = blkLabel
-                            dev.mountpoint = blkMount
-                            dev.used       = blkUsed
-                            dev.total      = blkTotal
-                            dev.pct        = blkPct
-                            dev.mounted    = isMounted
-                        } else if (!dev.isStorage) {
-                            // Disk with no partition yet seen
-                            dev.isStorage  = true
-                            dev.blockDev   = blkName
-                            dev.size       = blkSize
-                            dev.label      = blkLabel
-                            dev.mountpoint = blkMount
-                            dev.mounted    = isMounted
-                        }
-                        break
+                    if (dev.sysfsName !== usbPar) continue
+
+                    if (blkType === "part") {
+                        dev.isStorage  = true
+                        dev.blockDev   = blkName
+                        dev.size       = blkSize
+                        dev.label      = blkLabel
+                        dev.model      = blkModel || dev.model || ""
+                        dev.mountpoint = blkMount
+                        dev.used       = blkUsed
+                        dev.total      = blkTotal
+                        dev.pct        = blkPct
+                        dev.mounted    = isMounted
+                    } else if (!dev.isStorage) {
+                        dev.isStorage  = true
+                        dev.blockDev   = blkName
+                        dev.size       = blkSize
+                        dev.label      = blkLabel
+                        dev.model      = blkModel
+                        dev.mountpoint = blkMount
+                        dev.mounted    = isMounted
                     }
+                    break
                 }
             }
 
-            // ── Split into storage + other arrays ────────────────────
             var stgList = []
             var othList = []
             for (var j = 0; j < devList.length; j++) {
@@ -213,36 +205,38 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
                     othList.push(devList[j])
             }
 
-            // ── Sort storage: mounted first, then by label/name ──────
+            mntCount = 0
+            for (var m = 0; m < stgList.length; m++) {
+                if (stgList[m].mounted) mntCount++
+            }
+
             stgList.sort(function(a, b) {
                 if (a.mounted && !b.mounted) return -1
                 if (!a.mounted && b.mounted) return 1
-                var an = (a.label || a.product || "")
-                var bn = (b.label || b.product || "")
+                var an = (a.label || a.model || a.product || "")
+                var bn = (b.label || b.model || b.product || "")
                 return an.localeCompare(bn)
             })
 
-            // ── Sort other: by type, then by name ────────────────────
             othList.sort(function(a, b) {
                 if (a.type < b.type) return -1
                 if (a.type > b.type) return 1
                 return (a.product || "").localeCompare(b.product || "")
             })
 
-            root.storageDevices    = stgList
+            root.storageDevices     = stgList
             root.storageDeviceCount = stgList.length
-            root.mountedCount      = mntCount
-            root.otherDevices      = othList
-            root.otherDeviceCount  = othList.length
+            root.mountedCount       = mntCount
+            root.otherDevices       = othList
+            root.otherDeviceCount   = othList.length
 
-            // ── Storage tooltip ──────────────────────────────────────
             if (stgList.length === 0) {
                 root.storageTooltipText = "No USB storage"
             } else {
                 var slines = []
                 for (var st = 0; st < Math.min(stgList.length, 6); st++) {
                     var sd = stgList[st]
-                    var slabel = sd.label || sd.product || "Unknown"
+                    var slabel = sd.label || sd.model || sd.product || "Unknown"
                     if (sd.mounted) {
                         slabel += " -> " + sd.mountpoint
                         if (sd.pct) slabel += " (" + sd.pct + ")"
@@ -256,7 +250,6 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
                 root.storageTooltipText = "USB Storage . " + stgList.length + " devices: " + slines.join(" . ")
             }
 
-            // ── Other devices tooltip ────────────────────────────────
             if (othList.length === 0) {
                 root.otherTooltipText = "No USB devices"
             } else {
@@ -270,23 +263,18 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
                 root.otherTooltipText = "USB . " + othList.length + " devices: " + olines.join(" . ")
             }
 
-            // Reset buffers
             usbProc._devBuf = []
             usbProc._stgBuf = []
         }
     }
 
-    // ── Action process for mount/unmount ────────────────────────────
     readonly property var _actionProc: Process {
         id: actionProc
         running: false
         command: ["echo", "noop"]
-        onExited: function() {
-            root.refresh()
-        }
+        onExited: function() { root.refresh() }
     }
 
-    // Immediate re-poll after state change
     function refresh() {
         usbProc._devBuf = []
         usbProc._stgBuf = []
@@ -303,7 +291,6 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN,PKNAME 2>/dev/null)
         actionProc.running = true
     }
 
-    // ── Poll timer ──────────────────────────────────────────────────
     readonly property var _ticker: Timer {
         interval: 5000
         running: true
