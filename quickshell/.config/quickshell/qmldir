@@ -45,3 +45,5 @@ WidgetKeyLed 1.0 WidgetKeyLed.qml
 WidgetMedia 1.0 WidgetMedia.qml
 WidgetNetwork 1.0 WidgetNetwork.qml
 WidgetNotifBell 1.0 WidgetNotifBell.qml
+WidgetUsb 1.0 WidgetUsb.qml
+UsbPopup 1.0 UsbPopup.qml

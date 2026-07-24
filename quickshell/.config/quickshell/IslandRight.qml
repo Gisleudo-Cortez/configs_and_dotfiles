@@ -140,21 +140,7 @@ Island {
             }
         }
 
-        Item {
-            id: usbWidget
-            implicitWidth: usbChip.implicitWidth + 4
-            implicitHeight: Geometry.barHeight
-
-            StatChip {
-                id: usbChip
-                anchors.centerIn: parent
-                screen: root.screen
-                icon: "󰋊"
-                value: UsbService.activeCount > 1 ? "…" : (UsbService.available ? UsbService.activeCount + "" : "")
-                color: UsbService.available ? Colors.green : Colors.textDim
-                tooltip: UsbService.tooltipText
-            }
-        }
+        WidgetUsb { screen: root.screen }
 
         // ── Battery ───────────────────────────────────────────────────────
         StatChip {
