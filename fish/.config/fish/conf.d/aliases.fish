@@ -30,7 +30,7 @@ alias fgrep 'ugrep -F --color=auto'
 
 # System / package management
 abbr big 'expac -H M "%m\t%n" | sort -h | nl'
-abbr cls 'clear'
+abbr cls clear
 abbr dir 'dir --color=auto'
 abbr fixpacman 'sudo rm /var/lib/pacman/db.lck'
 abbr gitpkg 'pacman -Q | grep -i "\-git" | wc -l'
@@ -67,6 +67,7 @@ abbr print_file 'lp -d EPSON_L3210_Series'
 abbr sshup 'eval (ssh-agent -c); ssh-add ~/.ssh/id_ed25519'
 abbr rs 'rsync -avP'
 abbr update 'sudo pacman -Syu; paru -Syu; flatpak update'
+abbr ya 'yazi .'
 
 # Mullvad VPN region switching
 abbr vpn-br 'mullvad relay set location br for'
