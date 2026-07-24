@@ -97,6 +97,8 @@ Island {
 
         WidgetDocker { screen: root.screen; onClicked: root.dockerClicked() }
         WidgetBluetooth { screen: root.screen; onClicked: root.btClicked() }
+        WidgetUsbStorage { screen: root.screen }
+        WidgetUsb        { screen: root.screen }
         WidgetAudio     { screen: root.screen; onClicked: root.audioClicked() }
         WidgetKeyLed    { }
 
@@ -137,22 +139,6 @@ Island {
                 value: MicService.activeCount > 1 ? "…" : (MicService.activeCount > 0 ? MicService.activeCount + "" : "")
                 color: MicService.inUse ? Colors.alert : Colors.textDim
                 tooltip: MicService.tooltipText
-            }
-        }
-
-        Item {
-            id: usbWidget
-            implicitWidth: usbChip.implicitWidth + 4
-            implicitHeight: Geometry.barHeight
-
-            StatChip {
-                id: usbChip
-                anchors.centerIn: parent
-                screen: root.screen
-                icon: "󰋊"
-                value: UsbService.activeCount > 1 ? "…" : (UsbService.available ? UsbService.activeCount + "" : "")
-                color: UsbService.available ? Colors.green : Colors.textDim
-                tooltip: UsbService.tooltipText
             }
         }
 
