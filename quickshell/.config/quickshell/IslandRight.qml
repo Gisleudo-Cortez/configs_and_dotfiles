@@ -97,6 +97,8 @@ Island {
 
         WidgetDocker { screen: root.screen; onClicked: root.dockerClicked() }
         WidgetBluetooth { screen: root.screen; onClicked: root.btClicked() }
+        WidgetUsbStorage { screen: root.screen }
+        WidgetUsb        { screen: root.screen }
         WidgetAudio     { screen: root.screen; onClicked: root.audioClicked() }
         WidgetKeyLed    { }
 
@@ -139,9 +141,6 @@ Island {
                 tooltip: MicService.tooltipText
             }
         }
-
-        WidgetUsbStorage { screen: root.screen }
-        WidgetUsb        { screen: root.screen }
 
         // ── Battery ───────────────────────────────────────────────────────
         StatChip {
