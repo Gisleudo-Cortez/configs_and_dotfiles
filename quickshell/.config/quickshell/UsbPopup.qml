@@ -164,7 +164,13 @@ PanelWindow {
                                     }
 
                                     Text {
-                                        text: modelData.product || modelData.manufacturer || "Unknown"
+                                        // Storage: prefer filesystem label, then product, then manufacturer
+                                        // Non-storage: product, then manufacturer
+                                        text: {
+                                            if (modelData.isStorage && modelData.label)
+                                                return modelData.label
+                                            return modelData.product || modelData.manufacturer || "Unknown"
+                                        }
                                         color: Colors.text
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: Geometry.fontSizeSm

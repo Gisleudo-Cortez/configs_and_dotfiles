@@ -204,7 +204,8 @@ done < <(lsblk -P -o NAME,SIZE,LABEL,MOUNTPOINT,TYPE,TRAN 2>/dev/null)
                 var lines = []
                 for (var t = 0; t < Math.min(devList.length, 6); t++) {
                     var dd = devList[t]
-                    var lbl = dd.product || dd.manufacturer || "Unknown"
+                    var lbl = (dd.isStorage && dd.label) ? dd.label
+                             : (dd.product || dd.manufacturer || "Unknown")
                     if (dd.isStorage && dd.mounted) {
                         lbl += " -> " + dd.mountpoint
                         if (dd.pct) lbl += " (" + dd.pct + ")"
