@@ -87,7 +87,7 @@ abbr anki_launch 'LIBGL_ALWAYS_SOFTWARE=1 anki'
 abbr qs-reload 'pkill quickshell 2>/dev/null; quickshell &'
 
 # aria2 resilient download — resume, 16 connections, infinite retry, crash-safe
-abbr dl 'aria2c -c -x16 -s16 -k1M --max-tries=0 --retry-wait=5 --connect-timeout=30 --timeout=60 --file-allocation=falloc -d /run/media/nero/kingston/Games'
+abbr dl 'aria2c -c -x16 -s16 -k1M --max-tries=0 --retry-wait=5 --connect-timeout=30 --timeout=60 --file-allocation=falloc'
 
 ## abbreviations — navigation / yazi
 abbr yal "yazi ~/Documents/Lonam/"
