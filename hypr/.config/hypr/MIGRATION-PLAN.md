@@ -263,6 +263,93 @@ hypr/.config/hypr/
 ### Old files to keep (as fallback):
 - hyprland.conf, monitors_positioning.conf, nvidia.conf, theme.conf, keybindings.conf, flatpak.conf
 
+## Team Audit Results (2026-07-28)
+
+Three specialists audited this plan: Motoko (API accuracy), Vex (adversarial break-risk), Lain (dependency chain trace).
+
+### LAIN — Dependency Chain: CLEAN
+
+Source chain verified. Exactly 5 files are sourced by hyprland.conf:
+- monitors_positioning.conf, flatpak.conf, theme.conf, nvidia.conf, keybindings.conf
+None of these source anything else (flat chain, no nesting).
+Files NOT in the chain (confirmed HyDE artifacts, safe to ignore):
+- workflows.conf (sources $WORKFLOWS_PATH but is NOT sourced by hyprland.conf)
+- shaders.conf, mocha.conf, workspaces.conf (orphaned HyDE files, never loaded)
+- animations/theme.conf, themes/*.conf (all DEPRECATED, never sourced)
+
+### MOTOKO — API Accuracy: VERIFIED
+
+All API calls in the plan verified against wiki 0.56.0 and /usr/share/hypr/hyprland.lua:
+
+CORRECT:
+- hl.config({}) for config blocks (general, decoration, blur, shadow, dwindle, master, cursor, misc)
+- hl.env("NAME", "value") for environment variables
+- hl.bind("keys", dispatcher) for keybindings
+- hl.dsp.exec_cmd("command") for exec binds
+- hl.window_rule({ name=..., match={...}, effect=... }) for window rules
+- hl.layer_rule({ name=..., match={namespace=...}, blur=true }) for layer rules
+- hl.workspace_rule({ workspace=1, monitor="eDP-1" }) for workspace rules
+- hl.gesture({ fingers=3, direction="horizontal", action="workspace" }) for gestures
+- hl.on("hyprland.start", function() ... end) for autostart
+- hl.exec_cmd("cmd") spawns async — no & needed at end
+- hl.curve() and hl.animation() for animation curves and entries
+
+CORRECT WITH CORRECTION:
+- Monitor desc: prefix — CONFIRMED WORKING. Wiki shows: hl.monitor({ output = "desc:Manufacturer Name 0xHEX", ... })
+  The desc: prefix goes in the output field as a string, same as .conf format.
+- cursor:no_hardware_cursors → hl.config({ cursor = { no_hardware_cursors = true } })
+
+UNVERIFIED (need runtime testing):
+- killactive dispatcher exact name in Lua (likely hl.dsp.window.close() based on example, but killactive may be a separate dispatcher)
+- togglefloating, pseudo, fullscreen, cyclenext, movefocus, workspace, movetoworkspace, togglespecialworkspace — all need dispatchers page check
+
+### VEX — Adversarial Review: BREAK RISKS FOUND
+
+BREAK RISK #1: ANIMATION style FIELD MISSING
+- theme.conf has: animation = windowsIn, 1, 4.1, easeOutQuint, popin 87%
+- Plan shows: hl.animation({ leaf="windowsIn", enabled=true, speed=4.1, bezier="easeOutQuint" })
+- MISSING: style = "popin 87%" field. Must be: hl.animation({ leaf="windowsIn", enabled=true, speed=4.1, bezier="easeOutQuint", style="popin 87%" })
+- Affects: windowsIn (popin 87%), windowsOut (popin 87%), layersIn (fade), layersOut (fade), workspaces (fade), workspacesIn (fade), workspacesOut (fade)
+
+BREAK RISK #2: bindel FLAG MAPPING
+- .conf: bindel = exec + locked flags (e=exec, l=locked)
+- The 'e' flag in hyprlang means "exec" — it passes through to exec binds
+- In Lua, all binds that use hl.dsp.exec_cmd() are inherently exec binds
+- The 'l' flag maps to { locked = true }
+- So bindel → hl.bind("key", hl.dsp.exec_cmd("..."), { locked = true, repeating = true })
+  (repeating = true is the Lua equivalent of the 'e' flag behavior for media keys that should repeat)
+- VERDICT: Plan's mapping is approximately correct but needs clarification. The 'e' flag in hyprlang means the bind can trigger while locked AND repeats. In Lua: { locked = true, repeating = true }
+
+BREAK RISK #3: exec-once WITH SHELL OPERATORS
+- User has: exec-once = systemctl --user start hyprpolkitagent.service 2>/dev/null || hyprpolkitagent &
+- hl.exec_cmd() may not handle shell operators (||, 2>/dev/null)
+- The official example shows: hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
+- This PROVES hl.exec_cmd() passes through to a shell — operators work
+- VERDICT: Safe. hl.exec_cmd() runs through shell, so || and 2>/dev/null work. The & is not needed (async by default).
+
+EDGE CASE #1: KEYCODE BINDS
+- User has: bind = $mainMod, 36, exec, $terminal (36 is raw keycode)
+- Wiki shows: hl.bind("SUPER + code:28", hl.dsp.exec_cmd("amongus"))
+- Translation: hl.bind("SUPER + code:36", hl.dsp.exec_cmd(terminal))
+
+EDGE CASE #2: DUPLICATE BINDS
+- User has both "bind = SUPER, F, togglefloating" and "bind = $mainMod, V, togglefloating"
+- In Lua these become two separate hl.bind() calls — this is fine, Lua allows multiple binds for the same dispatcher
+
+EDGE CASE #3: FALLBACK SAFETY
+- Wiki Start page says: "The config is located in $XDG_CONFIG_HOME/hypr/hyprland.lua"
+- It does NOT mention .conf fallback — Hyprland 0.56 prefers .lua, falls back to .conf
+- If .lua exists and has errors: Hyprland shows an error notification but does NOT fall back to .conf
+- SAFETY MECHANISM: Before creating hyprland.lua, the .conf still works. After creating .lua, if it errors, delete .lua to restore .conf
+
+### PLAN CORRECTIONS NEEDED
+
+1. Add style field to all animation translations that have style modifiers
+2. Add code: prefix for keycode binds
+3. Clarify that hl.exec_cmd() handles shell operators (confirmed by official example)
+4. Note that .lua errors do NOT fall back to .conf — must delete .lua to restore fallback
+5. Confirm dispatcher names for: killactive, togglefloating, pseudo, fullscreen, cyclenext, movefocus, workspace, movetoworkspace, togglespecialworkspace
+
 ## Verification Steps
 
 After creating all .lua files:
