@@ -50,7 +50,12 @@ hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
 -- Flatpak desktop entry / icon discovery
-hl.env("XDG_DATA_DIRS", "/var/lib/flatpak/exports/share:/home/nero/.local/share/flatpak/exports/share:/usr/local/share:/usr/share:/home/nero/.nix-profile/share:/nix/var/nix/profiles/default/share")
+hl.env("XDG_DATA_DIRS",
+    "/var/lib/flatpak/exports/share:" ..
+    "/home/nero/.local/share/flatpak/exports/share:" ..
+    "/usr/local/share:/usr/share:" ..
+    "/home/nero/.nix-profile/share:" ..
+    "/nix/var/nix/profiles/default/share")
 
 -- NVIDIA multi-GPU configuration
 require("nvidia")

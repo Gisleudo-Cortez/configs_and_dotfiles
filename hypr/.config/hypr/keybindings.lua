@@ -40,7 +40,8 @@ hl.bind(mainMod .. " + SHIFT + E", hl.dsp.exec_cmd("hyprlauncher --provider emoj
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("killall hyprsunset 2>/dev/null || hyprsunset -t 3500"))
 
 -- Screen capture
-hl.bind("Print", hl.dsp.exec_cmd('grimblast copy area && notify-send -u low -t 1500 "Screen Shoot" "Copied to clipboard"'))
+hl.bind("Print", hl.dsp.exec_cmd(
+    'grimblast copy area && notify-send -u low -t 1500 "Screen Shoot" "Copied to clipboard"'))
 
 -- Force hyprctl reload
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd('hyprctl reload && notify-send -t 1500 "Reloaded" "hyprctl"'))
@@ -74,12 +75,20 @@ hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true }) -- 
 hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true }) -- RMB
 
 -- Multimedia and brightness keys
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true })
-hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
+local vol_flags = { locked = true, repeating = true }
+
+hl.bind("XF86AudioRaiseVolume",
+    hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), vol_flags)
+hl.bind("XF86AudioLowerVolume",
+    hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), vol_flags)
+hl.bind("XF86AudioMute",
+    hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), vol_flags)
+hl.bind("XF86AudioMicMute",
+    hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), vol_flags)
+hl.bind("XF86MonBrightnessUp",
+    hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), vol_flags)
+hl.bind("XF86MonBrightnessDown",
+    hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), vol_flags)
 
 -- Media controls using playerctl
 hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
