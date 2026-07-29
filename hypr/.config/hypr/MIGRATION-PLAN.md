@@ -388,6 +388,40 @@ ADDITIONAL MISSING ITEMS:
 - bind handles: local bind = hl.bind(...); bind:set_enabled(false) for conditional binds
 - submaps: hl.define_submap("name", function() ... end) if user uses submaps (user doesn't currently)
 
+### VEX FULL REPORT — ADDITIONAL FINDINGS
+
+BREAK RISK #4: cyclenext + bringactivetotop combined bind
+- .conf: bind = ALT, Tab, cyclenext, bringactivetotop (TWO dispatchers on one bind)
+- Lua requires a function with hl.dispatch():
+  hl.bind("ALT + Tab", function()
+      hl.dispatch(hl.dsp.window.cycle_next())
+      hl.dispatch(hl.dsp.window.alter_zorder({ mode = "top" }))
+  end)
+- If migrated as single dispatcher, only first action executes
+
+BREAK RISK #5: fullscreen with argument
+- .conf: bind = $mainMod, M, fullscreen, 1 (1 = maximized toggle)
+- Lua: hl.bind("SUPER + M", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
+- Needs runtime verification — exact parameter names unconfirmed
+
+BREAK RISK #6: hl.exec_cmd vs hl.dsp.exec_cmd distinction
+- In BINDS: must use hl.dsp.exec_cmd("cmd") — the dispatcher form
+- In AUTOSTART: use hl.exec_cmd("cmd") — the standalone form
+- Plan must clearly distinguish these two contexts
+
+EDGE CASE #4: Multi-modifier binds
+- .conf: bind = CTRL ALT, Delete, exec, wlogout ...
+- Lua: "CTRL + ALT + Delete" (use + between modifiers)
+
+EDGE CASE #5: bindl whitespace
+- .conf: bindl = , XF86AudioNext, exec, playerctl next (space after comma)
+- Lua: "XF86AudioNext" — NO leading space, must strip whitespace
+
+EDGE CASE #6: os.execute blocks, hl.exec_cmd doesn't
+- For polkitagent line with ||: use hl.exec_cmd("cmd") not os.execute()
+- os.execute() is blocking, hl.exec_cmd() is async
+- But hl.exec_cmd("cmd || fallback") should work since it passes through sh -c
+
 ### FINAL PLAN ACCURACY: ~95% after corrections
 23/24 verified API calls correct (1 integer→string fix)
 All dispatchers now mapped
