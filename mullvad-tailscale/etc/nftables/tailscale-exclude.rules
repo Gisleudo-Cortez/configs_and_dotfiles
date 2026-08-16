@@ -1,0 +1,23 @@
+# tailscale-exclude.rules — Mullvad split-tunnel exclusion for Tailscale
+# Mullvad's official documented method (mullvad.net/en/help/split-tunneling-with-linux-advanced)
+# The marks are Mullvad's hardcoded exclusion markers: 0x00000f41 (firewall bypass),
+# 0x6d6f6c65 (route outside tunnel). Priority -100 fires before Mullvad's own chains
+# (priority 0). Valid range: -200 to 0 — below -200 leaks the tunnel IP.
+# Rules are inert when Mullvad is disconnected — safe to leave loaded permanently.
+# Loaded at boot by mullvad-tailscale-exclusion.service (systemd).
+#
+# Load manually:   sudo nft -f /etc/nftables/tailscale-exclude.rules
+# Pre-flight:      sudo nft -c -f /etc/nftables/tailscale-exclude.rules
+# Verify:          sudo nft list table inet excludeTraffic
+# Rollback:        sudo nft delete table inet excludeTraffic
+
+table inet excludeTraffic {
+  chain excludeOutgoing {
+    type route hook output priority -100; policy accept;
+    ip daddr 100.64.0.0/10 ct mark set 0x00000f41 meta mark set 0x6d6f6c65;
+  }
+  chain excludeIncoming {
+    type filter hook input priority -100; policy accept;
+    ip saddr 100.64.0.0/10 ct mark set 0x00000f41 meta mark set 0x6d6f6c65;
+  }
+}

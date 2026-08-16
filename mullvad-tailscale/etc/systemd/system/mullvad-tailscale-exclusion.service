@@ -1,0 +1,17 @@
+[Unit]
+Description=Load Mullvad split-tunnel exclusion rules for Tailscale
+Documentation=https://mullvad.net/en/help/split-tunneling-with-linux-advanced
+# Load before the network is fully up so Tailscale traffic is excluded
+# from the Mullvad tunnel from the first packet.
+Before=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
+# '-' prefix: tolerate a manually-deleted table so stop never fails
+ExecStop=-/usr/bin/nft delete table inet excludeTraffic
+
+[Install]
+WantedBy=multi-user.target
