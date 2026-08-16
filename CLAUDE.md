@@ -16,7 +16,7 @@ bash scripts/11-deploy-dotfiles.sh
 bash scripts/11-deploy-dotfiles.sh --dry-run
 ```
 
-The stow packages currently deployed are: `fish`, `nvim`, `starship`, `hypr`, `kitty`, `waybar`, `quickshell`, `mako`, `rofi`, `wlogout`, `fastfetch`. Each must contain the directory tree as it should appear under `$HOME` (e.g. `fish/.config/fish/config.fish` → `~/.config/fish/config.fish`).
+The stow packages currently deployed are: `fish`, `nvim`, `starship`, `hypr`, `kitty`, `waybar`, `quickshell`, `mako`, `rofi`, `wlogout`, `fastfetch`, `tmux`, `hermes`, `codex`, `ronema`. Each must contain the directory tree as it should appear under `$HOME` (e.g. `fish/.config/fish/config.fish` → `~/.config/fish/config.fish`).
 
 ## System setup scripts
 
@@ -57,6 +57,7 @@ Each package directory maps to `$HOME`. Stow creates symlinks from `~/<path>` �
 | `wlogout/` | `~/.config/wlogout/` | Logout menu |
 | `quickshell/` | `~/.config/quickshell/` | Quickshell status bar (replaces waybar) |
 | `fastfetch/` | `~/.config/fastfetch/` | System info display |
+| `ronema/` | `~/.local/bin/ronema` + `~/.config/ronema/` | Rofi network menu (script + config) |
 
 ### Hyprland config structure
 

@@ -29,6 +29,7 @@ STOW_PACKAGES_TO_DEPLOY=(
     "tmux"
     "hermes"
     "codex"
+    "ronema"
 )
 
 # --- Main Logic ---
