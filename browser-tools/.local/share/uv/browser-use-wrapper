@@ -1,0 +1,44 @@
+#!/home/nero/.local/share/uv/tools/browser-use/bin/python3
+# -*- coding: utf-8 -*-
+"""browser-use wrapper — ensures Chrome CDP is alive before delegating to the real CLI.
+
+This wrapper sits at ~/.local/share/uv/tools/browser-use/bin/browser-use and is
+OVERWRITTEN by `uv tool upgrade browser-use`. Restore it by:
+  1. cp browser-use browser-use-real  (save the new version as -real)
+  2. Copy this file over browser-use
+  3. chmod +x browser-use
+
+The wrapper calls chrome-cdp-ensure (~/.local/bin/chrome-cdp-ensure) to check
+if Chrome is running on port 9222 and launch it if dead, then execs browser-use-real.
+
+Anti-bot posture: NO --headless (Cloudflare detects HeadlessChrome UA),
+NO --disable-gpu (Cloudflare fingerprints automation flags). The chrome-cdp-ensure
+script handles the launch with the correct flag set.
+
+Created 2026-08-12. Restored 2026-08-20 after uv tool upgrade overwrote it.
+"""
+import os
+import subprocess
+import sys
+
+# Ensure Chrome CDP is alive before running the real CLI
+ensure_script = os.path.expanduser("~/.local/bin/chrome-cdp-ensure")
+if os.path.exists(ensure_script):
+    try:
+        subprocess.run(
+            [ensure_script],
+            timeout=15,
+            capture_output=True,
+        )
+    except Exception:
+        pass  # best-effort — if Chrome can't be launched, browser-use-real will error with a clear message
+
+# Exec the real browser-use CLI
+from browser_use.cli import main
+
+if __name__ == "__main__":
+    if sys.argv[0].endswith("-script.pyw"):
+        sys.argv[0] = sys.argv[0][:-11]
+    elif sys.argv[0].endswith(".exe"):
+        sys.argv[0] = sys.argv[0][:-4]
+    sys.exit(main())

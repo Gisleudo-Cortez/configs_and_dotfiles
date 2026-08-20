@@ -1,0 +1,53 @@
+#!/bin/bash
+# chrome-cdp-ensure — check if Chrome CDP instance is alive on port 9222, launch if not
+# Used by Hermes browser automation. Safe to call repeatedly.
+
+CDP_URL="http://localhost:9222/json/version"
+CHROME_BIN="google-chrome-stable"
+USER_DATA_DIR="$HOME/.config/google-chrome-debug"
+LOG_FILE="$HOME/.local/share/chrome-cdp.log"
+
+# Check if CDP endpoint responds
+if curl -sf --connect-timeout 3 "$CDP_URL" >/dev/null 2>&1; then
+    echo "CDP alive on :9222"
+    exit 0
+fi
+
+# Chrome not running — launch it
+echo "CDP not responding, launching Chrome debug instance..." >&2
+
+# Log directory
+mkdir -p "$(dirname "$LOG_FILE")"
+
+# Launch Chrome with CDP — visible window, clean UA, X11 for Wayland compat
+# NO --headless (Cloudflare detects HeadlessChrome UA)
+# NO --disable-gpu (Cloudflare fingerprints automation flags)
+$CHROME_BIN \
+    --remote-debugging-port=9222 \
+    --user-data-dir="$USER_DATA_DIR" \
+    --no-first-run \
+    --no-default-browser-check \
+    --ozone-platform=x11 \
+    --incognito \
+    --disable-extensions \
+    --disable-background-networking \
+    --disable-background-timer-throttling \
+    --disable-backgrounding-occluded-windows \
+    --disable-renderer-backgrounding \
+    >> "$LOG_FILE" 2>&1 &
+
+CHROME_PID=$!
+echo "Chrome launched (PID $CHROME_PID)" >&2
+
+# Wait for CDP endpoint to come up (max 10 seconds)
+for i in $(seq 1 10); do
+    sleep 1
+    if curl -sf --connect-timeout 2 "$CDP_URL" >/dev/null 2>&1; then
+        echo "CDP ready on :9222 after ${i}s"
+        exit 0
+    fi
+done
+
+echo "ERROR: Chrome launched but CDP endpoint not responding after 10s" >&2
+echo "Check log: $LOG_FILE" >&2
+exit 1

@@ -29,6 +29,8 @@ STOW_PACKAGES_TO_DEPLOY=(
     "tmux"
     "hermes"
     "codex"
+    "email-tools"
+    "browser-tools"
     "ronema"
 )
 
