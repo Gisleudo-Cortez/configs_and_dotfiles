@@ -33,6 +33,10 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("wl-paste --watch cliphist store")
   hl.exec_cmd("systemctl --user start hyprpolkitagent.service 2>/dev/null || hyprpolkitagent")
   hl.exec_cmd("mullvad connect")
+  -- Chrome debug instance for Hermes browser automation (CDP on port 9222)
+  -- X11 + disable-vulkan: the debug instance crashes under Wayland+Vulkan
+  -- Routed to workspace 7 via window rule below — never steals focus
+  hl.exec_cmd("google-chrome-stable --remote-debugging-port=9222 --user-data-dir=/home/nero/.config/google-chrome-debug --no-first-run --no-default-browser-check --ozone-platform=x11 --disable-vulkan --incognito --disable-extensions --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding")
 end)
 
 -- Quickshell blur layer rule
@@ -150,4 +154,15 @@ hl.window_rule({
   match = { class = "hyprland-run" },
   move = "20 monitor_h-120",
   float = true,
+})
+
+-- Chrome debug instance (CDP port 9222) — route to workspace 7, never steal focus
+-- The user's daily browser is Zen (class "zen"); Chrome is exclusively the debug instance
+-- "silent" suffix: open on ws7 without switching the active workspace (wiki-documented)
+-- no_initial_focus: also prevents initial focus grant as belt-and-suspenders
+hl.window_rule({
+  name = "chrome-debug-ws7",
+  match = { class = "Google-chrome" },
+  workspace = "7 silent",
+  no_initial_focus = true,
 })
