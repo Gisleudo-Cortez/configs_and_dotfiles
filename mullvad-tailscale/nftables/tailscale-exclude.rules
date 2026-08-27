@@ -6,18 +6,35 @@
 # Rules are inert when Mullvad is disconnected — safe to leave loaded permanently.
 # Loaded at boot by mullvad-tailscale-exclusion.service (systemd).
 #
+# Idempotent: the leading `destroy table` makes this file safe to load repeatedly
+# (service restarts, manual reloads). Requires nftables >= 1.0.1.
+#
+# IPv4 + IPv6: covers Tailscale's CGNAT range (100.64.0.0/10) and its ULA range
+# (fd7a:115c:a1e0::/48). Incoming rules are constrained to the tailscale0 interface
+# so spoofed 100.64/10 or ULA sources on other interfaces cannot earn the
+# firewall-bypass mark.
+#
+# Tradeoff: the outgoing match is destination-based, not interface-based. If the ISP
+# uses CGNAT, a local process connecting to a non-Tailscale 100.64/10 address would
+# also bypass the tunnel. Accepted and documented — interface-based outgoing matching
+# needs live testing against Mullvad's policy routing before adoption.
+#
 # Load manually:   sudo nft -f /etc/nftables/tailscale-exclude.rules
 # Pre-flight:      sudo nft -c -f /etc/nftables/tailscale-exclude.rules
 # Verify:          sudo nft list table inet excludeTraffic
 # Rollback:        sudo nft delete table inet excludeTraffic
 
+destroy table inet excludeTraffic
+
 table inet excludeTraffic {
   chain excludeOutgoing {
     type route hook output priority -100; policy accept;
     ip daddr 100.64.0.0/10 ct mark set 0x00000f41 meta mark set 0x6d6f6c65;
+    ip6 daddr fd7a:115c:a1e0::/48 ct mark set 0x00000f41 meta mark set 0x6d6f6c65;
   }
   chain excludeIncoming {
     type filter hook input priority -100; policy accept;
-    ip saddr 100.64.0.0/10 ct mark set 0x00000f41 meta mark set 0x6d6f6c65;
+    iifname "tailscale0" ip saddr 100.64.0.0/10 ct mark set 0x00000f41 meta mark set 0x6d6f6c65;
+    iifname "tailscale0" ip6 saddr fd7a:115c:a1e0::/48 ct mark set 0x00000f41 meta mark set 0x6d6f6c65;
   }
 }

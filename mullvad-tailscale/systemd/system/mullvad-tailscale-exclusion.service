@@ -5,11 +5,16 @@ Documentation=https://mullvad.net/en/help/split-tunneling-with-linux-advanced
 # from the Mullvad tunnel from the first packet.
 Before=network-pre.target
 Wants=network-pre.target
+# If a generic nftables.service is ever enabled, run after it so its ruleset
+# flush cannot erase this table. Harmless when masked/absent.
+After=nftables.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
+# Safe to re-run: the rules file is idempotent (destroy + recreate)
+ExecReload=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
 # '-' prefix: tolerate a manually-deleted table so stop never fails
 ExecStop=-/usr/bin/nft delete table inet excludeTraffic
 
