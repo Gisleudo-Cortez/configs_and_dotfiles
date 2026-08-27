@@ -68,7 +68,7 @@ abbr sshup 'eval (ssh-agent -c); ssh-add ~/.ssh/id_ed25519'
 abbr rs 'rsync -avP'
 abbr update 'sudo pacman -Syu; paru -Syu; flatpak update'
 abbr ya 'yazi .'
-
+abbr lsblk 'lsblk -o NAME,SIZE,MODEL,MOUNTPOINT'
 # Mullvad VPN region switching
 abbr vpn-br 'mullvad relay set location br for'
 abbr vpn-us 'mullvad relay set location us mia'
