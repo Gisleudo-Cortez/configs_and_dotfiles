@@ -1,0 +1,197 @@
+#!/usr/bin/env bash
+#
+# himalaya-sweep — search every himalaya account in parallel using GNU parallel.
+#
+# Usage: himalaya-sweep [OPTIONS] <QUERY>
+#
+# Dependencies: himalaya, GNU parallel, jq
+
+set -uo pipefail
+
+# ---------------------------------------------------------------- helpers
+
+json_escape() {
+    local s="$1"
+    s=${s//\\/\\\\}
+    s=${s//\"/\\\"}
+    s=${s//$'\n'/\\n}
+    s=${s//$'\r'/\\r}
+    s=${s//$'\t'/\\t}
+    printf '"%s"' "$s"
+}
+
+usage() {
+    cat <<'EOF'
+Usage: himalaya-sweep [OPTIONS] <QUERY>
+
+Search <QUERY> across every himalaya account in parallel.
+
+Arguments:
+  QUERY                 himalaya search query (same DSL as
+                        `himalaya envelope search`, e.g. "from faturatim",
+                        "subject fatura and after 2026-08-01")
+
+Options:
+      --json            Emit a single JSON document (for piping)
+      --folder <NAME>   Mailbox to search (default: INBOX)
+      --accounts <LIST> Space- or comma-separated list of accounts to search
+                        (default: every configured account)
+  -h, --help            Show this help and exit
+
+Examples:
+  himalaya-sweep "from faturatim"
+  himalaya-sweep --json "subject fatura and after 2026-08-01"
+  himalaya-sweep --folder Junk "subject TIM"
+  himalaya-sweep --accounts "subiliminal lonam-uol" "from faturatim"
+EOF
+}
+
+# ---------------------------------------------------------------- internal
+
+# GNU parallel fans out to: $0 --_run-one <account>
+# (query / folder / json-mode are passed via the environment)
+if [[ "${1:-}" == "--_run-one" ]]; then
+    acct="${2:-}"
+    query="${HSWEEP_QUERY:-}"
+    folder="${HSWEEP_FOLDER:-INBOX}"
+    json_mode="${HSWEEP_JSON:-0}"
+
+    mailbox_args=()
+    [[ "$folder" != "INBOX" ]] && mailbox_args=(-m "$folder")
+
+    err_file="$(mktemp)"
+    out="$(himalaya -a "$acct" envelope search "${mailbox_args[@]}" --json -- "$query" 2>"$err_file")"
+    rc=$?
+
+    if (( rc != 0 )); then
+        # With --json, himalaya reports errors as JSON on stdout:
+        #   {"error":"...","sources":[],"backtrace":null}
+        msg="$(printf '%s' "$out" | jq -r '.error // empty' 2>/dev/null)"
+        if [[ -z "$msg" ]]; then
+            msg="$(head -c 200 "$err_file" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g')"
+        fi
+        [[ -n "$msg" ]] || msg="himalaya exited with status $rc"
+        msg="${msg:0:200}"
+        rm -f "$err_file"
+        if [[ "$json_mode" == "1" ]]; then
+            printf '{"account":%s,"error":%s}\n' "$(json_escape "$acct")" "$(json_escape "$msg")"
+        else
+            printf '=== %s ===\n  [error: %s]\n' "$acct" "$msg"
+        fi
+        exit 0
+    fi
+    rm -f "$err_file"
+
+    # out is a single JSON object: {"envelopes":[...]}
+    if [[ "$json_mode" == "1" ]]; then
+        printf '{"account":%s,%s\n' "$(json_escape "$acct")" "${out:1}"
+    else
+        n="$(printf '%s' "$out" | jq '.envelopes | length')"
+        if (( n > 0 )); then
+            printf '=== %s ===\n' "$acct"
+            printf '%s' "$out" | jq -r '.envelopes[] | [((.date // "") | split("T")[0]), (.id // ""), ((.from[0].email) // (.from[0].name) // ""), (.subject // "")] | @tsv' \
+                | sed 's/^/  /'
+        fi
+    fi
+    exit 0
+fi
+
+# ---------------------------------------------------------------- main
+
+DEFAULT_ACCOUNTS=(
+    administracao-gegfreiosaar
+    gcdemedeiros-hotmail
+    gcmf-uni
+    gcortez-uol
+    gisleudo-cmf
+    gisleudo-ourodata
+    lonam-gisleudofilho
+    lonam-uol
+    subiliminal
+)
+
+JSON_MODE=0
+FOLDER="INBOX"
+ACCOUNTS=()
+POSITIONAL=()
+
+# ---------------------------------------------------------------- argument parsing
+
+while (( $# > 0 )); do
+    case "$1" in
+        --json)
+            JSON_MODE=1
+            shift
+            ;;
+        --folder)
+            [[ -n "${2:-}" ]] || { echo "himalaya-sweep: --folder requires a value" >&2; exit 2; }
+            FOLDER="$2"
+            shift 2
+            ;;
+        --accounts)
+            [[ -n "${2:-}" ]] || { echo "himalaya-sweep: --accounts requires a value" >&2; exit 2; }
+            read -r -a ACCOUNTS <<< "${2//,/ }"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        --)
+            shift
+            POSITIONAL+=("$@")
+            break
+            ;;
+        -*)
+            echo "himalaya-sweep: unknown option: $1" >&2
+            usage >&2
+            exit 2
+            ;;
+        *)
+            POSITIONAL+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if (( ${#POSITIONAL[@]} == 0 )); then
+    echo "himalaya-sweep: missing QUERY" >&2
+    usage >&2
+    exit 2
+fi
+QUERY="$(printf '%s ' "${POSITIONAL[@]}")"
+QUERY="${QUERY% }"
+
+(( ${#ACCOUNTS[@]} > 0 )) || ACCOUNTS=("${DEFAULT_ACCOUNTS[@]}")
+
+# ---------------------------------------------------------------- dependencies
+
+PARALLEL="$(command -v parallel || true)"
+[[ -n "$PARALLEL" ]] || PARALLEL="/usr/bin/parallel"
+[[ -x "$PARALLEL" ]] || { echo "himalaya-sweep: GNU parallel not found" >&2; exit 1; }
+
+command -v himalaya >/dev/null 2>&1 || { echo "himalaya-sweep: himalaya not found in PATH" >&2; exit 1; }
+command -v jq       >/dev/null 2>&1 || { echo "himalaya-sweep: jq not found in PATH (required)" >&2; exit 1; }
+
+# ---------------------------------------------------------------- run
+
+export HSWEEP_QUERY="$QUERY"
+export HSWEEP_FOLDER="$FOLDER"
+export HSWEEP_JSON="$JSON_MODE"
+
+output="$(printf '%s\n' "${ACCOUNTS[@]}" | \
+    "$PARALLEL" --keep-order \
+        --env HSWEEP_QUERY --env HSWEEP_FOLDER --env HSWEEP_JSON \
+        "$0" --_run-one '{}')"
+
+if [[ "$JSON_MODE" == "1" ]]; then
+    inner="$(printf '%s' "$output" | paste -sd, -)"
+    printf '{"query":%s,"folder":%s,"accounts":[%s]}\n' \
+        "$(json_escape "$QUERY")" "$(json_escape "$FOLDER")" "$inner"
+else
+    if [[ -z "${output//[$' \t\n']/}" ]]; then
+        echo "No matches in any account." >&2
+    else
+        printf '%s\n' "$output"
+    fi
+fi
