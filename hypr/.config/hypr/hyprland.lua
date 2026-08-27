@@ -32,11 +32,12 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("kdeconnectd")
   hl.exec_cmd("wl-paste --watch cliphist store")
   hl.exec_cmd("systemctl --user start hyprpolkitagent.service 2>/dev/null || hyprpolkitagent")
-  hl.exec_cmd("mullvad connect")
   -- Chrome debug instance for Hermes browser automation (CDP on port 9222)
   -- X11 + disable-vulkan: the debug instance crashes under Wayland+Vulkan
   -- Routed to workspace 7 via window rule below — never steals focus
-  hl.exec_cmd("google-chrome-stable --remote-debugging-port=9222 --user-data-dir=/home/nero/.config/google-chrome-debug --no-first-run --no-default-browser-check --ozone-platform=x11 --disable-vulkan --incognito --disable-extensions --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding")
+  hl.exec_cmd(
+    "google-chrome-stable --remote-debugging-port=9222 --user-data-dir=/home/nero/.config/google-chrome-debug --no-first-run --no-default-browser-check --ozone-platform=x11 --disable-vulkan --incognito --disable-extensions --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding"
+  )
 end)
 
 -- Quickshell blur layer rule
