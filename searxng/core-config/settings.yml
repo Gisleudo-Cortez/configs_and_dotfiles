@@ -16,7 +16,12 @@ search:
   autocomplete: ''
   autocomplete_min: 4
   favicon_resolver: ''
-  default_lang: auto
+  # PINNED to en-US 2026-09-03: "auto" + no Accept-Language header (every API/MCP
+  # client sends none) resolved to lang=all, which sends Bing no mkt param ->
+  # IP-geo BR-market garbage for English queries. Measured: 77.8% -> 52.4%
+  # top-3 noise. pt-BR queries must pass language=pt-BR explicitly per call
+  # (they were 100% noise in every ablation cell either way).
+  default_lang: en-US
   ban_time_on_fail: 30
   max_ban_time_on_fail: 120
   suspended_times:
@@ -212,6 +217,9 @@ engines:
   categories:
   - general
   shortcut: aol
+  # Tested 2026-09-03 and DISABLED: search.aol.com/aol/search 404s from this
+  # network even on bare queries (endpoint dead in pinned build 2026.4.10 —
+  # PR #5882's path no longer resolves). Revisit on next version bump.
   disabled: true
 - name: aol images
   engine: aol
