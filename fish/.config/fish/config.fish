@@ -113,9 +113,10 @@ function cleanup
     end
 end
 
-## Run fastfetch if session is interactive
-if status --is-interactive && type -q fastfetch
+## Run fastfetch once per interactive shell — not again on config re-source
+if status --is-interactive && type -q fastfetch && not set -q __fish_config_banner_shown
     fastfetch --file ~/.config/fastfetch/lain.txt --logo-color-1 "#00c8aa" --config neofetch.jsonc
+    set -g __fish_config_banner_shown 1
 end
 
 # Custom functions
@@ -153,9 +154,6 @@ end
 
 # change editor to nvim
 set -gx EDITOR /usr/bin/nvim
-
-# Generated for envman. Do not edit.
-test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
 
 # LM Studio CLI PATH (disabled — provider offline)
 # set -gx PATH $PATH /home/nero/.lmstudio/bin
