@@ -15,9 +15,15 @@ return {
     config = function()
       require("luasnip.loaders.from_vscode").lazy_load()  -- loads friendly-snippets
       -- Optional: your own snippets in ~/.config/nvim/snippets
-      require("luasnip.loaders.from_vscode").lazy_load({
-        paths = { vim.fn.stdpath("config") .. "/snippets" },
-      })
+      -- Guard: lazy_load warns twice per session ("Could not find
+      -- package.json", "Could not resolve all manifests") when the path
+      -- doesn't exist. Only load when the dir is present.
+      local snip_dir = vim.fn.stdpath("config") .. "/snippets"
+      if vim.uv.fs_stat(snip_dir) then
+        require("luasnip.loaders.from_vscode").lazy_load({
+          paths = { snip_dir },
+        })
+      end
     end,
   },
 
