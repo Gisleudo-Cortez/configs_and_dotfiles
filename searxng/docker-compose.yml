@@ -7,6 +7,12 @@ services:
   core:
     container_name: searxng-core
     image: docker.io/searxng/searxng:${SEARXNG_VERSION:-2026.4.10-7737a0da1}
+    # 2026-09-04: run as nero (uid/gid 1000). Durable fix for the ownership
+    # cycle — root-run container re-claimed core-config/ to its runtime uid
+    # (977/systemd-network) on every restart, breaking git ops on the repo.
+    # Validated on test boot: uid 1000 parses config, serves JSON, and the
+    # bind-mounted settings.yml stays nero-owned after boot.
+    user: "1000:1000"
     restart: always
     network_mode: host
     ports:
