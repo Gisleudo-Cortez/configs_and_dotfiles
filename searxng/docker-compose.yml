@@ -6,7 +6,7 @@ name: searxng
 services:
   core:
     container_name: searxng-core
-    image: docker.io/searxng/searxng:${SEARXNG_VERSION:-2026.4.10-7737a0da1}
+    image: docker.io/searxng/searxng:${SEARXNG_VERSION:-2026.9.4-15b0c8ef3}
     # 2026-09-04: run as nero (uid/gid 1000). Durable fix for the ownership
     # cycle — root-run container re-claimed core-config/ to its runtime uid
     # (977/systemd-network) on every restart, breaking git ops on the repo.
