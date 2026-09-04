@@ -87,8 +87,9 @@ return {
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     event = { "BufReadPre", "BufNewFile" },
     opts = {
-      -- Servers mason-lspconfig installs + enables on first launch.
-      -- Install extras on demand with :MasonInstall <server-name>.
+      -- Servers mason-lspconfig installs (binaries via Mason). Enabling is
+      -- governed by automatic_enable below. rust_analyzer stays listed so the
+      -- binary is installed — rustaceanvim (rust.lua) launches it from PATH.
       ensure_installed = {
         -- Core data-science / finance stack
         "lua_ls",
@@ -130,7 +131,15 @@ return {
         "qmlls", -- QML (Qt)
         "fish_lsp", -- Fish shell
       },
-      automatic_enable = true, -- vim.lsp.enable() per installed server
+      automatic_enable = {
+        exclude = {
+          "rust_analyzer", -- rustaceanvim (rust.lua) starts its own client; two
+                            -- inlayHint-capable clients on one buffer trigger the
+                            -- nvim 0.12.5 inlay_hint race (neovim#36318/#39772):
+                            -- stale hints from the slower client apply past
+                            -- end-of-line → "Invalid 'col'" on every redraw.
+        },
+      },
     },
   },
 
