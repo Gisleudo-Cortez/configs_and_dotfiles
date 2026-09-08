@@ -35,17 +35,33 @@ PanelWindow {
           || (PopupState.hoverActive === "bluetooth" && PopupState.hoverScreen === _screen)
 
     readonly property var adapter: Bluetooth.defaultAdapter
+    readonly property bool _scanning: adapter?.scanning ?? false
 
-    // Start scan when click-opened; stop when closed
-    // onVisibleChanged triggers a compile error — use a Connections on PopupState instead
+    // Start scan when the popup opens (click or hover); stop when it closes.
+    // onVisibleChanged triggers a compile error — use a Connections on PopupState instead.
+    // Debounced: toggleAt/showHoverAt set several PopupState props in one tick, which
+    // would otherwise fire duplicate startDiscovery() DBus calls before `scanning`
+    // flips to true on the reply.
+    Timer {
+        id: discoverySync
+        interval: 50
+        onTriggered: root._syncDiscovery()
+    }
+
     Connections {
         target: PopupState
-        function onActiveChanged() {
-            if (PopupState.active === "bluetooth" && PopupState.screen === root._screen) {
-                if (root.adapter && root.adapter.enabled) root.adapter.startDiscovery()
-            } else if (root.adapter && root.adapter.scanning) {
-                root.adapter.stopDiscovery()
-            }
+        function onActiveChanged() { discoverySync.restart() }
+        function onHoverActiveChanged() { discoverySync.restart() }
+        function onScreenChanged() { discoverySync.restart() }
+        function onHoverScreenChanged() { discoverySync.restart() }
+    }
+
+    function _syncDiscovery() {
+        const open = (PopupState.active === "bluetooth" && PopupState.screen === root._screen)
+                  || (PopupState.hoverActive === "bluetooth" && PopupState.hoverScreen === root._screen)
+        if (root.adapter && root.adapter.enabled) {
+            if (open && !root.adapter.scanning) root.adapter.startDiscovery()
+            else if (!open && root.adapter.scanning) root.adapter.stopDiscovery()
         }
     }
 
@@ -93,11 +109,10 @@ PanelWindow {
                         Layout.fillWidth: true
                     }
 
-                    // Scan button — only visible when click-opened
+                    // Scan button — visible whenever the popup is open (click or hover)
                     Text {
                         visible: root.adapter !== null
                               && root.adapter.enabled
-                              && PopupState.active === "bluetooth"
                         text: (root.adapter !== null && root.adapter.scanning) ? "󰑪 scanning" : "󰑺 scan"
                         color: (root.adapter !== null && root.adapter.scanning) ? Colors.cyan : Colors.textDim
                         font.family: "JetBrainsMono Nerd Font"
@@ -157,6 +172,8 @@ PanelWindow {
                 }
 
                 // ── Device list ───────────────────────────────────────────
+                // Paired/known devices always show; unpaired entries (ambient scan junk
+                // and new devices in pairing mode) only surface while a scan is running.
                 Repeater {
                     id: devRepeater
                     model: (root.adapter !== null && root.adapter.enabled)
@@ -165,6 +182,7 @@ PanelWindow {
                     delegate: ColumnLayout {
                         width: box.width
                         spacing: 0
+                        visible: modelData.paired || modelData.connected || root._scanning
 
                         Rectangle {
                             Layout.fillWidth: true
@@ -252,7 +270,7 @@ PanelWindow {
                 Text {
                     visible: root.adapter !== null
                           && root.adapter.enabled
-                          && root.adapter.devices.count === 0
+                          && root.adapter.devices.values.length === 0
                     text: (root.adapter !== null && root.adapter.scanning)
                           ? "Scanning for devices…" : "No known devices"
                     color: Colors.textDim
