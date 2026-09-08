@@ -27,9 +27,11 @@ Item {
         text: Bluetooth.defaultAdapter?.enabled ? "󰂯" : "󰂲"
         color: {
             if (!(Bluetooth.defaultAdapter?.enabled ?? false)) return Colors.textDim
-            const devs = Bluetooth.defaultAdapter?.devices
-            for (let i = 0; i < (devs?.count ?? 0); i++) {
-                if (devs.values[i].connected) return Colors.blue
+            // Iterate `values` (notified list property) — reading model.count
+            // registers no dependency and the binding never re-evaluates.
+            const devs = Bluetooth.defaultAdapter?.devices?.values ?? []
+            for (let i = 0; i < devs.length; i++) {
+                if (devs[i].connected) return Colors.blue
             }
             return Qt.rgba(0.247, 0.725, 0.976, 0.5)
         }
@@ -41,10 +43,10 @@ Item {
         onHoveredChanged: {
             if (hovered) {
                 btHoverTimer.start()
-                const devs = Bluetooth.defaultAdapter?.devices
+                const devs = Bluetooth.defaultAdapter?.devices?.values ?? []
                 let connected = 0
-                for (let i = 0; i < (devs?.count ?? 0); i++) {
-                    if (devs.values[i].connected) connected++
+                for (let i = 0; i < devs.length; i++) {
+                    if (devs[i].connected) connected++
                 }
                 const text = (Bluetooth.defaultAdapter?.enabled ?? false)
                     ? "Bluetooth · " + connected + " connected"

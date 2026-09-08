@@ -270,7 +270,7 @@ PanelWindow {
                 Text {
                     visible: root.adapter !== null
                           && root.adapter.enabled
-                          && root.adapter.devices.count === 0
+                          && root.adapter.devices.values.length === 0
                     text: (root.adapter !== null && root.adapter.scanning)
                           ? "Scanning for devices…" : "No known devices"
                     color: Colors.textDim
