@@ -60,7 +60,7 @@ abbr jctl 'journalctl -p 3 -xb'
 abbr rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
 
 # Custom aliases
-abbr backup_all 'sudo bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/backup_all.sh'
+abbr bkp 'sudo bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/backup_all.sh'
 abbr source_fish 'source $HOME/Documents/configs_and_dotfiles/fish/.config/fish/config.fish'
 abbr save_fish_config 'cp ~/.config/fish/config.fish $conf/fish/.config/fish/config.fish && cp ~/.config/fish/conf.d/aliases.fish $conf/fish/.config/fish/conf.d/aliases.fish'
 abbr print_file 'lp -d EPSON_L3210_Series'
