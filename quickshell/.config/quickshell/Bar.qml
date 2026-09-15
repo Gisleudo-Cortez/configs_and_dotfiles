@@ -22,6 +22,7 @@ PanelWindow {
         // Pulse is event-driven: breathes only while media plays (WidgetMedia
         // pattern). No infinite timer — an idle desktop costs zero frames.
         Rectangle {
+            id: traceRect
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 1
 
@@ -38,11 +39,18 @@ PanelWindow {
                 return false
             }
 
-            NumberAnimation on _pulse {
+            // Standalone animation, imperative control — NOT 'Animation on _pulse'.
+            // QML auto-starts 'on' animations and the imperative start destroys
+            // the declarative running: binding, so the gate never engages.
+            NumberAnimation {
+                target: traceRect
+                property: "_pulse"
                 from: 0.6; to: 0.85
                 duration: 6000
-                running: parent._mediaActive
+                loops: Animation.Infinite
                 easing.type: Easing.InOutSine
+
+                running: traceRect._mediaActive
             }
 
             gradient: Gradient {
