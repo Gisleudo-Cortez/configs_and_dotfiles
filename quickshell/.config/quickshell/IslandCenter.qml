@@ -30,15 +30,6 @@ Island {
     property string _hh: ""
     property string _mm: ""
     property string _ss: ""
-    property real _colonBlink: 1.0
-
-    // Colon blink — slow sine-wave fade
-    Timer {
-        interval: 800
-        running: true
-        repeat: true
-        onTriggered: root._colonBlink = (root._colonBlink > 0.5) ? 0.4 : 1.0
-    }
 
     function _tick() {
         const d = new Date()
@@ -69,9 +60,6 @@ Island {
             color: Colors.cyan
             font.family: "DSEG7 Classic Bold"
             font.pixelSize: 18
-            opacity: root._colonBlink
-
-            Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.InOutSine } }
         }
         Text {
             text: root._mm
@@ -84,9 +72,6 @@ Island {
             color: Colors.cyan
             font.family: "DSEG7 Classic Bold"
             font.pixelSize: 18
-            opacity: root._colonBlink
-
-            Behavior on opacity { NumberAnimation { duration: 600; easing.type: Easing.InOutSine } }
         }
         Text {
             text: root._ss
