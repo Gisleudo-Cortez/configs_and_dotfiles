@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
+import Quickshell.Services.Mpris
 
 PanelWindow {
     id: root
@@ -18,7 +19,8 @@ PanelWindow {
         anchors.fill: parent
 
         // Miku signal trace — breathing teal line, dim edges, bright center
-        // Slow 6-second pulse. Carries current, not just painted on.
+        // Pulse is event-driven: breathes only while media plays (WidgetMedia
+        // pattern). No infinite timer — an idle desktop costs zero frames.
         Rectangle {
             anchors { top: parent.top; left: parent.left; right: parent.right }
             height: 1
@@ -26,10 +28,20 @@ PanelWindow {
             property real _pulse: 0.75
             opacity: _pulse
 
+            // Any active player breathing = bright line; paused/none = dim rest
+            readonly property bool _mediaActive: {
+                if (!Mpris.players || Mpris.players.count === 0) return false
+                const players = Mpris.players.values
+                for (let i = 0; i < players.length; i++) {
+                    if (players[i].isPlaying) return true
+                }
+                return false
+            }
+
             NumberAnimation on _pulse {
                 from: 0.6; to: 0.85
                 duration: 6000
-                loops: Animation.Infinite
+                running: parent._mediaActive
                 easing.type: Easing.InOutSine
             }
 
