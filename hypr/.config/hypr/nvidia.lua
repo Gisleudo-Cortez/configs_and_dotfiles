@@ -31,12 +31,15 @@ hl.env("AQ_FORCE_LINEAR_BLIT", "0")
 hl.env("AQ_MGPU_NO_EXPLICIT", "1")
 
 -- Hardware cursor configuration
--- If you want to try hardware cursors, set no_hardware_cursors = 0 (or 2 for auto)
--- and also enable allow_dumb_copy = true, which may cause small to major hitches
--- whenever the cursor shape changes.
 -- Values: 0 = hw cursors, 1 = no hw cursors, 2 = auto
+-- Was 1 (software) as an anti-hitch measure; software cursor forces the
+-- compositor to re-render the pointer every mouse move. 2 = auto lets
+-- hardware cursors engage when the driver supports them — measured
+-- Hyprland ~10-13% of one core at idle with the animation loops gone;
+-- this trims the per-move composite cost on top. If shape-change
+-- hitches return, revert to 1.
 hl.config({
     cursor = {
-        no_hardware_cursors = 1, -- Set to 1 to avoid hitches (INT, not BOOL)
+        no_hardware_cursors = 2, -- auto: hw cursors where driver allows
     }
 })
