@@ -31,6 +31,7 @@ STOW_PACKAGES_TO_DEPLOY=(
     "codex"
     "email-tools"
     "browser-tools"
+    "mimeapps"
     "ronema"
 )
 
