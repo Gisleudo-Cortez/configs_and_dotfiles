@@ -40,12 +40,10 @@ hl.on("hyprland.start", function()
   )
 end)
 
--- Quickshell blur layer rule
-hl.layer_rule({
-  name = "quickshell-blur",
-  match = { namespace = "^quickshell:" },
-  blur = true,
-})
+-- Quickshell bar: no blur layer rule.
+-- A blur=true pass on the bar was a per-frame NVIDIA cost while the bar
+-- was animating; the bar renders clean at full opacity without it and the
+-- compositor skips the blur pass entirely on an idle desktop.
 
 -------------------------------
 ---- ENVIRONMENT VARIABLES ----
