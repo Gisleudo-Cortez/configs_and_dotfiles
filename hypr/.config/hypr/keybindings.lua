@@ -43,6 +43,19 @@ hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("killall hyprsunset 2>/dev/nu
 hl.bind("Print", hl.dsp.exec_cmd(
     'grimblast copy area && notify-send -u low -t 1500 "Screen Shoot" "Copied to clipboard"'))
 
+-- Laptop lid switch: disable internal panel when closed, re-enable on open.
+-- Lua-era switch keys are INFIX (switch:on:<name>), not .conf suffix form
+-- (verified against Hyprland 0.56.2 source, KeybindManager.cpp:536-546).
+-- Polarity: lid CLOSE fires :on, lid OPEN fires :off (libinput switch state).
+-- Re-enable carries the FULL spec (idempotent — guards against auto-placement).
+hl.bind("switch:on:Lid Switch", function()
+    hl.monitor({ output = "eDP-1", disabled = true })
+end, { locked = true })
+
+hl.bind("switch:off:Lid Switch", function()
+    hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "0x0", scale = 1.6, disabled = false })
+end, { locked = true })
+
 -- Force hyprctl reload
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd('hyprctl reload && notify-send -t 1500 "Reloaded" "hyprctl"'))
 

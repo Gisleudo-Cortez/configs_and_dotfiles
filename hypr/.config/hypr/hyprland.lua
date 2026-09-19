@@ -25,6 +25,19 @@ local browser = "zen-browser"
 
 -- See https://wiki.hypr.land/0.56.0/Configuring/Basics/Autostart/
 hl.on("hyprland.start", function()
+  -- Lid-state check at compositor start: if the lid is ALREADY closed (cold
+  -- boot or restart with lid down), no switch transition will fire, so the
+  -- lid binds never trigger. Disable the internal panel explicitly here.
+  -- Switch binds only fire on state TRANSITIONS (aquamarine emits toggle
+  -- events on change only).
+  local f = io.open("/proc/acpi/button/lid/LID1/state")
+  if f then
+    local state = f:read("*a")
+    f:close()
+    if state:find("closed") then
+      hl.monitor({ output = "eDP-1", disabled = true })
+    end
+  end
   hl.exec_cmd(terminal)
   hl.exec_cmd("quickshell")
   hl.exec_cmd("mullvad-daemon")
