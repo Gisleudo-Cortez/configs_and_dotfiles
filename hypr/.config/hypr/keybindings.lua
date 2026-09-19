@@ -85,7 +85,14 @@ end, { locked = true })
 
 hl.bind("switch:off:Lid Switch", function()
     hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "0x0", scale = 1.6, disabled = false })
-    lidHealLayers()
+    -- Defer the heal: on lid-open the surviving monitor's auto-side re-seat
+    -- is still pending when the bind body runs. Reading m.x in this tick
+    -- captures the stale lid-closed position and the 1px wiggle lands inside
+    -- eDP-1's zone -> transient overlap warning (i18n Engine.cpp:246).
+    -- Heal 250ms later, when the re-seat has settled: fresh read, and the
+    -- wiggle can never overlap. Close path needs no delay — eDP-1 is out of
+    -- the layout when its wiggle fires, so there is nothing to overlap.
+    hl.timer(function() lidHealLayers() end, { timeout = 250, type = "oneshot" })
 end, { locked = true })
 
 -- Force hyprctl reload
