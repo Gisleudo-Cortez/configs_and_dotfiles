@@ -48,12 +48,44 @@ hl.bind("Print", hl.dsp.exec_cmd(
 -- (verified against Hyprland 0.56.2 source, KeybindManager.cpp:536-546).
 -- Polarity: lid CLOSE fires :on, lid OPEN fires :off (libinput switch state).
 -- Re-enable carries the FULL spec (idempotent — guards against auto-placement).
+
+-- Layer-heal: Hyprland 0.56.x does NOT reposition layer-shell surfaces
+-- (quickshell bar, hyprpaper) when a monitor is disabled programmatically —
+-- upstream discussion #15760, unfixed as of 0.56.2. The surviving monitor
+-- re-seats to the origin but the bar keeps stale coordinates, rendering
+-- half off-screen. A 1px position wiggle forces real moves, which layers
+-- DO follow, re-anchoring them. The return move re-asserts the configured
+-- auto SIDE (not a fixed coordinate): a dynamic auto-side rule tracks the
+-- layout on every future transition, exactly like the static config rule.
+local lidSides = {
+    ["LG Electronics LG SMART WQHD 0x01010101"] = "auto-right", -- home
+    ["LG Electronics LG ULTRAWIDE 0x0005EAFC"]  = "auto-left",  -- work
+    ["LG Electronics 25UM58G 0x01010101"]       = "auto-left",  -- workshop
+}
+
+local function lidHealLayers()
+    for _, m in ipairs(hl.get_monitors()) do
+        if m.name ~= "eDP-1" and m.name ~= "FALLBACK" then
+            local side = lidSides[tostring(m.description)]
+            local x, y = m.x, m.y
+            -- wiggle out 1px now (real move), return via timer (real move).
+            -- Same-tick moves coalesce; the timer guarantees both render.
+            hl.monitor({ output = m.name, position = (x + 1) .. "x" .. y })
+            hl.timer(function()
+                hl.monitor({ output = m.name, position = side or (x .. "x" .. y) })
+            end, { timeout = 150, type = "oneshot" })
+        end
+    end
+end
+
 hl.bind("switch:on:Lid Switch", function()
     hl.monitor({ output = "eDP-1", disabled = true })
+    lidHealLayers()
 end, { locked = true })
 
 hl.bind("switch:off:Lid Switch", function()
     hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "0x0", scale = 1.6, disabled = false })
+    lidHealLayers()
 end, { locked = true })
 
 -- Force hyprctl reload
