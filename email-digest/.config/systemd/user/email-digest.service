@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily email digest — scan, classify, report, Telegram ping
+
+[Service]
+Type=oneshot
+ExecStart=/home/nero/.config/email-mcp/run-digest.sh
+Environment=HOME=/home/nero
+StandardOutput=append:/home/nero/.config/email-mcp/digest-cron.log
+StandardError=append:/home/nero/.config/email-mcp/digest-cron.log
