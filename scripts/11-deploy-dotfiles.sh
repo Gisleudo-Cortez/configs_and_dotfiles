@@ -33,6 +33,7 @@ STOW_PACKAGES_TO_DEPLOY=(
     "browser-tools"
     "mimeapps"
     "ronema"
+    "ollama"
 )
 
 # --- Main Logic ---
