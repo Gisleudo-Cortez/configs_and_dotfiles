@@ -34,6 +34,8 @@ STOW_PACKAGES_TO_DEPLOY=(
     "mimeapps"
     "ronema"
     "ollama"
+    "mcp-http"
+    "email-digest"
 )
 
 # --- Main Logic ---

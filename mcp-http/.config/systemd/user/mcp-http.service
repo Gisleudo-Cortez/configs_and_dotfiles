@@ -1,0 +1,11 @@
+[Unit]
+Description=MCP servers (streamable-HTTP mode for Open WebUI)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/nero/Documents/Estudos/07-tools-and-infrastructure/lms_mcp/mcp_http_launcher.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
