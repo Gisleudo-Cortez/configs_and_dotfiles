@@ -119,6 +119,21 @@ verify_deployment() {
         failures=$((failures + 1))
     fi
 
+    if systemctl is-enabled --quiet mullvad-tailscale-reapply.timer 2>/dev/null; then
+        echo "  OK: mullvad-tailscale-reapply.timer enabled"
+    else
+        echo "  NOT ENABLED: mullvad-tailscale-reapply.timer"
+        failures=$((failures + 1))
+    fi
+
+    if systemctl is-active --quiet mullvad-tailscale-reapply.timer 2>/dev/null; then
+        # Timer state is 'waiting' when active — is-active maps it to 'active'.
+        echo "  OK: mullvad-tailscale-reapply.timer active (waiting)"
+    else
+        echo "  NOT ACTIVE: mullvad-tailscale-reapply.timer"
+        failures=$((failures + 1))
+    fi
+
     if ! command -v nft &>/dev/null; then
         echo "  ERROR: 'nft' command not found — cannot verify ruleset"
         failures=$((failures + 1))
@@ -184,7 +199,13 @@ deploy() {
     run_cmd systemctl enable "$SERVICE"
     run_cmd systemctl reload-or-restart "$SERVICE"
 
-    # 5. Verify the table actually loaded
+    # 5. Enable the safety-net timer. The main service's ExecStart only fires
+    #    at boot; Mullvad connect/disconnect churn wipes the rule table WITHOUT
+    #    restarting the unit — the 60s reapply timer is the only thing that
+    #    heals that. First deploy (2026-09-26) forgot to enable it.
+    run_cmd systemctl enable --now mullvad-tailscale-reapply.timer
+
+    # 6. Verify the table actually loaded
     if nft list table inet excludeTraffic >/dev/null 2>&1; then
         echo "  OK: table inet excludeTraffic loaded"
     else

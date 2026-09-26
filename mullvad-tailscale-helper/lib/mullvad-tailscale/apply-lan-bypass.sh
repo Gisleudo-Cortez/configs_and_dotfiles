@@ -66,19 +66,24 @@ if ip rule list | grep -Fq "${NEEDLE}"; then
     exit 0
 fi
 
-if ip rule add priority "${RULE_PRIO}" from "${LAN_PREFIX}" to "${LAN_PREFIX}" table "${TABLE}" 2>/tmp/lan-bypass.err; then
+# Error capture is IN-MEMORY (command substitution), never a scratch file.
+# This runs as root from a system unit: a fixed path under /tmp is a bug
+# class, not a convenience. fs.protected_regular=1 makes root's O_CREAT
+# fail on a sticky-dir /tmp when a user-owned file of that name exists —
+# the redirect dies BEFORE ip rule add even executes, and the stale file's
+# contents get echoed as if they were live output (deployed 2026-09-26:
+# exactly this failure, with a test-artifact file from the night before).
+if err=$(ip rule add priority "${RULE_PRIO}" from "${LAN_PREFIX}" to "${LAN_PREFIX}" table "${TABLE}" 2>&1); then
     log "added: priority ${RULE_PRIO} from ${LAN_PREFIX} to ${LAN_PREFIX} lookup ${TABLE}"
     exit 0
 fi
 
 # Race: another actor inserted an equivalent rule between check and add.
-if grep -qi "file exists" /tmp/lan-bypass.err 2>/dev/null; then
+if grep -qi "file exists" <<<"$err"; then
     log "equivalent rule appeared concurrently — accepting current state"
-    rm -f /tmp/lan-bypass.err
     exit 0
 fi
 
 log "ip rule add failed:"
-cat /tmp/lan-bypass.err >&2 || true
-rm -f /tmp/lan-bypass.err
+printf '%s\n' "$err" >&2
 exit 1

@@ -33,16 +33,19 @@ ExecStart=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
 # breaks the Tailscale path — lab-proven 2026-09-25). Priority 2500 sits
 # outside Tailscale's 5200–5500 rule range per the official KB.
 # Idempotent — the script checks for the rule and only adds it if missing.
-# Wrapped in '-' so a transient failure here doesn't take the unit to
-# failed state (the nft rules are the more critical half).
-ExecStart=-/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh
+# NO '-' prefix (deliberate, revised 2026-09-26). The first deploy shipped
+# with '-' while the helper had a /tmp error-capture bug: the unit stayed
+# green while the rule silently failed to install. A missing LAN-bypass
+# rule is a broken unit, not a transient warning — fail loudly so
+# `systemctl --failed` and the deploy's --verify both catch it.
+ExecStart=/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh
 
 # Verify after the script — exit non-zero on missing table.
 ExecStartPost=/usr/bin/nft list table inet excludeTraffic
 
 # Idempotent reload (used by `systemctl reload`).
 ExecReload=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
-ExecReload=-/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh
+ExecReload=/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh
 
 # '-' prefix so stop never fails on a manually-deleted table.
 ExecStop=-/usr/bin/nft delete table inet excludeTraffic
