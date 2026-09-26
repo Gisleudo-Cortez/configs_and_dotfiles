@@ -18,4 +18,8 @@ Documentation=https://mullvad.net/en/help/split-tunneling-with-linux-advanced
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
-ExecStart=-/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh
+# NO '-' prefix (consistent with the main exclusion unit, revised 2026-09-26):
+# a failed install must fail the unit so systemctl --failed catches it. The
+# timer retries in 60s anyway, so transient failures self-heal AND self-clear;
+# persistent ones stay visible.
+ExecStart=/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh

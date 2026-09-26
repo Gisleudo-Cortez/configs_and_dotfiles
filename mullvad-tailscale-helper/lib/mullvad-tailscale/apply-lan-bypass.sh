@@ -43,17 +43,24 @@ TABLE="${TABLE:-main}"
 
 log() { printf '[apply-lan-bypass] %s\n' "$*" >&2; }
 
+# Journal-quiet on happy paths. The safety-net timer runs this every 60s;
+# a "rule already present" line per minute is ~500k journal lines/year of
+# nothing. Under systemd there's no controlling TTY → silent no-ops. Manual
+# runs from a terminal still speak. Failures log unconditionally — a failed
+# install must always be loud.
+tty_log() { [[ -t 2 ]] && log "$*"; }
+
 # Preflight: skip entirely if tailscale0 isn't around. Nothing to bypass
 # yet, nothing harmful either — bail quietly.
 if ! ip -o link show tailscale0 &>/dev/null; then
-    log "tailscale0 absent — nothing to bypass yet, exiting clean"
+    tty_log "tailscale0 absent — nothing to bypass yet, exiting clean"
     exit 0
 fi
 
 # Preflight: if no rule references table 52, Tailscale hasn't installed its
 # routing yet. Our rule is still safe, but skip to keep the journal quiet.
 if ! ip rule list | grep -qE 'lookup[[:space:]]+52\b'; then
-    log "no rule references table 52 — Tailscale rules not yet installed, skipping"
+    tty_log "no rule references table 52 — Tailscale rules not yet installed, skipping"
     exit 0
 fi
 
@@ -62,7 +69,7 @@ fi
 # so a -F substring match is robust (no regex-escaping pitfalls).
 NEEDLE="from ${LAN_PREFIX} to ${LAN_PREFIX} lookup ${TABLE}"
 if ip rule list | grep -Fq "${NEEDLE}"; then
-    log "rule already present (from+to ${LAN_PREFIX} lookup ${TABLE})"
+    tty_log "rule already present (from+to ${LAN_PREFIX} lookup ${TABLE})"
     exit 0
 fi
 
