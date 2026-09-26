@@ -8,7 +8,7 @@ Documentation=https://tailscale.com/kb/1019/subnets/
 # and the ip rule are inert without network, but having them in place before
 # tailscaled / mullvad-daemon start means the very first packet gets the right
 # treatment — no first-second-of-boot black hole.
-# tailscaled: must run AFTER it so the kernel has table 52 loaded. If our 5200
+# tailscaled: must run AFTER it so the kernel has table 52 loaded. If our 2500
 # rule fires before Tailscale populates table 52, the away-path is briefly
 # broken; harmless in practice (lookup main fails → fallthrough → 5270 →
 # table 52 → ok).
@@ -27,7 +27,11 @@ RemainAfterExit=yes
 # reloads and restarts are safe. Inert when Mullvad is disconnected.
 ExecStart=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
 
-# Step 2: local-LAN bypass ip rule (priority 5200, lookup main).
+# Step 2: local-LAN bypass ip rule (priority 2500, from+to 192.168.2.0/24,
+# lookup main). From-scoped so it self-disables away from the workshop LAN
+# (an unscoped "to <prefix> lookup main" matches the DEFAULT route away and
+# breaks the Tailscale path — lab-proven 2026-09-25). Priority 2500 sits
+# outside Tailscale's 5200–5500 rule range per the official KB.
 # Idempotent — the script checks for the rule and only adds it if missing.
 # Wrapped in '-' so a transient failure here doesn't take the unit to
 # failed state (the nft rules are the more critical half).

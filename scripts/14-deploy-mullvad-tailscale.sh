@@ -129,10 +129,10 @@ verify_deployment() {
         failures=$((failures + 1))
     fi
 
-    if ip rule list 2>/dev/null | grep -qE '^\s*5200:.*\bto\s+192\.168\.2\.0/24\b.*\blookup\s+main\b'; then
-        echo "  OK: ip rule 5200 (LAN bypass) installed"
+    if ip rule list 2>/dev/null | grep -Fq 'from 192.168.2.0/24 to 192.168.2.0/24 lookup main'; then
+        echo "  OK: ip rule 2500 (from-scoped LAN bypass) installed"
     else
-        echo "  MISSING: ip rule 5200 (LAN bypass) — service start probably failed"
+        echo "  MISSING: ip rule 2500 (from-scoped LAN bypass) — service start probably failed"
         failures=$((failures + 1))
     fi
 
@@ -194,7 +194,7 @@ deploy() {
 
     echo "[14-deploy-mullvad-tailscale] Deployment complete."
     echo "  Verify: sudo nft list table inet excludeTraffic"
-    echo "  Verify: sudo ip rule list | grep 5200"
+    echo "  Verify: sudo ip rule list | grep 'from 192.168.2.0/24 to 192.168.2.0/24'"
     echo "  Test:   ping -c 3 <tailscale-peer-ip>"
     echo "  Rollback: sudo systemctl disable --now $SERVICE; sudo nft delete table inet excludeTraffic 2>/dev/null || true"
 }
