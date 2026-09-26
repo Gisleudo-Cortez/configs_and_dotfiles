@@ -1,0 +1,21 @@
+[Unit]
+Description=Safety-net re-apply: nft exclusion table + priority-5200 LAN-bypass ip rule
+Documentation=https://mullvad.net/en/help/split-tunneling-with-linux-advanced
+
+# This is a *belt-and-suspenders* unit. The main loader is
+# mullvad-tailscale-exclusion.service (ExecStart at boot). This timer exists
+# to recover from two specific events that bypass ExecStart:
+#   1. Mullvad connect/disconnect: the daemon rewrites the RPDB table
+#      without restarting itself, so the mullvad-daemon.service.d drop-in
+#      ExecStartPost= does NOT fire. We re-apply the 5200 rule periodically.
+#   2. tailscaled deleting rules: tailscaled's restoration callback re-creates
+#      its own 5210/5230/5250/5270 set. It does NOT touch the nft table.
+#      No timer fix needed there — the nft table is not affected.
+# The apply script and nft -f are idempotent; running them every minute is
+# free when state is already correct (grep exits 1, nft re-loads the same
+# table).
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
+ExecStart=-/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh

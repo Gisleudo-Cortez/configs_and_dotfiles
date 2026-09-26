@@ -1,0 +1,16 @@
+[Unit]
+Description=Periodically re-apply nft + ip rule (recover from Mullvad churn)
+Documentation=https://mullvad.net/en/help/split-tunneling-with-linux-advanced
+
+[Timer]
+# 60s cadence is the sweet spot: long enough not to spam the journal,
+# short enough that a Mullvad connect/disconnect cycle leaves at most one
+# missed re-apply. OnUnitActiveSec re-fires after the LAST run completes,
+# not on a fixed wall-clock — keeps the cadence stable if a run takes >0s.
+OnBootSec=30
+OnUnitActiveSec=60
+AccuracySec=5
+# Persistent=false: we don't want a backlog of missed runs after sleep.
+
+[Install]
+WantedBy=timers.target

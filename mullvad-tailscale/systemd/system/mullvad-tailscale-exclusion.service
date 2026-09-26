@@ -1,21 +1,46 @@
 [Unit]
-Description=Load Mullvad split-tunnel exclusion rules for Tailscale
+Description=Load Mullvad split-tunnel exclusion rules + local-LAN bypass ip rule
 Documentation=https://mullvad.net/en/help/split-tunneling-with-linux-advanced
-# Load before the network is fully up so Tailscale traffic is excluded
-# from the Mullvad tunnel from the first packet.
-Before=network-pre.target
-Wants=network-pre.target
-# If a generic nftables.service is ever enabled, run after it so its ruleset
-# flush cannot erase this table. Harmless when masked/absent.
-After=nftables.service
+Documentation=https://tailscale.com/kb/1019/subnets/
+
+# --- Ordering rationale ---
+# network-pre.target: exist before any interface comes up. Both the nft marks
+# and the ip rule are inert without network, but having them in place before
+# tailscaled / mullvad-daemon start means the very first packet gets the right
+# treatment — no first-second-of-boot black hole.
+# tailscaled: must run AFTER it so the kernel has table 52 loaded. If our 5200
+# rule fires before Tailscale populates table 52, the away-path is briefly
+# broken; harmless in practice (lookup main fails → fallthrough → 5270 →
+# table 52 → ok).
+# mullvad-daemon: After it so our nft marks already exist when Mullvad
+# installs its nftables chains. If Mullvad loads first, our -100 priority
+# table would still insert cleanly above Mullvad's priority-0 chains, but
+# the ordering makes the journal log linear (one event, one source).
+After=network-pre.target tailscaled.service mullvad-daemon.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
+
+# Step 1: nftables exclusion marks for 100.64.0.0/10 (Tailscale CGNAT).
+# The rules file is itself idempotent (`destroy table …` at the top), so
+# reloads and restarts are safe. Inert when Mullvad is disconnected.
 ExecStart=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
-# Safe to re-run: the rules file is idempotent (destroy + recreate)
+
+# Step 2: local-LAN bypass ip rule (priority 5200, lookup main).
+# Idempotent — the script checks for the rule and only adds it if missing.
+# Wrapped in '-' so a transient failure here doesn't take the unit to
+# failed state (the nft rules are the more critical half).
+ExecStart=-/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh
+
+# Verify after the script — exit non-zero on missing table.
+ExecStartPost=/usr/bin/nft list table inet excludeTraffic
+
+# Idempotent reload (used by `systemctl reload`).
 ExecReload=/usr/bin/nft -f /etc/nftables/tailscale-exclude.rules
-# '-' prefix: tolerate a manually-deleted table so stop never fails
+ExecReload=-/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh
+
+# '-' prefix so stop never fails on a manually-deleted table.
 ExecStop=-/usr/bin/nft delete table inet excludeTraffic
 
 [Install]
