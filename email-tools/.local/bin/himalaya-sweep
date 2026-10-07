@@ -100,7 +100,10 @@ fi
 
 DEFAULT_ACCOUNTS=(
     administracao-gegfreiosaar
+    compras-gegfreiosaar
+    financeiro-gegfreiosaar
     gcdemedeiros-hotmail
+    gcmf-invest
     gcmf-uni
     gcortez-uol
     gisleudo-cmf
