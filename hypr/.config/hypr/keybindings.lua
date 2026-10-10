@@ -57,10 +57,13 @@ hl.bind("Print", hl.dsp.exec_cmd(
 -- DO follow, re-anchoring them. The return move re-asserts the configured
 -- auto SIDE (not a fixed coordinate): a dynamic auto-side rule tracks the
 -- layout on every future transition, exactly like the static config rule.
+-- Home heads (G5, home LG) are absent on purpose: they run a
+-- fixed-coordinate layout, so the x,y fallback below re-seats them
+-- exactly where nwg-displays placed them. (The old home entry used
+-- serial 0x01010101, which never matched the real unit 0x9195A922.)
 local lidSides = {
-    ["LG Electronics LG SMART WQHD 0x01010101"] = "auto-right", -- home
     ["LG Electronics LG ULTRAWIDE 0x0005EAFC"]  = "auto-left",  -- work
-    ["LG Electronics 25UM58G 0x01010101"]       = "auto-left",  -- workshop
+    ["LG Electronics 25UM58G 0x01010101"]       = "auto-left", -- workshop
 }
 
 local function lidHealLayers()
@@ -84,7 +87,7 @@ hl.bind("switch:on:Lid Switch", function()
 end, { locked = true })
 
 hl.bind("switch:off:Lid Switch", function()
-    hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "0x0", scale = 1.6, disabled = false })
+    hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "3840x0", scale = 1.6, disabled = false })
     -- Defer the heal: on lid-open the surviving monitor's auto-side re-seat
     -- is still pending when the bind body runs. Reading m.x in this tick
     -- captures the stale lid-closed position and the 1px wiggle lands inside
