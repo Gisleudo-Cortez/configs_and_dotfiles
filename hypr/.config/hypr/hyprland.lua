@@ -56,6 +56,7 @@ hl.on("hyprland.start", function()
   hl.exec_cmd(
     "google-chrome-stable --remote-debugging-port=9222 --user-data-dir=/home/nero/.config/google-chrome-debug --no-first-run --no-default-browser-check --ozone-platform=x11 --disable-vulkan --incognito --disable-extensions --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding"
   )
+  hl.exec_cmd("openrgb -l; openrgb -p Brigth_Scar ")
 end)
 
 -- Quickshell bar: no blur layer rule.
