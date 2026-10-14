@@ -145,7 +145,7 @@ PanelWindow {
 
                 // ── Sink list ─────────────────────────────────────────────
                 Text {
-                    visible: Pipewire.nodes.count === 0
+                    visible: Pipewire.nodes.values.length === 0
                     text: "No audio outputs found"
                     color: Colors.textDim
                     font.family: "JetBrainsMono Nerd Font"
@@ -162,6 +162,15 @@ PanelWindow {
                         visible: modelData.isSink && !modelData.isStream && modelData.audio !== null
                         width: box.width
                         spacing: 0
+
+                        // HDMI/DP sinks append "[Monitor Name]" (ELD) to the
+                        // description — show the monitor name instead of the
+                        // long card string (elide would cut the suffix off).
+                        readonly property string displayName: {
+                            const d = modelData.description || modelData.name || ""
+                            const eld = d.match(/\[([^\]]+)\]\s*$/)
+                            return eld ? eld[1] : d
+                        }
 
                         Rectangle {
                             visible: parent.visible
@@ -191,7 +200,7 @@ PanelWindow {
 
                                 Text {
                                     id: sinkLabel
-                                    text: modelData.description || modelData.name
+                                    text: displayName
                                     color: modelData === AudioService.sink ? Colors.text : Colors.textDim
                                     font.family: "JetBrainsMono Nerd Font"
                                     font.pixelSize: Geometry.fontSizeSm

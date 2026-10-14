@@ -16,6 +16,13 @@ QtObject {
 
     readonly property string sinkShortName: {
         const n = sinkName
+        // HDMI/DP sinks append the ELD monitor name in brackets, e.g.
+        // "AD104 High Definition Audio Controller Digital Stereo (HDMI 2) [LG SMART WQHD]"
+        // — prefer the monitor name so the bar reads "LG SMART WQHD".
+        const eld = n.match(/\[([^\]]+)\]\s*$/)
+        if (eld) {
+            return eld[1].length > 18 ? eld[1].substring(0, 16) + "…" : eld[1]
+        }
         const c = n.replace(/ \(.*\)$/, "")
                    .replace(/ Analog Stereo$/, "")
                    .replace(/ Digital Stereo$/, "")
