@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
 # 14-deploy-mullvad-tailscale.sh
 #
-# Deploys the Mullvad split-tunnel exclusion for Tailscale:
-#   - /etc/nftables/tailscale-exclude.rules  (the nftables rules)
-#   - /etc/systemd/system/mullvad-tailscale-exclusion.service  (boot loader)
+# Deploys the Mullvad split-tunnel exclusion for Tailscale AND the local-LAN
+# bypass ip rule:
+#   - /etc/nftables/tailscale-exclude.rules                              (nft)
+#   - /etc/systemd/system/mullvad-tailscale-exclusion.service            (boot loader)
+#   - /usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh               (ip rule)
 #
-# The package lives in the dotfiles repo at mullvad-tailscale/ and targets
-# /etc (not $HOME), so it needs its own root-target stow step — it is NOT
-# part of 11-deploy-dotfiles.sh.
+# Two stow packages: `mullvad-tailscale` (→ /etc) and `mullvad-tailscale-helper`
+# (→ /usr/local). GNU Stow can only target one root per package invocation,
+# so we run stow twice. Both packages live in the dotfiles repo.
 #
 # Usage:
 #   sudo ./14-deploy-mullvad-tailscale.sh            # deploy + enable + reload
 #   sudo ./14-deploy-mullvad-tailscale.sh --dry-run  # simulate stow + validate rules
 #   sudo ./14-deploy-mullvad-tailscale.sh --verify   # check deployed state (exit 1 on failure)
 #
-# Requires: stow, nft, systemd. Must run as root (targets /etc).
+# Requires: stow, nft, systemd. Must run as root (targets /etc and /usr/local).
 
 set -euo pipefail
 
@@ -37,9 +39,11 @@ done
 
 need_root
 
-STOW_PACKAGE="mullvad-tailscale"
+STOW_PACKAGE_ETC="mullvad-tailscale"
+STOW_PACKAGE_USR="mullvad-tailscale-helper"
 RULES_FILE="/etc/nftables/tailscale-exclude.rules"
 UNIT_FILE="/etc/systemd/system/mullvad-tailscale-exclusion.service"
+HELPER_FILE="/usr/local/lib/mullvad-tailscale/apply-lan-bypass.sh"
 SERVICE="mullvad-tailscale-exclusion.service"
 
 main() {
@@ -94,6 +98,13 @@ verify_deployment() {
         failures=$((failures + 1))
     fi
 
+    if [[ -f "$HELPER_FILE" ]]; then
+        echo "  OK: $HELPER_FILE"
+    else
+        echo "  MISSING: $HELPER_FILE"
+        failures=$((failures + 1))
+    fi
+
     if systemctl is-enabled --quiet "$SERVICE" 2>/dev/null; then
         echo "  OK: $SERVICE enabled"
     else
@@ -108,6 +119,21 @@ verify_deployment() {
         failures=$((failures + 1))
     fi
 
+    if systemctl is-enabled --quiet mullvad-tailscale-reapply.timer 2>/dev/null; then
+        echo "  OK: mullvad-tailscale-reapply.timer enabled"
+    else
+        echo "  NOT ENABLED: mullvad-tailscale-reapply.timer"
+        failures=$((failures + 1))
+    fi
+
+    if systemctl is-active --quiet mullvad-tailscale-reapply.timer 2>/dev/null; then
+        # Timer state is 'waiting' when active — is-active maps it to 'active'.
+        echo "  OK: mullvad-tailscale-reapply.timer active (waiting)"
+    else
+        echo "  NOT ACTIVE: mullvad-tailscale-reapply.timer"
+        failures=$((failures + 1))
+    fi
+
     if ! command -v nft &>/dev/null; then
         echo "  ERROR: 'nft' command not found — cannot verify ruleset"
         failures=$((failures + 1))
@@ -115,6 +141,13 @@ verify_deployment() {
         echo "  OK: nftables table inet excludeTraffic loaded"
     else
         echo "  MISSING: nftables table inet excludeTraffic"
+        failures=$((failures + 1))
+    fi
+
+    if ip rule list 2>/dev/null | grep -Fq 'from 192.168.2.0/24 to 192.168.2.0/24 lookup main'; then
+        echo "  OK: ip rule 2500 (from-scoped LAN bypass) installed"
+    else
+        echo "  MISSING: ip rule 2500 (from-scoped LAN bypass) — service start probably failed"
         failures=$((failures + 1))
     fi
 
@@ -129,12 +162,17 @@ verify_deployment() {
 dry_run_deploy() {
     echo "[14-deploy-mullvad-tailscale] Dry run — simulating deployment from $dotfiles_root"
 
-    # Real stow simulation (read-only)
-    stow --simulate --verbose --target=/etc "$STOW_PACKAGE"
+    # Real stow simulation (read-only) — both packages, both roots
+    stow --simulate --verbose --target=/etc "$STOW_PACKAGE_ETC"
+    stow --simulate --verbose --target=/usr/local "$STOW_PACKAGE_USR"
 
     # Validate the source rules file without loading
     nft -c -f "mullvad-tailscale/nftables/tailscale-exclude.rules"
     echo "  OK: rules file syntax valid"
+
+    # Validate the helper script syntax (bash -n is read-only)
+    bash -n "mullvad-tailscale-helper/lib/mullvad-tailscale/apply-lan-bypass.sh"
+    echo "  OK: helper script syntax valid"
 
     echo "[14-deploy-mullvad-tailscale] Dry run complete — no changes made."
 }
@@ -145,9 +183,12 @@ deploy() {
     # 1. Validate the source rules file BEFORE touching /etc
     nft -c -f "mullvad-tailscale/nftables/tailscale-exclude.rules"
     echo "  OK: source rules file syntax valid"
+    bash -n "mullvad-tailscale-helper/lib/mullvad-tailscale/apply-lan-bypass.sh"
+    echo "  OK: helper script syntax valid"
 
-    # 2. Stow the package with target /etc (root-target stow)
-    run_cmd stow -Svt /etc "$STOW_PACKAGE"
+    # 2. Stow both packages (two roots: /etc and /usr/local)
+    run_cmd stow -Svt /etc "$STOW_PACKAGE_ETC"
+    run_cmd stow -Svt /usr/local "$STOW_PACKAGE_USR"
 
     # 3. Pre-flight: validate the deployed rules file without loading
     run_cmd nft -c -f "$RULES_FILE"
@@ -158,7 +199,13 @@ deploy() {
     run_cmd systemctl enable "$SERVICE"
     run_cmd systemctl reload-or-restart "$SERVICE"
 
-    # 5. Verify the table actually loaded
+    # 5. Enable the safety-net timer. The main service's ExecStart only fires
+    #    at boot; Mullvad connect/disconnect churn wipes the rule table WITHOUT
+    #    restarting the unit — the 60s reapply timer is the only thing that
+    #    heals that. First deploy (2026-09-26) forgot to enable it.
+    run_cmd systemctl enable --now mullvad-tailscale-reapply.timer
+
+    # 6. Verify the table actually loaded
     if nft list table inet excludeTraffic >/dev/null 2>&1; then
         echo "  OK: table inet excludeTraffic loaded"
     else
@@ -168,6 +215,7 @@ deploy() {
 
     echo "[14-deploy-mullvad-tailscale] Deployment complete."
     echo "  Verify: sudo nft list table inet excludeTraffic"
+    echo "  Verify: sudo ip rule list | grep 'from 192.168.2.0/24 to 192.168.2.0/24'"
     echo "  Test:   ping -c 3 <tailscale-peer-ip>"
     echo "  Rollback: sudo systemctl disable --now $SERVICE; sudo nft delete table inet excludeTraffic 2>/dev/null || true"
 }

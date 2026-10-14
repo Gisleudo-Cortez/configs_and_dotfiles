@@ -43,6 +43,74 @@ hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("killall hyprsunset 2>/dev/nu
 hl.bind("Print", hl.dsp.exec_cmd(
     'grimblast copy area && notify-send -u low -t 1500 "Screen Shoot" "Copied to clipboard"'))
 
+-- Laptop lid switch: disable internal panel when closed, re-enable on open.
+-- Lua-era switch keys are INFIX (switch:on:<name>), not .conf suffix form
+-- (verified against Hyprland 0.56.2 source, KeybindManager.cpp:536-546).
+-- Polarity: lid CLOSE fires :on, lid OPEN fires :off (libinput switch state).
+-- Re-enable carries the FULL spec (idempotent — guards against auto-placement).
+
+-- Panel seat is LOCATION-DEPENDENT under the nwg-displays profile workflow
+-- (0x0 at away locations so auto-left-docked externals sit flush against
+-- the panel's left edge; 3840x0 at home). The open path restores the seat
+-- captured at close instead of a hardcoded coordinate. Same-tick reads in
+-- the close handler see the PRE-transition layout — exactly the settled
+-- seat to restore. Boot with lid already closed fires no switch transition,
+-- so hyprland.lua's start block calls capturePanelSeat() before disabling.
+panelSeat = "3840x0" -- global: hyprland.lua's start block reads it too
+function capturePanelSeat()
+    local m = hl.get_monitor("eDP-1")
+    if m then panelSeat = m.x .. "x" .. m.y end
+end
+
+-- Layer-heal: Hyprland 0.56.x does NOT reposition layer-shell surfaces
+-- (quickshell bar, hyprpaper) when a monitor is disabled programmatically —
+-- upstream discussion #15760, unfixed as of 0.56.2. The surviving monitor
+-- re-seats to the origin but the bar keeps stale coordinates, rendering
+-- half off-screen. A 1px position wiggle forces real moves, which layers
+-- DO follow, re-anchoring them. The return move re-asserts the configured
+-- auto SIDE (not a fixed coordinate): a dynamic auto-side rule tracks the
+-- layout on every future transition, exactly like the static config rule.
+-- Home heads (G5, home LG) are absent on purpose: they run a
+-- fixed-coordinate layout, so the x,y fallback below re-seats them
+-- exactly where nwg-displays placed them.
+local lidSides = {
+    ["LG Electronics LG ULTRAWIDE 0x0005EAFC"]  = "auto-left",  -- loja
+    ["LG Electronics 25UM58G 0x01010101"]       = "auto-left", -- workshop
+}
+
+local function lidHealLayers()
+    for _, m in ipairs(hl.get_monitors()) do
+        if m.name ~= "eDP-1" and m.name ~= "FALLBACK" then
+            local side = lidSides[tostring(m.description)]
+            local x, y = m.x, m.y
+            -- wiggle out 1px now (real move), return via timer (real move).
+            -- Same-tick moves coalesce; the timer guarantees both render.
+            hl.monitor({ output = m.name, position = (x + 1) .. "x" .. y })
+            hl.timer(function()
+                hl.monitor({ output = m.name, position = side or (x .. "x" .. y) })
+            end, { timeout = 150, type = "oneshot" })
+        end
+    end
+end
+
+hl.bind("switch:on:Lid Switch", function()
+    capturePanelSeat()
+    hl.monitor({ output = "eDP-1", disabled = true })
+    lidHealLayers()
+end, { locked = true })
+
+hl.bind("switch:off:Lid Switch", function()
+    hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = panelSeat, scale = 1.6, disabled = false })
+    -- Defer the heal: on lid-open the surviving monitor's auto-side re-seat
+    -- is still pending when the bind body runs. Reading m.x in this tick
+    -- captures the stale lid-closed position and the 1px wiggle lands inside
+    -- eDP-1's zone -> transient overlap warning (i18n Engine.cpp:246).
+    -- Heal 250ms later, when the re-seat has settled: fresh read, and the
+    -- wiggle can never overlap. Close path needs no delay — eDP-1 is out of
+    -- the layout when its wiggle fires, so there is nothing to overlap.
+    hl.timer(function() lidHealLayers() end, { timeout = 250, type = "oneshot" })
+end, { locked = true })
+
 -- Force hyprctl reload
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd('hyprctl reload && notify-send -t 1500 "Reloaded" "hyprctl"'))
 
