@@ -11,7 +11,8 @@ One profile per location. Apply the matching profile in nwg-displays after
 changing locations — an Apply auto-runs hyprctl reload and writes both
 monitors.conf and monitors.lua through the stow symlinks.
 
-- Loja.json — store: panel at 0x0, LG ULTRAWIDE docks auto-left at -2560x0
+- Loja.json — store, lid-closed on two externals: LG SMART WQHD 34" leftmost
+  at 0x0, LG ULTRAWIDE portrait at 3440x0; panel eDP-1 active:false
 - Casa.json — home: 3-head (panel 3840x0, G5 portrait 5440x0, LG 6880x710)
 
 The away-head rules (desc-matched, auto-left) live in the hypr package:
@@ -24,10 +25,11 @@ the panel at 0x0.
 | Head | Description string | Status |
 |------|--------------------|--------|
 | eDP-1 — built-in panel | BOE 0x0A99 | verified 2026-10-14 |
-| Store LG ULTRAWIDE (HDMI-A-1) | LG Electronics LG ULTRAWIDE 0x0005EAFC | verified 2026-10-14 |
+| Loja LG ULTRAWIDE (DP-3, portrait) | LG Electronics LG ULTRAWIDE 0x0005EAFC | verified 2026-10-14 |
+| Loja LG SMART WQHD 34" (DP-4) | LG Electronics LG SMART WQHD 0x01010101 | verified 2026-10-14 |
 | Home G5 (HDMI-A-1) | PLACEHOLDER in Casa.json | capture at home |
 | Home LG (DP-1) | PLACEHOLDER in Casa.json (serial hint 0x9195A922) | capture at home |
-| Workshop LG 25UM58G | placeholder serial 0x01010101 in monitors-locations.lua | capture at workshop |
+| Workshop LG 25UM58G | serial 0x01010101 is a real no-serial EDID value — verify this unit's exact string at the workshop | capture at workshop |
 
 ## Home-session checklist (completes the desc migration)
 
@@ -36,12 +38,13 @@ the panel at 0x0.
    serial hint from git history is 0x9195A922 — verify against live output,
    do not trust the hint.
 2. Replace the two placeholder descriptions in profiles/Casa.json.
-3. Flip use-desc to true in BOTH places that matter:
-   - this package's `config` file (drives the GUI Apply writer), and
-   - the "config" block embedded in EACH profile JSON (profile loads read
-     use-desc from the profile, not the global config).
-   Or simpler: flip the global `config`, then re-save both profiles from
-   the GUI so they embed the new value.
+3. use-desc status: the GLOBAL flip is done (2026-10-14, at the store) —
+   the GUI Apply writer now emits desc-prefixed entries, and Loja.json
+   embeds use-desc: true. Casa still embeds false ON PURPOSE: with its
+   G5/DP-1 placeholder descriptions, desc matching would leave those
+   heads silently inert, while connector-named writes still work at home.
+   After the step-2 true-up, re-save Casa from the GUI — the re-save
+   embeds use-desc: true and the real descriptions in one shot.
 4. Apply Casa; verify with `hyprctl monitors` + `hyprctl configerrors`.
 5. Re-save Loja too, so its embedded config block matches.
 6. Commit; active_profile.json will have appeared in this package after

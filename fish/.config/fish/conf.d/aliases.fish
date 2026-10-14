@@ -1,5 +1,3 @@
-## Useful aliases
-
 # Replace ls with eza
 alias ls 'eza -al --color=always --group-directories-first --icons=always' # preferred listing
 alias lsz 'eza -al --color=always --total-size --group-directories-first --icons=always' # include file size
@@ -49,26 +47,23 @@ abbr mirrora 'sudo reflector --latest 50 --number 20 --sort age --save /etc/pacm
 abbr mirrord 'sudo reflector --latest 50 --number 20 --sort delay --save /etc/pacman.d/mirrorlist'
 abbr mirrors 'sudo reflector --latest 50 --number 20 --sort score --save /etc/pacman.d/mirrorlist'
 
-# Help people new to Arch
-abbr tb 'nc termbin.com 9999'
-abbr helpme 'echo "To print basic information about a command use tldr <command>"'
-
 # Get the error messages from journalctl
 abbr jctl 'journalctl -p 3 -xb'
 
 # Recent installed packages
 abbr rip 'expac --timefmt="%Y-%m-%d %T" "%l\t%n %v" | sort | tail -200 | nl'
 
-# Custom aliases
+# misc
 abbr bkp 'sudo bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/mount_storage_backup.sh && bash $HOME/Documents/Estudos/07-tools-and-infrastructure/Bash_Scripts/backup_all.sh'
 abbr source_fish 'source $HOME/Documents/configs_and_dotfiles/fish/.config/fish/config.fish'
 abbr save_fish_config 'cp ~/.config/fish/config.fish $conf/fish/.config/fish/config.fish && cp ~/.config/fish/conf.d/aliases.fish $conf/fish/.config/fish/conf.d/aliases.fish'
-abbr print_file 'lp -d EPSON_L3210_Series'
+abbr print_file 'lp -d L3250 -o media=EPREMGLOSSY -o print-quality=5 -o print-color-mode=color -o PageSize=A4 -o scaling=100'
 abbr sshup 'eval (ssh-agent -c); ssh-add ~/.ssh/id_ed25519'
 abbr rs 'rsync -avP'
 abbr update 'sudo pacman -Syu; paru -Syu; flatpak update'
 abbr ya 'yazi .'
 abbr lsblk 'lsblk -o NAME,SIZE,MODEL,MOUNTPOINT'
+
 # Mullvad VPN region switching
 abbr vpn-br 'mullvad relay set location br for'
 abbr vpn-us 'mullvad relay set location us mia'

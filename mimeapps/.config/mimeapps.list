@@ -18,6 +18,8 @@ x-scheme-handler/news=userapp-Thunderbird-RK84R3.desktop
 x-scheme-handler/snews=userapp-Thunderbird-RK84R3.desktop
 x-scheme-handler/nntp=userapp-Thunderbird-RK84R3.desktop
 x-scheme-handler/net.thunderbird=userapp-Thunderbird-K9Z6R3.desktop
+x-scheme-handler/lycheeslicer=lycheeslicer-url-handler.desktop
+x-scheme-handler/adskidmgr=adskidmgr-opener.desktop
 
 [Added Associations]
 x-scheme-handler/http=zen.desktop;

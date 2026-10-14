@@ -1,16 +1,37 @@
 {
   "displays": [
     {
-      "name": "HDMI-A-1",
+      "name": "DP-2",
       "description": "LG Electronics LG ULTRAWIDE 0x0005EAFC",
-      "x": -2560,
+      "x": 5410,
       "y": 0,
       "physical_width": 2560,
       "physical_height": 1080,
-      "transform": "normal",
+      "transform": "90",
       "scale": 1.0,
       "scale_filter": null,
       "refresh": 74.99,
+      "dpms": true,
+      "adaptive_sync": false,
+      "custom_mode": false,
+      "mirror": "",
+      "ten_bit": false,
+      "color_mode": "",
+      "sdr_brightness": 1.0,
+      "sdr_saturation": 1.0,
+      "active": true
+    },
+    {
+      "name": "DP-3",
+      "description": "LG Electronics LG SMART WQHD 0x01010101",
+      "x": 1970,
+      "y": 189,
+      "physical_width": 3440,
+      "physical_height": 1440,
+      "transform": "normal",
+      "scale": 1.0,
+      "scale_filter": null,
+      "refresh": 99.98,
       "dpms": true,
       "adaptive_sync": false,
       "custom_mode": false,
@@ -24,7 +45,7 @@
     {
       "name": "eDP-1",
       "description": "BOE 0x0A99",
-      "x": 0,
+      "x": -1600,
       "y": 0,
       "physical_width": 2560,
       "physical_height": 1600,
@@ -40,7 +61,7 @@
       "color_mode": "",
       "sdr_brightness": 1.0,
       "sdr_saturation": 1.0,
-      "active": true
+      "active": false
     }
   ],
   "config": {
@@ -48,7 +69,7 @@
     "snap-threshold": 10,
     "indicator-timeout": 500,
     "custom-mode": [],
-    "use-desc": false,
+    "use-desc": true,
     "confirm-timeout": 10,
     "profile-bound-wallpapers": false
   }
