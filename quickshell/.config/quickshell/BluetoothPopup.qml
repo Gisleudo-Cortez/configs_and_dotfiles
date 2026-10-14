@@ -37,6 +37,21 @@ PanelWindow {
     readonly property var adapter: Bluetooth.defaultAdapter
     readonly property bool _scanning: adapter?.scanning ?? false
 
+    // ── Pair/connect action feedback ─────────────────────────────
+    // The C++ layer only logs DBus errors (qCWarning) — QML never sees
+    // them. Outcomes are inferred from property transitions instead:
+    // pairing true→false while still unpaired = failed; state
+    // Connecting→Disconnected while not connected = failed.
+    property string actionFeedback: ""
+    property bool actionFailed: false
+    property bool cancelExpected: false
+    Timer { id: feedbackClear; interval: 4000; onTriggered: root.actionFeedback = "" }
+    function setFeedback(msg, failed) {
+        actionFeedback = msg
+        actionFailed = failed
+        feedbackClear.restart()
+    }
+
     // Start scan when the popup opens (click or hover); stop when it closes.
     // onVisibleChanged triggers a compile error — use a Connections on PopupState instead.
     // Debounced: toggleAt/showHoverAt set several PopupState props in one tick, which
@@ -148,6 +163,20 @@ PanelWindow {
 
                 Rectangle { Layout.fillWidth: true; height: 1; color: Colors.textDim; opacity: 0.25 }
 
+                // Action outcome line (pair/connect success/failure)
+                Text {
+                    visible: root.actionFeedback !== ""
+                    text: root.actionFeedback
+                    color: root.actionFailed ? Colors.alert : Colors.cyan
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: Geometry.fontSizeSm
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    Layout.margins: Geometry.innerPad
+                    Layout.topMargin: 6
+                    Layout.bottomMargin: 2
+                }
+
                 // ── No adapter ────────────────────────────────────────────
                 Text {
                     visible: root.adapter === null
@@ -182,7 +211,48 @@ PanelWindow {
                     delegate: ColumnLayout {
                         width: box.width
                         spacing: 0
+                        // Unpaired rows surface while scanning; keep rows for
+                        // in-flight pair/connect attempts visible too — stopping
+                        // discovery on pair-click would otherwise hide the row.
                         visible: modelData.paired || modelData.connected || root._scanning
+                              || modelData.pairing
+                              || modelData.state === BluetoothDeviceState.Connecting
+
+                        readonly property bool pairingNow: modelData.pairing
+                        readonly property bool connectingNow: modelData.state === BluetoothDeviceState.Connecting
+                        readonly property string devName: modelData.name || modelData.deviceName || modelData.address
+                        property string recheckKind: ""
+
+                        onPairingNowChanged: {
+                            if (!pairingNow) {
+                                if (modelData.paired) root.setFeedback("󰗡  paired: " + devName, false)
+                                else if (root.cancelExpected) {
+                                    root.cancelExpected = false
+                                    root.setFeedback("pairing canceled", false)
+                                } else recheckKind = "pair"
+                            }
+                        }
+                        onConnectingNowChanged: {
+                            if (!connectingNow) {
+                                if (modelData.connected) root.setFeedback("connected: " + devName, false)
+                                else recheckKind = "connect"
+                            }
+                        }
+                        // Re-check outcome after property updates settle — guards
+                        // against the reply-arrives-before-DBus-property race.
+                        onRecheckKindChanged: if (recheckKind !== "") outcomeRecheck.restart()
+
+                        Timer {
+                            id: outcomeRecheck
+                            interval: 600
+                            onTriggered: {
+                                if (recheckKind === "pair" && !modelData.paired)
+                                    root.setFeedback("󰝥  pair failed: " + devName, true)
+                                else if (recheckKind === "connect" && !modelData.connected)
+                                    root.setFeedback("󰝥  connect failed: " + devName, true)
+                                recheckKind = ""
+                            }
+                        }
 
                         Rectangle {
                             Layout.fillWidth: true
@@ -210,7 +280,7 @@ PanelWindow {
                                     spacing: 1
 
                                     Text {
-                                        text: modelData.name || modelData.address
+                                        text: modelData.name || modelData.deviceName || modelData.address
                                         color: modelData.connected ? Colors.text : Colors.textDim
                                         font.family: "JetBrainsMono Nerd Font"
                                         font.pixelSize: Geometry.fontSizeSm
@@ -232,9 +302,11 @@ PanelWindow {
                                 }
 
                                 Text {
-                                    text: modelData.connected   ? "disconnect"
-                                        : modelData.paired      ? "connect"
-                                        : "pair"
+                                    text: modelData.connected ? "disconnect"
+                                        : modelData.pairing   ? "cancel"
+                                        : connectingNow       ? "connecting…"
+                                        : modelData.paired    ? "connect"
+                                        :                       "pair"
                                     color: modelData.connected ? Colors.alert : Colors.cyan
                                     font.family: "JetBrainsMono Nerd Font"
                                     font.pixelSize: Geometry.fontSizeSm
@@ -242,9 +314,25 @@ PanelWindow {
                                         anchors.fill: parent
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: {
-                                            if (modelData.connected)   modelData.disconnect()
-                                            else if (modelData.paired) modelData.connect()
-                                            else                        modelData.pair()
+                                            if (modelData.connected) {
+                                                modelData.disconnect()
+                                            } else if (modelData.pairing) {
+                                                root.cancelExpected = true
+                                                modelData.cancelPair()
+                                            } else if (connectingNow) {
+                                                // connect in flight — no cancel API
+                                            } else if (modelData.paired) {
+                                                modelData.connect()
+                                            } else {
+                                                // Stop inquiry before pairing — many
+                                                // peripherals reject pairing while being
+                                                // scanned for (blueman/GNOME do the same).
+                                                // Row stays visible via the `pairing` flag.
+                                                if (root.adapter !== null && root.adapter.scanning)
+                                                    root.adapter.stopDiscovery()
+                                                root.setFeedback("pairing " + devName + "…", false)
+                                                modelData.pair()
+                                            }
                                         }
                                     }
                                 }
