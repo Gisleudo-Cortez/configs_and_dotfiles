@@ -67,14 +67,15 @@ end
 -- upstream discussion #15760, unfixed as of 0.56.2. The surviving monitor
 -- re-seats to the origin but the bar keeps stale coordinates, rendering
 -- half off-screen. A 1px position wiggle forces real moves, which layers
--- DO follow, re-anchoring them. The return move re-asserts the configured
--- auto SIDE (not a fixed coordinate): a dynamic auto-side rule tracks the
--- layout on every future transition, exactly like the static config rule.
--- Home heads (G5, home LG) are absent on purpose: they run a
--- fixed-coordinate layout, so the x,y fallback below re-seats them
+-- DO follow, re-anchoring them. The return move re-asserts the monitor's
+-- SEAT from the table below: fixed coordinates for the Loja heads (the
+-- panel disable can re-seat survivors to the origin, so explicit seats
+-- guarantee truth), auto-side for the workshop (origin contract). Heads
+-- absent from the table keep their current x,y — home heads re-seat
 -- exactly where nwg-displays placed them.
 local lidSides = {
-    ["LG Electronics LG ULTRAWIDE 0x0005EAFC"]  = "auto-left",  -- loja
+    ["LG Electronics LG SMART WQHD 0x01010101"] = "0x0",       -- loja: 34" leftmost
+    ["LG Electronics LG ULTRAWIDE 0x0005EAFC"]  = "3440x0",    -- loja: portrait right
     ["LG Electronics 25UM58G 0x01010101"]       = "auto-left", -- workshop
 }
 
