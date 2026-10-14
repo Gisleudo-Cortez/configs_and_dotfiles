@@ -40,6 +40,11 @@ hl.on("hyprland.start", function()
     local state = f:read("*a")
     f:close()
     if state:find("closed") then
+      -- Capture the panel's seat BEFORE disabling it: booting with the lid
+      -- already closed fires no switch transition, so the lid-open path
+      -- would otherwise fall back to a hardcoded seat. capturePanelSeat is
+      -- defined in keybindings.lua, loaded before this callback runs.
+      if capturePanelSeat then capturePanelSeat() end
       hl.monitor({ output = "eDP-1", disabled = true })
     end
   end
